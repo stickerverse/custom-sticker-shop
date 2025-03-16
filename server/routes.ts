@@ -1,9 +1,17 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request as ExpressRequest, Response } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertUserSchema, insertMessageSchema, insertCartItemSchema, insertOrderSchema } from "@shared/schema";
+import session from 'express-session';
+
+// Extend Express Request to include session
+interface Request extends ExpressRequest {
+  session: session.Session & {
+    userId?: number;
+  };
+}
 
 // WebSocket connections by user ID
 const connections: Map<number, WebSocket[]> = new Map();
