@@ -229,7 +229,14 @@ const Admin = () => {
           
           {/* Main Content */}
           <div className="flex-1">
-            <TabsContent value="dashboard" className={activeTab === "dashboard" ? "" : "hidden"}>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="mb-6 hidden">
+                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                <TabsTrigger value="orders">Orders</TabsTrigger>
+                <TabsTrigger value="conversations">Conversations</TabsTrigger>
+                <TabsTrigger value="products">Products</TabsTrigger>
+              </TabsList>
+              <TabsContent value="dashboard">
               <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
               
               {/* Stats Cards */}
@@ -327,7 +334,7 @@ const Admin = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="orders" className={activeTab === "orders" ? "" : "hidden"}>
+            <TabsContent value="orders">
               <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Orders</h1>
                 <Select defaultValue="all">
@@ -528,7 +535,7 @@ const Admin = () => {
               </div>
             </TabsContent>
             
-            <TabsContent value="conversations" className={activeTab === "conversations" ? "" : "hidden"}>
+            <TabsContent value="conversations">
               <h1 className="text-2xl font-bold mb-6">Customer Messages</h1>
               
               <Card>
@@ -593,7 +600,7 @@ const Admin = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="products" className={activeTab === "products" ? "" : "hidden"}>
+            <TabsContent value="products">
               <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Products</h1>
                 <Button className="bg-primary text-white hover:bg-primary/90">
@@ -675,6 +682,7 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
