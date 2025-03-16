@@ -173,7 +173,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
   return (
     <div className="flex-1 flex flex-col h-screen md:border-r border-gray-200">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white shadow-sm">
         <div className="flex items-center">
           <div className="md:hidden mr-2">
             <Button variant="ghost" size="sm" onClick={() => setLocation("/chat")}>
@@ -182,17 +182,27 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
           </div>
           <div className="flex items-center">
             <div className="relative">
-              <Avatar>
+              <Avatar className="h-10 w-10 border border-gray-200">
                 <AvatarImage src={product?.imageUrl} alt={product?.title} />
-                <AvatarFallback>{product?.title?.charAt(0) || "S"}</AvatarFallback>
+                <AvatarFallback className="bg-blue-50 text-blue-600">{product?.title?.charAt(0) || "S"}</AvatarFallback>
               </Avatar>
-              <span className="absolute bottom-0 right-0 bg-success w-3 h-3 rounded-full border-2 border-white"></span>
+              <span className="absolute bottom-0 right-0 bg-green-500 w-3 h-3 rounded-full border-2 border-white"></span>
             </div>
             <div className="ml-3">
-              <h2 className="font-semibold">{user?.isAdmin ? "Customer" : "Seller"}</h2>
+              <h2 className="font-semibold text-gray-800">
+                {activeConversation.isDirectChat 
+                  ? activeConversation.subject 
+                  : user?.isAdmin ? "Customer" : "Seller"}
+              </h2>
               <div className="flex items-center text-sm text-gray-500">
-                <span className="material-icons text-xs mr-1">shopping_bag</span>
-                <span>Order #{order?.id} - {product?.title}</span>
+                {activeConversation.isDirectChat ? (
+                  <span>Online now</span>
+                ) : (
+                  <>
+                    <span className="material-icons text-xs mr-1">shopping_bag</span>
+                    <span>Order #{order?.id} - {product?.title}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -202,13 +212,13 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
             variant="outline" 
             size="sm"
             onClick={() => setShowNewChatDialog(true)}
-            className="hidden md:flex"
+            className="hidden md:flex bg-white hover:bg-gray-50 border-gray-200"
           >
             <span className="material-icons text-sm mr-1">add</span>
             New Chat
           </Button>
-          <Button variant="ghost" size="sm">
-            <span className="material-icons text-gray-500">more_vert</span>
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100">
+            <span className="material-icons text-lg">more_vert</span>
           </Button>
         </div>
       </div>
@@ -275,16 +285,22 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
       {/* Chat Input */}
       <div className="p-3 border-t border-gray-200 bg-white">
         <form onSubmit={handleSubmit} className="flex items-end">
-          <div className="relative">
-            <input
-              type="file"
-              id="image-upload"
-              accept="image/*"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              onChange={handleFileChange}
-            />
-            <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-full text-gray-500 hover:bg-gray-100">
-              <span className="material-icons">add_photo_alternate</span>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <input
+                type="file"
+                id="image-upload"
+                accept="image/*"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={handleFileChange}
+              />
+              <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100">
+                <span className="material-icons text-lg">add_photo_alternate</span>
+              </Button>
+            </div>
+            
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100">
+              <span className="material-icons text-lg">emoji_emotions</span>
             </Button>
           </div>
           
@@ -294,13 +310,13 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
                 <img 
                   src={imagePreview} 
                   alt="Preview" 
-                  className="max-h-32 rounded-md"
+                  className="max-h-32 rounded-xl"
                 />
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 h-6 w-6 rounded-full"
+                  className="absolute top-1 right-1 h-6 w-6 rounded-full bg-gray-800 bg-opacity-70 hover:bg-opacity-100 text-white"
                   onClick={() => {
                     setImage(null);
                     setImagePreview(null);
@@ -312,7 +328,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
             )}
             <textarea
               placeholder="Type a message..."
-              className="w-full border border-gray-300 rounded-[8px] p-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none"
+              className="w-full border border-gray-300 rounded-[20px] py-2 px-4 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 resize-none text-gray-800"
               rows={1}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
@@ -321,7 +337,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
           
           <Button
             type="submit"
-            className="bg-primary text-white p-2 rounded-full hover:bg-opacity-90"
+            className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600"
             disabled={(!messageText.trim() && !image) || isMessageSending}
           >
             <span className="material-icons">send</span>

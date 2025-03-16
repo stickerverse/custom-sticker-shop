@@ -19,30 +19,33 @@ const MessageBubble = ({ message, isOwnMessage, product }: MessageBubbleProps) =
   
   if (isOwnMessage) {
     return (
-      <div className="flex mb-4 justify-end">
+      <div className="flex mb-6 justify-end">
         <div className="flex flex-col items-end max-w-[75%]">
           {message.messageType === "text" ? (
-            <div className="bg-secondary text-white p-3 rounded-[8px] shadow-sm">
-              <p className="text-sm">{message.content}</p>
+            <div className="bg-blue-500 text-white p-3 rounded-2xl rounded-tr-sm shadow-sm">
+              <p className="text-sm leading-relaxed">{message.content}</p>
             </div>
           ) : (
-            <div className="bg-secondary text-white p-2 rounded-[8px] shadow-sm">
+            <div className="bg-blue-500 text-white p-2 rounded-2xl rounded-tr-sm shadow-sm">
               <img 
                 src={message.imageUrl} 
                 alt="Shared image" 
-                className="w-full h-auto rounded-[8px] mb-1"
+                className="w-full h-auto rounded-xl mb-1"
               />
-              {message.content && <p className="text-sm mt-1">{message.content}</p>}
+              {message.content && <p className="text-sm mt-1 leading-relaxed">{message.content}</p>}
             </div>
           )}
-          <span className="text-xs text-gray-500 mt-1">{formattedTime}</span>
+          <div className="flex items-center mt-1">
+            <span className="text-xs text-gray-500">{formattedTime}</span>
+            <div className="ml-1 text-xs text-green-500">✓✓</div>
+          </div>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="flex mb-4">
+    <div className="flex mb-6">
       <div className="flex-shrink-0 mr-3">
         <Avatar className="w-8 h-8">
           <AvatarImage src={product?.imageUrl} alt="Sender" />
@@ -51,17 +54,17 @@ const MessageBubble = ({ message, isOwnMessage, product }: MessageBubbleProps) =
       </div>
       <div className="flex flex-col max-w-[75%]">
         {message.messageType === "text" ? (
-          <div className="bg-white p-3 rounded-[8px] shadow-sm">
-            <p className="text-sm">{message.content}</p>
+          <div className="bg-white border border-gray-200 p-3 rounded-2xl rounded-tl-sm shadow-sm">
+            <p className="text-sm text-gray-800 leading-relaxed">{message.content}</p>
           </div>
         ) : (
-          <div className="bg-white p-2 rounded-[8px] shadow-sm">
+          <div className="bg-white border border-gray-200 p-2 rounded-2xl rounded-tl-sm shadow-sm">
             <img 
               src={message.imageUrl} 
               alt="Shared image" 
-              className="w-full h-auto rounded-[8px] mb-1" 
+              className="w-full h-auto rounded-xl mb-1" 
             />
-            {message.content && <p className="text-sm mt-1">{message.content}</p>}
+            {message.content && <p className="text-sm mt-1 text-gray-800 leading-relaxed">{message.content}</p>}
             <p className="text-xs text-gray-500">{message.imageUrl?.split("/").pop()}</p>
           </div>
         )}
