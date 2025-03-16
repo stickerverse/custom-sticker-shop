@@ -1,0 +1,69 @@
+### **Custom Sticker Shop & Messaging Platform**  
+
+A **web-based application** that combines **real-time messaging** and **eCommerce functionality** to streamline communication and order approvals for custom stickers. Designed for **Etsy and eBay buyers**, this platform enhances the **buyer-seller interaction** with a **dedicated chat system** and a **seamless ordering experience**.  
+
+---
+
+## **🌟 Core Features**  
+
+### **🔹 Real-Time Messaging for Order Communication**  
+- **Instant chat** between buyers and sellers  
+- **Image upload** for design approvals & proofing  
+- **Conversation threads linked to specific orders**  
+- **Message history & search functionality**  
+- **Push notifications** to mobile for new messages  
+
+### **🛒 E-Commerce System**  
+- **Customizable sticker catalog** with:  
+  - **Title, description, and preview images**  
+  - **Customization options:** Size, Color, Quantity  
+- **Add-to-cart & secure checkout (Stripe integration)**  
+- **Automated chat room creation** after purchase for order discussions  
+
+### **📦 Order & Product Management**  
+- **Admin Dashboard** for managing:  
+  - **Products** (add/edit/delete items)  
+  - **Orders & chat history**  
+  - **Customer interactions & design approvals**  
+- **Customers can track order history & chat updates**  
+
+---
+
+## **🎨 UI & Design**  
+Inspired by **Etsy’s messaging UI** and **Slack’s clean chat experience**, focusing on clarity, efficiency, and responsiveness.  
+
+### **💡 Style Guide**  
+- **Primary Color:** `#F56400` (Etsy Orange)  
+- **Secondary Color:** `#2557A7` (eBay Blue)  
+- **Background:** `#FFFFFF` (White)  
+- **Text:** `#222222` (Dark Grey)  
+- **Success Highlight:** `#2E7D32` (Green)  
+- **Accent:** `#757575` (Medium Grey)  
+
+### **📱 Layout & UX**  
+- **Left sidebar** for chat navigation  
+- **Clean chat bubbles** (8px radius)  
+- **Minimalistic product catalog**  
+- **Fully responsive for desktop & mobile**  
+
+---
+
+## **🔗 Tech Stack**  
+- **Frontend:** Next.js + Tailwind CSS  
+- **Backend:** Node.js + Express  
+- **Database:** PostgreSQL (Neon.tech)  
+- **Authentication:** Clerk / Firebase  
+- **Payments:** Stripe API  
+- **Chat System:** WebSockets (Socket.io)  
+- **File Storage:** Cloudinary / AWS S3  
+
+---
+
+## **🚀 Summary**  
+This **all-in-one platform** eliminates the **limitations of Etsy/eBay messaging** by offering:  
+✅ **Real-time chat & notifications**  
+✅ **Seamless design approvals via image uploads**  
+✅ **Full eCommerce functionality with checkout**  
+✅ **Admin dashboard for easy product & order management**  
+
+A streamlined, **fully functional** communication & sales hub for custom sticker orders. 🔥

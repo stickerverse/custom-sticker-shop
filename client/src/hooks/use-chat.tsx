@@ -18,8 +18,11 @@ type Message = {
 
 type Conversation = {
   id: number;
-  orderId: number;
+  orderId?: number;
+  userId: number;
   createdAt: Date;
+  subject: string;
+  isDirectChat?: boolean;
   order?: any;
   product?: any;
   orderItems?: any[];
@@ -40,10 +43,12 @@ interface ChatContextType {
   loadingConversations: boolean;
   loadingConversation: boolean;
   isMessageSending: boolean;
+  isCreatingConversation: boolean;
   unreadCount: number;
   loadConversations: () => Promise<void>;
   loadConversation: (id: number) => Promise<void>;
   sendMessage: (params: SendMessageParams) => Promise<void>;
+  createNewConversation: (subject: string) => Promise<number>;
   activateConversation: (id: number) => void;
 }
 
@@ -54,10 +59,12 @@ const ChatContext = createContext<ChatContextType>({
   loadingConversations: false,
   loadingConversation: false,
   isMessageSending: false,
+  isCreatingConversation: false,
   unreadCount: 0,
   loadConversations: async () => {},
   loadConversation: async () => {},
   sendMessage: async () => {},
+  createNewConversation: async () => 0,
   activateConversation: () => {},
 });
 
@@ -73,6 +80,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [loadingConversation, setLoadingConversation] = useState(false);
   const [isMessageSending, setIsMessageSending] = useState(false);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Load conversations
@@ -199,6 +207,46 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   
+  // Create a new conversation
+  const createNewConversation = async (subject: string): Promise<number> => {
+    if (!isAuthenticated || !user) {
+      toast({
+        title: "Not Authenticated",
+        description: "You need to be logged in to create a conversation.",
+        variant: "destructive",
+      });
+      throw new Error("Not authenticated");
+    }
+    
+    try {
+      setIsCreatingConversation(true);
+      
+      const response = await apiRequest("POST", "/api/conversations", { subject });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create conversation");
+      }
+      
+      const newConversation = await response.json();
+      
+      // Add the new conversation to the list
+      setConversations(prev => [newConversation, ...prev]);
+      
+      // Return the new conversation ID
+      return newConversation.id;
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create a new conversation. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsCreatingConversation(false);
+    }
+  };
+  
   // Set active conversation ID
   const activateConversation = (id: number) => {
     setActiveConversationId(id);
@@ -295,10 +343,12 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         loadingConversations,
         loadingConversation,
         isMessageSending,
+        isCreatingConversation,
         unreadCount,
         loadConversations,
         loadConversation,
         sendMessage,
+        createNewConversation,
         activateConversation,
       }}
     >
