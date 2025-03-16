@@ -1,0 +1,141 @@
+Below is a **unified style guide** that blends the modern, card-based **project management/chat** UIs in your screenshots with the **minimal product page** aesthetic seen on RedBubble. Use this as a blueprint for updating your chat/project management/eCommerce application to closely match the visuals in the provided images.
+
+---
+
+## 1. Overall Look & Feel
+
+- **Minimal & Modern**  
+  - Predominantly white background, spacious layout, and subtle pastel accents.
+  - Generous whitespace to separate different sections (tasks, chats, products).
+  - Soft shadows for cards and modals (e.g., `box-shadow: 0 4px 16px rgba(0,0,0,0.05)`).
+  - Smooth, rounded corners on containers and buttons (8–12px radius).
+
+- **Clean Typography**  
+  - Use a **sans-serif** font (e.g., [Inter](https://fonts.google.com/specimen/Inter), [Roboto](https://fonts.google.com/specimen/Roboto), or a system font stack).
+  - Hierarchy:
+    - **H1** (28–32px, semi-bold) for major headings (e.g., “Projects” or “Product Name”).
+    - **H2** (22–24px, medium) for subheadings (e.g., “Last Tasks,” “Chat”).
+    - **Body** (16px) for regular text.
+    - **Caption** (12–14px) for small labels, timestamps, etc.
+
+---
+
+## 2. Color Palette
+
+From your screenshots, the UIs heavily feature white with pastel or muted accents for status or emphasis. Here’s a suggested palette based on the images:
+
+- **Primary Background:** `#FFFFFF`  
+- **Card Background:** Slight off-white or very light gray (`#F9FAFC` or `#FAFBFD`)  
+- **Text (Primary):** `#1F1F1F` (dark gray)  
+- **Text (Secondary):** `#555555` or `#757575` (medium gray)  
+- **Accent Colors:**  
+  - **Soft Blue (Tasks, Buttons):** `#EEF4FF` background or `#4A90E2` text/icon  
+  - **Soft Green (Completed/Success):** `#D1F7C4` background or `#2E7D32` text/icon  
+  - **Soft Orange (Alerts/Attention):** `#FCE8D5` background or `#F56400` text/icon  
+  - **Soft Red (Errors/Important):** `#FFD9D9` background or `#FF4B4B` text/icon  
+
+*(Feel free to tweak these to match exactly the pastels in your screenshots.)*
+
+---
+
+## 3. Layout & Navigation
+
+1. **Left Sidebar (Project/Chat Navigation)**  
+   - A vertical panel on the left, ~250px wide, white or very light gray background.
+   - Icons or small avatars for each project/chat item.  
+   - Hover highlight or subtle color blocks to indicate the active item.  
+   - Collapsible for mobile view.
+
+2. **Main Content Area**  
+   - **Card-based layout** for tasks, chat, product listings, etc.  
+   - **Section Headers** (e.g., “Last Tasks,” “Chats,” “File Center”) with a bold H2 or H3.  
+   - **Grid or stacked columns** for different sections, with consistent spacing (16–24px between cards).
+
+3. **Top Bar (Optional)**  
+   - A slim top navbar with a **search field** and **profile info** (like the user avatar and name).  
+   - Could show notifications or a quick link to the cart if using an eCommerce approach.
+
+---
+
+## 4. UI Components
+
+### 4.1 Cards & Modules
+- **Rounded corners** (8–12px).
+- **Light background** (#FFFFFF or #F9FAFC).
+- **Subtle shadow** for depth.
+- Each card can display:
+  - Title (H2 or H3).
+  - Status tags (colored labels like “Done!”, “In Progress”).
+  - Progress bars (thin, pastel-colored bars with ~4px height).
+
+### 4.2 Chat Interface
+- **Chat Panel** (centered card or full-width section) with a top bar showing:
+  - Chat title (e.g., “Order #1234 - Sticker Proofs”).
+  - Participant avatars.
+  - A small button for “Open in App” or “View Details.”
+- **Message Bubbles**:
+  - Rounded corners (8px).
+  - Different background color for sender vs. recipient (e.g., #EEF4FF for the other person, #FFFFFF for self).
+  - Timestamps in smaller, gray text (12px).
+- **Message Input**:
+  - A single row text field with an attach button (paperclip icon) for uploading images.
+  - Possibly a “Send” button in a pastel accent color.
+
+### 4.3 Task/Project Cards
+- **Title** (bold, ~18px).
+- **Progress bar** or status pill (e.g., “Done,” “50%,” “In Review”).
+- **Small user avatars** for assigned collaborators.
+- Light pastel backgrounds to distinguish statuses (see accent colors).
+
+### 4.4 E-Commerce Product Listings
+- **Card Layout** or **Grid** for product overview.
+- Product image on top, product name, short description, price below.
+- **Add to Cart** button in an accent color (e.g., #4A90E2 or #FF4B4B).
+- Minimal but clear product info, matching the style from RedBubble (white background, bold price, etc.).
+
+### 4.5 Product Detail Page (RedBubble-Inspired)
+- **Large product image** on the left.
+- **Title & Price** on the right in bold, easy-to-scan text.
+- **Customization Options** (Size, Color, Quantity) in well-spaced radio buttons or dropdowns.
+- **Add to Cart** or **Buy Now** button in a bright accent color.
+- Customer reviews or rating below the product info if needed.
+- Keep the layout **simple & clean**, referencing the RedBubble style (lots of whitespace, big clickable buttons).
+
+---
+
+## 5. Interactions & Animations
+
+- **Hover & Focus States**  
+  - Slight shadow or color change on buttons and cards to indicate interactivity.
+- **Smooth Transitions**  
+  - 150–200ms transitions on hover states, modal openings, etc.
+- **Notifications**  
+  - Toast-like pop-ups or subtle top-right corner notifications for new chat messages or eCommerce actions (e.g., “Item added to cart”).
+
+---
+
+## 6. Responsive Behavior
+
+- **Mobile First**  
+  - Sidebar collapses into a hamburger menu.
+  - Cards stack vertically.
+  - Chat input is fixed at the bottom for easy thumb typing.
+- **Tablet & Desktop**  
+  - Maintain the left sidebar for quick navigation.
+  - Two or three-column layouts for tasks, chat, and product listings.
+
+---
+
+## 7. Final Notes & Best Practices
+
+1. **Consistency**: Keep the same corner radii, shadows, and spacing across all components.  
+2. **Iconography**: Use a cohesive icon set (e.g., Feather Icons, Material Icons) to maintain visual unity.  
+3. **Branding**: If you have a specific brand color, apply it consistently to your primary buttons and highlights.  
+4. **Accessibility**: Ensure sufficient color contrast for text and important UI elements.  
+5. **Performance**: Optimize images and only load essential resources for faster page speeds.
+
+---
+
+### Putting It All Together
+
+By following these guidelines, your **chat/project management/eCommerce application** will match the **modern, minimal, and card-based** aesthetic seen in your screenshots, as well as incorporate the **clean product presentation** style from RedBubble. The result is a polished, user-friendly interface that seamlessly integrates **chat, tasks, and product purchases** into one cohesive platform.
