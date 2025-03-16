@@ -4,6 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatRelative } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,12 +25,16 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
     activeConversation, 
     loadingConversation, 
     sendMessage, 
-    isMessageSending 
+    isMessageSending,
+    createNewConversation,
+    isCreatingConversation
   } = useChat();
   
   const [messageText, setMessageText] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showNewChatDialog, setShowNewChatDialog] = useState(false);
+  const [newChatSubject, setNewChatSubject] = useState("");
   
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   
@@ -190,7 +197,16 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
             </div>
           </div>
         </div>
-        <div>
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowNewChatDialog(true)}
+            className="hidden md:flex"
+          >
+            <span className="material-icons text-sm mr-1">add</span>
+            New Chat
+          </Button>
           <Button variant="ghost" size="sm">
             <span className="material-icons text-gray-500">more_vert</span>
           </Button>
@@ -312,6 +328,66 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
           </Button>
         </form>
       </div>
+
+      {/* New Chat Dialog */}
+      <Dialog open={showNewChatDialog} onOpenChange={setShowNewChatDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Start a New Conversation</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="subject" className="text-right">
+                Subject
+              </Label>
+              <Input
+                id="subject"
+                value={newChatSubject}
+                onChange={(e) => setNewChatSubject(e.target.value)}
+                placeholder="What would you like to discuss?"
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowNewChatDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!newChatSubject.trim()) {
+                  toast({
+                    title: "Subject required",
+                    description: "Please enter a subject for your conversation.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                
+                try {
+                  const newConversationId = await createNewConversation(newChatSubject);
+                  setNewChatSubject('');
+                  setShowNewChatDialog(false);
+                  setLocation(`/chat/${newConversationId}`);
+                } catch (error) {
+                  console.error('Error creating conversation:', error);
+                  toast({
+                    title: "Failed to create conversation",
+                    description: error instanceof Error ? error.message : "Something went wrong",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={isCreatingConversation || !newChatSubject.trim()}
+            >
+              {isCreatingConversation ? 'Creating...' : 'Create Conversation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

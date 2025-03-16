@@ -142,7 +142,7 @@ const Sidebar = () => {
   return (
     <aside className="hidden md:block w-64 bg-white border-r border-gray-200 overflow-y-auto h-screen">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-lg">Messages</h2>
           <Button 
             variant="outline" 
@@ -153,6 +153,7 @@ const Sidebar = () => {
             New Chat
           </Button>
         </div>
+        <div className="flex justify-start mb-3">
           <Link href="/shop">
             <Button variant="ghost" size="sm">
               <span className="material-icons text-sm mr-1">arrow_back</span>
@@ -160,7 +161,7 @@ const Sidebar = () => {
             </Button>
           </Link>
         </div>
-        <div className="mt-2 relative">
+        <div className="relative">
           <Input
             type="text"
             placeholder="Search conversations..."
