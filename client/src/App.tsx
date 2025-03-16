@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AuthProvider } from "@/hooks/use-auth";
 import { CartProvider } from "@/hooks/use-cart";
 import { ChatProvider } from "@/hooks/use-chat";
+import { WebSocketProvider } from "@/lib/socket";
 
 import Navbar from "@/components/layout/Navbar";
 import Home from "@/pages/home";
@@ -64,9 +65,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <ChatProvider>
-            <Router />
-          </ChatProvider>
+          <WebSocketProvider>
+            <ChatProvider>
+              <Router />
+            </ChatProvider>
+          </WebSocketProvider>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
