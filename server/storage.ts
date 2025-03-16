@@ -33,6 +33,7 @@ export interface IStorage {
   getConversations(userId: number): Promise<any[]>;
   getConversation(id: number): Promise<any | undefined>;
   getConversationByOrder(orderId: number): Promise<any | undefined>;
+  createNewConversation(userId: number, subject: string): Promise<any>;
   getMessages(conversationId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   
@@ -367,11 +368,10 @@ export class MemStorage implements IStorage {
   
   // Conversation & Message methods
   async getConversations(userId: number): Promise<any[]> {
-    // Get orders for the user
-    const userOrders = await this.getOrders(userId);
-    
-    // Get conversations for those orders
     const conversations = [];
+    
+    // Get order-related conversations
+    const userOrders = await this.getOrders(userId);
     for (const order of userOrders) {
       const conversationId = this.conversationsByOrder.get(order.id);
       if (conversationId) {
@@ -396,24 +396,68 @@ export class MemStorage implements IStorage {
       }
     }
     
-    return conversations;
+    // Get direct conversations (not associated with orders)
+    const allConversations = Array.from(this.conversations.values());
+    const directConversations = allConversations.filter(conv => 
+      conv.isDirectChat && (conv.userId === userId || (userId === 1)) // User 1 is admin
+    );
+    
+    for (const conversation of directConversations) {
+      // Get the user info
+      const user = await this.getUser(conversation.userId);
+      
+      // Get the last message
+      const messages = await this.getMessages(conversation.id);
+      const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+      
+      conversations.push({
+        ...conversation,
+        user,
+        lastMessage
+      });
+    }
+    
+    // Sort by most recent activity (last message date or conversation creation date)
+    return conversations.sort((a, b) => {
+      const dateA = a.lastMessage?.createdAt || a.createdAt;
+      const dateB = b.lastMessage?.createdAt || b.createdAt;
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    });
   }
   
   async getConversation(id: number): Promise<any | undefined> {
     const conversation = this.conversations.get(id);
-    if (conversation) {
+    if (!conversation) return undefined;
+    
+    // Handle direct conversations (not associated with orders)
+    if (conversation.isDirectChat) {
+      const user = await this.getUser(conversation.userId);
+      const messages = await this.getMessages(id);
+      
+      return {
+        ...conversation,
+        user,
+        messages
+      };
+    }
+    
+    // Handle order-related conversations
+    if (conversation.orderId) {
       const order = await this.getOrder(conversation.orderId);
       const orderItems = await this.getOrderItems(conversation.orderId);
       const firstItem = orderItems[0];
       const product = firstItem ? await this.getProduct(firstItem.productId) : null;
+      const messages = await this.getMessages(id);
       
       return {
         ...conversation,
         order,
         product,
-        orderItems
+        orderItems,
+        messages
       };
     }
+    
     return undefined;
   }
   
@@ -423,6 +467,30 @@ export class MemStorage implements IStorage {
       return this.getConversation(conversationId);
     }
     return undefined;
+  }
+  
+  async createNewConversation(userId: number, subject: string): Promise<any> {
+    const id = this.currentConversationId++;
+    
+    // Create a direct conversation without an order
+    const conversation = {
+      id,
+      subject,
+      userId,
+      isDirectChat: true,
+      createdAt: new Date()
+    };
+    
+    this.conversations.set(id, conversation);
+    this.messages.set(id, []);
+    
+    // Get user info
+    const user = await this.getUser(userId);
+    
+    return {
+      ...conversation,
+      user
+    };
   }
   
   async getMessages(conversationId: number): Promise<Message[]> {

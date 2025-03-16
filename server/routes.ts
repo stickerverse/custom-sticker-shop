@@ -611,6 +611,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.post('/api/conversations', async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      const { subject } = req.body;
+      
+      if (!subject) {
+        return res.status(400).json({ message: 'Subject is required' });
+      }
+      
+      const conversation = await storage.createNewConversation(userId, subject);
+      res.status(201).json(conversation);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      res.status(500).json({ message: 'Error creating conversation' });
+    }
+  });
+  
   app.post('/api/conversations/:id/messages', async (req: Request, res: Response) => {
     const userId = req.session.userId;
     
@@ -628,7 +650,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if user is participant (owner or admin)
       const user = await storage.getUser(userId);
-      if (conversation.order.userId !== userId && !user?.isAdmin) {
+      
+      // For direct conversations, only the creator and admins can message
+      if (conversation.isDirectChat) {
+        if (conversation.userId !== userId && !user?.isAdmin) {
+          return res.status(403).json({ message: 'Not authorized to message in this conversation' });
+        }
+      } 
+      // For order conversations, only the order owner and admins can message
+      else if (conversation.order && conversation.order.userId !== userId && !user?.isAdmin) {
         return res.status(403).json({ message: 'Not authorized to message in this conversation' });
       }
       
@@ -642,18 +672,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = await storage.createMessage(messageData);
       
       // Notify connected clients via WebSocket
-      const notifyUserIds = new Set([
-        userId, // Message sender
-        conversation.order.userId, // Order owner
-      ]);
+      const notifyUserIds = new Set([userId]); // Always include message sender
       
-      // Add admin users if they're not already included
-      if (!user?.isAdmin) {
-        const adminUsers = Array.from((await storage.getUsers() || []))
-          .filter(u => u.isAdmin);
+      // For direct conversations, add admin users
+      if (conversation.isDirectChat) {
+        // Add all admin users if the sender is not an admin
+        if (!user?.isAdmin) {
+          const adminUsers = Array.from((await storage.getUsers()))
+            .filter(u => u.isAdmin)
+            .map(admin => admin.id);
+          
+          adminUsers.forEach(adminId => notifyUserIds.add(adminId));
+        }
+      }
+      // For order conversations, add the order owner and admins
+      else if (conversation.order) {
+        notifyUserIds.add(conversation.order.userId); // Add order owner
         
-        for (const admin of adminUsers) {
-          notifyUserIds.add(admin.id);
+        // Add admin users if sender is not an admin
+        if (!user?.isAdmin) {
+          const adminUsers = Array.from((await storage.getUsers()))
+            .filter(u => u.isAdmin)
+            .map(admin => admin.id);
+          
+          adminUsers.forEach(adminId => notifyUserIds.add(adminId));
         }
       }
       
