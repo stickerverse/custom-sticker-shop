@@ -10,10 +10,13 @@ import { formatDistanceToNow } from "date-fns";
 
 interface ConversationProps {
   id: number;
-  orderId: number;
-  product: any;
-  lastMessage: any;
-  order: any;
+  orderId?: number;
+  product?: any;
+  lastMessage?: any;
+  order?: any;
+  user?: any;
+  subject?: string;
+  isDirectChat?: boolean;
   createdAt: Date;
   isSelected: boolean;
 }
@@ -24,6 +27,9 @@ const ConversationItem = ({
   product, 
   lastMessage, 
   order,
+  user,
+  subject,
+  isDirectChat,
   createdAt,
   isSelected 
 }: ConversationProps) => {
@@ -38,7 +44,28 @@ const ConversationItem = ({
     setLocation(`/chat/${id}`);
   };
   
-  const isActive = lastMessage?.userId !== order?.userId;
+  // Determine active status based on conversation type
+  let isActive = false;
+  if (isDirectChat) {
+    isActive = !!lastMessage && lastMessage.userId !== user?.id;
+  } else {
+    isActive = !!lastMessage && lastMessage.userId !== order?.userId;
+  }
+  
+  // Determine avatar and title based on conversation type
+  let avatarSrc = '';
+  let avatarFallback = 'S';
+  let title = '';
+  
+  if (isDirectChat) {
+    avatarSrc = '';
+    avatarFallback = subject?.charAt(0) || 'D';
+    title = subject || 'Direct Message';
+  } else {
+    avatarSrc = product?.imageUrl || '';
+    avatarFallback = product?.title?.charAt(0) || 'S';
+    title = order?.userId ? "Order Discussion" : "Admin";
+  }
   
   return (
     <div 
@@ -48,23 +75,29 @@ const ConversationItem = ({
       <div className="p-3 flex items-start">
         <div className="relative">
           <Avatar>
-            <AvatarImage src={product?.imageUrl} alt={product?.title} />
-            <AvatarFallback>{product?.title?.charAt(0) || "S"}</AvatarFallback>
+            <AvatarImage src={avatarSrc} alt={title} />
+            <AvatarFallback>{avatarFallback}</AvatarFallback>
           </Avatar>
           <span className={`absolute bottom-0 right-0 ${isActive ? 'bg-success' : 'bg-gray-400'} w-3 h-3 rounded-full border-2 border-white`}></span>
         </div>
         <div className="ml-3 flex-1">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-sm truncate">{order?.userId ? "Customer" : "Admin"}</h3>
+            <h3 className="font-semibold text-sm truncate">{title}</h3>
             <span className="text-xs text-gray-500">{timeAgo}</span>
           </div>
           <p className="text-sm text-gray-600 truncate">
             {lastMessage?.content || "No messages yet"}
           </p>
           <div className="mt-1 flex items-center">
-            <Badge variant="outline" className="text-xs font-medium text-primary px-2 py-0.5 bg-primary bg-opacity-10 rounded-full">
-              Order #{orderId}
-            </Badge>
+            {isDirectChat ? (
+              <Badge variant="outline" className="text-xs font-medium text-blue-600 px-2 py-0.5 bg-blue-50 rounded-full">
+                Direct Chat
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs font-medium text-primary px-2 py-0.5 bg-primary bg-opacity-10 rounded-full">
+                Order #{orderId}
+              </Badge>
+            )}
           </div>
         </div>
       </div>
@@ -78,12 +111,27 @@ const Sidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   
   const filteredConversations = conversations.filter(conv => {
-    const orderNumber = `Order #${conv.orderId}`;
-    const productTitle = conv.product?.title || "";
-    const lastMessageContent = conv.lastMessage?.content || "";
+    // Build search terms based on conversation type
+    const searchTerms = [];
     
-    const searchTerms = [orderNumber, productTitle, lastMessageContent].join(" ").toLowerCase();
-    return searchQuery === "" || searchTerms.includes(searchQuery.toLowerCase());
+    if (conv.isDirectChat) {
+      // For direct chats, search by subject and message content
+      searchTerms.push(conv.subject || "");
+      searchTerms.push("Direct Chat");
+      if (conv.lastMessage) {
+        searchTerms.push(conv.lastMessage.content || "");
+      }
+    } else {
+      // For order-related chats, search by order number, product, and messages
+      searchTerms.push(`Order #${conv.orderId}`);
+      searchTerms.push(conv.product?.title || "");
+      if (conv.lastMessage) {
+        searchTerms.push(conv.lastMessage.content || "");
+      }
+    }
+    
+    const searchTermsText = searchTerms.join(" ").toLowerCase();
+    return searchQuery === "" || searchTermsText.includes(searchQuery.toLowerCase());
   });
   
   // Extract the selected conversation ID from the URL
@@ -131,6 +179,9 @@ const Sidebar = () => {
               product={conversation.product}
               lastMessage={conversation.lastMessage}
               order={conversation.order}
+              user={conversation.user}
+              subject={conversation.subject}
+              isDirectChat={conversation.isDirectChat}
               createdAt={conversation.createdAt}
               isSelected={selectedId === conversation.id}
             />

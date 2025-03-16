@@ -13,15 +13,21 @@ import { useToast } from "@/hooks/use-toast";
 
 const Chat = () => {
   const { id } = useParams<{ id: string }>();
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const { 
     loadConversation, 
     activeConversation, 
     activateConversation, 
-    conversations 
+    conversations,
+    createNewConversation,
+    isCreatingConversation
   } = useChat();
   
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showNewChatDialog, setShowNewChatDialog] = useState(false);
+  const [newChatSubject, setNewChatSubject] = useState('');
   const conversationId = id ? parseInt(id) : null;
   
   // Load conversation when ID changes
@@ -92,16 +98,81 @@ const Chat = () => {
             <span className="material-icons text-gray-300 text-6xl mb-4">chat</span>
             <h2 className="text-2xl font-bold mb-2">No Conversation Selected</h2>
             <p className="text-gray-600 mb-4">
-              Select a conversation from the sidebar or start a new one from your orders.
+              Select a conversation from the sidebar or start a new chat.
             </p>
-            {conversations.length === 0 && (
-              <Button className="bg-primary text-white hover:bg-primary/90">
-                Browse Products
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button 
+                className="bg-primary text-white hover:bg-primary/90"
+                onClick={() => setShowNewChatDialog(true)}
+              >
+                <span className="material-icons mr-2 text-sm">add</span>
+                Start New Chat
               </Button>
-            )}
+              
+              {conversations.length === 0 && (
+                <Button variant="outline">
+                  Browse Products
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}
+      
+      {/* New Chat Dialog */}
+      <Dialog open={showNewChatDialog} onOpenChange={setShowNewChatDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Start a New Conversation</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="subject" className="text-right">
+                Subject
+              </Label>
+              <Input
+                id="subject"
+                value={newChatSubject}
+                onChange={(e) => setNewChatSubject(e.target.value)}
+                placeholder="What would you like to discuss?"
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowNewChatDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!newChatSubject.trim()) {
+                  toast({
+                    title: "Subject required",
+                    description: "Please enter a subject for your conversation.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                
+                try {
+                  const newConversationId = await createNewConversation(newChatSubject);
+                  setNewChatSubject('');
+                  setShowNewChatDialog(false);
+                  navigate(`/chat/${newConversationId}`);
+                } catch (error) {
+                  console.error('Error creating conversation:', error);
+                }
+              }}
+              disabled={isCreatingConversation || !newChatSubject.trim()}
+            >
+              {isCreatingConversation ? 'Creating...' : 'Create Conversation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
