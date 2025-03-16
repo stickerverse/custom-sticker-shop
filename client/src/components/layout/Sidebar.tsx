@@ -144,6 +144,15 @@ const Sidebar = () => {
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-lg">Messages</h2>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setLocation('/chat/new')}
+          >
+            <span className="material-icons text-sm mr-1">add</span>
+            New Chat
+          </Button>
+        </div>
           <Link href="/shop">
             <Button variant="ghost" size="sm">
               <span className="material-icons text-sm mr-1">arrow_back</span>
