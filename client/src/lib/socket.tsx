@@ -114,21 +114,30 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const newSocket = createWebSocketConnection();
-    
-    // Cleanup function
-    return () => {
-      console.log("Closing WebSocket connection due to component unmount");
-      newSocket.close(1000, "Component unmounted");
-    };
+    // Only attempt to connect if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      console.log("Creating initial WebSocket connection");
+      const newSocket = createWebSocketConnection();
+      
+      // Cleanup function
+      return () => {
+        console.log("Closing WebSocket connection due to component unmount");
+        if (newSocket.readyState !== WebSocket.CLOSED && newSocket.readyState !== WebSocket.CLOSING) {
+          newSocket.close(1000, "Component unmounted");
+        }
+      };
+    }
   }, []);
 
   // Reconnect on page visibility change (tab becomes active again)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && (!socket || socket.readyState !== WebSocket.OPEN)) {
-        console.log("Page became visible, reconnecting WebSocket");
-        reconnect();
+      if (document.visibilityState === "visible") {
+        // Check if socket is not in OPEN state or not connected
+        if (!socket || socket.readyState !== WebSocket.OPEN || !connected) {
+          console.log("Page became visible, reconnecting WebSocket");
+          reconnect();
+        }
       }
     };
 
@@ -137,12 +146,13 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [socket]);
+  }, [socket, connected]);
 
-  // Listen for auth changes
+  // Listen for auth changes and authenticate when connection is established
   useEffect(() => {
     const checkAndAuthenticate = () => {
-      if (connected && !authenticated) {
+      if (connected && !authenticated && socket?.readyState === WebSocket.OPEN) {
+        console.log("Connection established, authenticating WebSocket");
         authenticate();
       }
     };

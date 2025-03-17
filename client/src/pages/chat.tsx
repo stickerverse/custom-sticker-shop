@@ -165,19 +165,29 @@ const Chat = () => {
                 
                 try {
                   // Prevent multiple submissions
-                  if (isCreatingConversation) return;
+                  if (isCreatingConversation) {
+                    console.log("Creation already in progress, ignoring click");
+                    return;
+                  }
                   
-                  const newConversationId = await createNewConversation(newChatSubject);
-                  console.log("Successfully created conversation with ID:", newConversationId);
-                  
-                  // Clear input and close dialog first
+                  // First, close the dialog and clear the input
+                  // This prevents UI freezing during API call
                   setNewChatSubject('');
                   setShowNewChatDialog(false);
                   
-                  // Use setTimeout to delay navigation and prevent React state update loops
-                  setTimeout(() => {
-                    navigate(`/chat/${newConversationId}`);
-                  }, 100);
+                  console.log("Starting conversation creation process");
+                  const newConversationId = await createNewConversation(newChatSubject);
+                  console.log("Successfully created conversation with ID:", newConversationId);
+                  
+                  // Use setTimeout with a longer delay to ensure all state updates are complete
+                  // This prevents React state update loops
+                  if (newConversationId) {
+                    console.log(`Scheduling navigation to /chat/${newConversationId} after 300ms`);
+                    setTimeout(() => {
+                      console.log(`Navigating to /chat/${newConversationId}`);
+                      navigate(`/chat/${newConversationId}`);
+                    }, 300);
+                  }
                 } catch (error) {
                   console.error('Error creating conversation:', error);
                   toast({
