@@ -33,6 +33,7 @@ export const products = pgTable("products", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   imageUrl: text("image_url").notNull(),
+  price: integer("price").notNull(), // Price in cents
   categoryId: integer("category_id").references(() => productCategories.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
