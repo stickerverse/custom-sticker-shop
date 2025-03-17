@@ -179,19 +179,19 @@ export function AdvancedEditor({
   ];
 
   return (
-    <Card className="p-4 bg-background/95 backdrop-blur-md border-primary/20 shadow-lg">
+    <Card className="p-4 bg-white border-gray-200 shadow-sm rounded-md">
       {!imagePreview ? (
         // Upload section - shown only when no image is uploaded
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-medium flex items-center">
+            <h3 className="text-base font-medium text-gray-700 flex items-center">
               <ImageIcon className="h-4 w-4 mr-2 text-primary" />
-              Upload Image
+              Upload Your Design
             </h3>
           </div>
           
           <div 
-            className="border-2 border-dashed border-primary/20 rounded-lg p-6 cursor-pointer hover:bg-primary/5 transition-colors"
+            className="border-2 border-dashed border-gray-300 rounded-md p-6 cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={handleUploadClick}
           >
             <input
@@ -203,25 +203,25 @@ export function AdvancedEditor({
             />
             
             <div className="flex flex-col items-center justify-center py-4">
-              <div className="bg-primary/10 p-4 rounded-full mb-3">
+              <div className="bg-blue-50 p-4 rounded-full mb-3">
                 <Upload className="h-6 w-6 text-primary" />
               </div>
-              <h4 className="text-base font-medium mb-1">Select Image</h4>
-              <p className="text-sm text-muted-foreground text-center">
+              <h4 className="text-base font-medium mb-1 text-gray-800">Upload Your Image</h4>
+              <p className="text-sm text-gray-500 text-center">
                 Click to browse your files<br/>or drag and drop
               </p>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-gray-400 mt-2">
                 JPG, PNG, WEBP up to 5MB
               </p>
             </div>
           </div>
           
-          <div className="rounded-lg p-3 bg-primary/5 text-sm space-y-1">
+          <div className="rounded-md p-3 bg-blue-50 text-sm space-y-1">
             <div className="flex items-center">
               <Sparkles className="h-4 w-4 text-primary mr-2" />
-              <span className="font-medium">AI-Powered Tools</span>
+              <span className="font-medium text-gray-700">AI-Powered Tools</span>
             </div>
-            <ul className="text-xs text-muted-foreground pl-6 mt-1 space-y-1 list-disc">
+            <ul className="text-xs text-gray-600 pl-6 mt-1 space-y-1 list-disc">
               <li>Background removal</li>
               <li>Edge detection</li>
               <li>Custom shapes</li>
@@ -233,7 +233,7 @@ export function AdvancedEditor({
         // Customization tools - shown after image is uploaded
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-medium flex items-center">
+            <h3 className="text-base font-medium text-gray-700 flex items-center">
               <Brush className="h-4 w-4 mr-2 text-primary" />
               Customize Sticker
             </h3>
@@ -241,7 +241,7 @@ export function AdvancedEditor({
               <Button 
                 size="sm" 
                 variant="outline"
-                className="text-xs"
+                className="text-xs border-gray-300 text-gray-600"
                 onClick={handleUploadClick}
               >
                 <Upload className="h-3 w-3 mr-1" />
@@ -250,7 +250,7 @@ export function AdvancedEditor({
               <Button 
                 size="sm" 
                 variant="outline"
-                className="text-xs text-red-500"
+                className="text-xs text-red-500 border-red-200"
                 onClick={clearImage}
               >
                 <Trash2 className="h-3 w-3 mr-1" />
@@ -259,34 +259,34 @@ export function AdvancedEditor({
             </div>
           </div>
           
-          <div className="relative rounded-lg overflow-hidden bg-black/5">
+          <div className="relative rounded-md overflow-hidden bg-gray-100 border border-gray-200">
             <img 
               src={imagePreview} 
               alt="Preview" 
               className="w-full max-h-[120px] object-contain"
             />
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
-                <div className="flex items-center space-x-2 bg-background/80 px-3 py-2 rounded-full">
+              <div className="absolute inset-0 flex items-center justify-center bg-white/60">
+                <div className="flex items-center space-x-2 bg-white px-3 py-2 rounded-full shadow-sm">
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span className="text-xs font-medium">Processing...</span>
+                  <span className="text-xs font-medium text-gray-700">Processing...</span>
                 </div>
               </div>
             )}
           </div>
           
-          <div className="rounded-lg border border-primary/20 p-3 space-y-2">
+          <div className="rounded-md border border-gray-200 p-4 space-y-2 bg-blue-50">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold flex items-center">
+              <Label className="text-sm font-semibold flex items-center text-gray-700">
                 <Wand2 className="h-4 w-4 mr-2 text-primary" />
-                AI Enhancements
+                AI Background Removal
               </Label>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Remove background to create professional stickers
+            <p className="text-xs text-gray-600">
+              Create professional stickers with transparent backgrounds
             </p>
             <Button 
-              className="w-full bg-primary"
+              className="w-full bg-primary hover:bg-primary/90 text-white"
               size="sm"
               onClick={removeBackground}
               disabled={isLoading}
@@ -305,82 +305,90 @@ export function AdvancedEditor({
             </Button>
           </div>
           
-          <Separator className="my-2 bg-primary/10" />
+          <div className="h-px bg-gray-200 my-4"></div>
           
           <div>
-            <Label className="text-sm font-semibold flex items-center mb-2">
+            <Label className="text-sm font-semibold flex items-center mb-3 text-gray-700">
               <LayoutGrid className="h-4 w-4 mr-2 text-primary" />
-              Shape
+              Choose Sticker Shape
             </Label>
             <div className="grid grid-cols-5 gap-2">
               {shapes.map(shape => (
-                <Button
+                <button
                   key={shape.id}
                   type="button"
-                  variant={selectedShape === shape.id ? "default" : "outline"}
-                  className={`flex flex-col items-center justify-center py-1 px-1 h-auto aspect-square ${
+                  className={`flex flex-col items-center justify-center py-2 px-1 h-auto rounded-md border ${
                     selectedShape === shape.id 
-                      ? "bg-primary/90 text-primary-foreground border-primary" 
-                      : "bg-background hover:bg-primary/5 text-foreground border-primary/20"
+                      ? "bg-blue-50 border-primary text-primary" 
+                      : "bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                   }`}
                   onClick={() => onShapeSelected(shape.id)}
                 >
-                  {shape.icon}
-                  <span className="text-[9px] mt-1 leading-tight">{shape.label}</span>
-                </Button>
+                  <div className="w-8 h-8 flex items-center justify-center mb-1">
+                    {shape.icon}
+                  </div>
+                  <span className="text-xs font-medium">{shape.label}</span>
+                </button>
               ))}
             </div>
           </div>
           
-          <Separator className="my-2 bg-primary/10" />
+          <div className="h-px bg-gray-200 my-4"></div>
           
           <div>
-            <Label className="text-sm font-semibold flex items-center">
+            <Label className="text-sm font-semibold flex items-center text-gray-700">
               <Layers className="h-4 w-4 mr-2 text-primary" />
               Border Width
             </Label>
-            <div className="flex items-center mt-2">
-              <Slider
-                min={0}
-                max={20}
-                step={1}
-                value={[borderWidth]}
-                onValueChange={(value) => onBorderWidthChanged(value[0])}
-                className="flex-1"
-              />
-              <span className="ml-2 text-sm min-w-[40px] text-right">
-                {borderWidth}px
-              </span>
+            <div className="flex flex-col mt-2">
+              <div className="flex items-center">
+                <Slider
+                  min={0}
+                  max={20}
+                  step={1}
+                  value={[borderWidth]}
+                  onValueChange={(value) => onBorderWidthChanged(value[0])}
+                  className="flex-1"
+                />
+                <span className="ml-3 text-sm min-w-[40px] text-right text-gray-700 font-semibold">
+                  {borderWidth}px
+                </span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-1 px-0.5">
+                <span>None</span>
+                <span>Medium</span>
+                <span>Thick</span>
+              </div>
             </div>
           </div>
           
           {borderWidth > 0 && (
             <>
-              <Separator className="my-2 bg-primary/10" />
+              <div className="h-px bg-gray-200 my-4"></div>
               
               <div>
-                <Label className="text-sm font-semibold flex items-center mb-2">
+                <Label className="text-sm font-semibold flex items-center mb-3 text-gray-700">
                   <Palette className="h-4 w-4 mr-2 text-primary" />
                   Border Color
                 </Label>
-                <div className="grid grid-cols-7 gap-2">
-                  {['#FF3366', '#3399FF', '#33CC66', '#FFCC33', '#9966FF', '#FF6633', '#000000'].map(color => (
+                <div className="grid grid-cols-7 gap-3">
+                  {['#0078D4', '#3399FF', '#33CC66', '#FFCC33', '#9966FF', '#FF6633', '#000000'].map(color => (
                     <button
                       key={color}
                       type="button"
                       onClick={() => onBorderColorChanged(color)}
-                      className={`w-full aspect-square rounded-full border-2 ${
+                      className={`w-full aspect-square rounded-md border ${
                         borderColor.toUpperCase() === color.toUpperCase()
-                          ? 'border-white ring-2 ring-primary shadow-lg'
-                          : 'border-white/50'
+                          ? 'border-gray-400 ring-2 ring-primary shadow-md'
+                          : 'border-gray-200'
                       }`}
                       style={{ backgroundColor: color }}
                     />
                   ))}
                 </div>
-                <div className="flex items-center mt-3">
+                <div className="flex items-center mt-4">
                   <div 
-                    className="w-10 h-10 rounded-md border border-primary/20 relative overflow-hidden flex items-center justify-center"
+                    className="w-10 h-10 rounded-md border border-gray-200 relative overflow-hidden flex items-center justify-center shadow-sm"
                     style={{ background: `linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), 
                              linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)`,
                              backgroundSize: '8px 8px',
@@ -397,12 +405,13 @@ export function AdvancedEditor({
                       className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                     />
                   </div>
-                  <div className="ml-2 flex-1">
+                  <div className="ml-3 flex-1">
                     <input
                       type="text"
                       value={borderColor}
                       onChange={(e) => onBorderColorChanged(e.target.value)}
-                      className="w-full h-10 px-3 rounded-md border border-primary/20 text-sm bg-background"
+                      className="w-full h-10 px-3 rounded-md border border-gray-200 text-sm bg-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
+                      placeholder="Custom color (HEX)"
                     />
                   </div>
                 </div>

@@ -369,8 +369,30 @@ export default function Customizer() {
       {/* Main Content - with margin to accommodate the chat sidebar */}
       <div className={`transition-all duration-300 ${chatExpanded ? 'ml-64' : 'ml-16'}`}>
         <div className="container mx-auto py-8 px-4">
+          {/* Hero section */}
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-8 mb-8 shadow-sm">
+            <div className="max-w-3xl">
+              <h1 className="text-3xl font-bold text-gray-800 mb-3">Design Custom Stickers</h1>
+              <p className="text-gray-600 mb-4">Create your own personalized stickers with our easy-to-use online editor. Upload your image, customize the shape, and we'll deliver high-quality stickers to your door.</p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center text-primary">
+                  <span className="material-icons text-sm mr-1">check_circle</span>
+                  <span className="text-sm">Premium Quality</span>
+                </div>
+                <div className="flex items-center text-primary">
+                  <span className="material-icons text-sm mr-1">check_circle</span>
+                  <span className="text-sm">Weatherproof</span>
+                </div>
+                <div className="flex items-center text-primary">
+                  <span className="material-icons text-sm mr-1">check_circle</span>
+                  <span className="text-sm">Free Shipping</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-primary/90">Create Your Custom Sticker</h1>
+            <h2 className="text-2xl font-bold text-gray-800">Customize Your Sticker</h2>
             <Button 
               variant="outline" 
               size="sm" 

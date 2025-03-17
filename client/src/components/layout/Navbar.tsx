@@ -89,33 +89,33 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-3">
-          <div className="flex items-center space-x-4">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center space-x-6">
             <Link href="/" className="flex items-center">
-              <span className="material-icons text-primary text-3xl">bubble_chart</span>
-              <span className="font-bold text-xl ml-2">StickerChat</span>
+              <span className="material-icons text-primary text-3xl">auto_awesome</span>
+              <span className="font-bold text-xl ml-2 text-gray-800">StickerApp</span>
             </Link>
-            <div className="hidden md:flex space-x-4">
-              <Link href="/shop" className="hover:text-primary">Shop</Link>
-              <Link href="/customizer" className="hover:text-primary">Create Your Own</Link>
-              <Link href="/#about" className="hover:text-primary">About</Link>
-              <Link href="/#contact" className="hover:text-primary">Contact</Link>
+            <div className="hidden md:flex space-x-8">
+              <Link href="/shop" className="text-gray-600 hover:text-primary font-medium">Shop</Link>
+              <Link href="/customizer" className="text-gray-600 hover:text-primary font-medium">Custom Stickers</Link>
+              <Link href="/#about" className="text-gray-600 hover:text-primary font-medium">FAQ</Link>
+              <Link href="/#contact" className="text-gray-600 hover:text-primary font-medium">Contact</Link>
             </div>
           </div>
           
           <div className="relative hidden md:block w-1/3">
-            <form onSubmit={handleSearch}>
+            <form onSubmit={handleSearch} className="relative">
               <Input
                 type="text"
                 placeholder="Search stickers..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button type="submit" className="absolute right-3 top-2">
-                <span className="material-icons text-accent">search</span>
+              <button type="submit" className="absolute right-3 top-2.5">
+                <span className="material-icons text-gray-500 text-sm">search</span>
               </button>
             </form>
           </div>
@@ -208,28 +208,40 @@ const Navbar = () => {
             
             <div className="hidden md:block">
               {isAuthenticated ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
+                  <Link href="/account" className="text-gray-600 hover:text-primary transition-colors">
+                    <div className="flex items-center">
+                      <span className="material-icons mr-1 text-primary">person</span>
+                      <span className="text-sm font-medium">My Account</span>
+                    </div>
+                  </Link>
                   {user?.isAdmin && (
-                    <Link href="/admin">
-                      <Button variant="outline" size="sm">
-                        Admin
-                      </Button>
+                    <Link href="/admin" className="text-gray-600 hover:text-primary transition-colors">
+                      <div className="flex items-center">
+                        <span className="material-icons mr-1 text-primary">admin_panel_settings</span>
+                        <span className="text-sm font-medium">Admin</span>
+                      </div>
                     </Link>
                   )}
-                  <Button variant="outline" size="sm" onClick={handleLogout}>
-                    Logout
-                  </Button>
+                  <button
+                    onClick={handleLogout}
+                    className="text-gray-600 hover:text-primary transition-colors flex items-center"
+                  >
+                    <span className="material-icons mr-1">logout</span>
+                    <span className="text-sm font-medium">Logout</span>
+                  </button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="ghost" 
+                <div className="flex items-center space-x-4">
+                  <button 
                     onClick={() => setIsLoginModalOpen(true)}
+                    className="text-gray-600 hover:text-primary transition-colors flex items-center"
                   >
-                    Login
-                  </Button>
+                    <span className="material-icons mr-1">login</span>
+                    <span className="text-sm font-medium">Login</span>
+                  </button>
                   <Button 
-                    className="bg-primary text-white hover:bg-opacity-90"
+                    className="bg-primary text-white hover:bg-primary/90 px-4 py-2 text-sm rounded-md font-medium"
                     onClick={() => setIsSignupModalOpen(true)}
                   >
                     Sign Up
