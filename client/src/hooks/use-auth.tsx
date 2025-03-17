@@ -41,6 +41,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Save user data to session storage for persistence
+  const saveUserToStorage = (userData: User | null) => {
+    if (userData) {
+      // Store the user data in session storage for retrieval by the WebSocket provider
+      sessionStorage.setItem('userData', JSON.stringify(userData));
+    } else {
+      // Clear the user data from session storage on logout
+      sessionStorage.removeItem('userData');
+    }
+  };
+
+  // Load user data from session storage on initial load
+  useEffect(() => {
+    const storedUserData = sessionStorage.getItem('userData');
+    if (storedUserData) {
+      try {
+        const userData = JSON.parse(storedUserData);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (e) {
+        console.error("Failed to parse stored user data:", e);
+        sessionStorage.removeItem('userData');
+      }
+    }
+  }, []);
+
   const checkAuth = async () => {
     try {
       setIsLoading(true);
@@ -52,14 +78,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userData = await response.json();
         setUser(userData);
         setIsAuthenticated(true);
+        saveUserToStorage(userData);
       } else {
         setUser(null);
         setIsAuthenticated(false);
+        saveUserToStorage(null);
       }
     } catch (error) {
       console.error("Auth check failed:", error);
       setUser(null);
       setIsAuthenticated(false);
+      saveUserToStorage(null);
     } finally {
       setIsLoading(false);
     }
@@ -81,6 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const userData = await response.json();
       setUser(userData);
       setIsAuthenticated(true);
+      saveUserToStorage(userData);
       return userData;
     } catch (error) {
       throw error;
@@ -99,6 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Auto login after registration
       setUser(newUser);
       setIsAuthenticated(true);
+      saveUserToStorage(newUser);
       return newUser;
     } catch (error) {
       throw error;
@@ -113,6 +144,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await apiRequest("POST", "/api/auth/logout", {});
       setUser(null);
       setIsAuthenticated(false);
+      saveUserToStorage(null);
     } catch (error) {
       console.error("Logout failed:", error);
       throw error;
