@@ -384,10 +384,20 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
                 }
                 
                 try {
+                  // Disable multiple submissions by checking if already creating
+                  if (isCreatingConversation) return;
+                  
                   const newConversationId = await createNewConversation(newChatSubject);
+                  console.log("Successfully created conversation with ID:", newConversationId);
+                  
+                  // Clear input and close dialog first
                   setNewChatSubject('');
                   setShowNewChatDialog(false);
-                  setLocation(`/chat/${newConversationId}`);
+                  
+                  // Use setTimeout to delay navigation and prevent React state update loops
+                  setTimeout(() => {
+                    setLocation(`/chat/${newConversationId}`);
+                  }, 100);
                 } catch (error) {
                   console.error('Error creating conversation:', error);
                   toast({

@@ -214,7 +214,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   
-  // Create a new conversation
+  // Create a new conversation with protection against double-submission
   const createNewConversation = async (subject: string): Promise<number> => {
     if (!isAuthenticated || !user) {
       toast({
@@ -225,9 +225,16 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       throw new Error("Not authenticated");
     }
     
+    // Safety check to prevent multiple simultaneous calls
+    if (isCreatingConversation) {
+      console.warn("Creation already in progress, ignoring duplicate request");
+      throw new Error("Creation already in progress");
+    }
+    
     try {
       setIsCreatingConversation(true);
       
+      console.log("Creating new conversation with subject:", subject);
       const response = await apiRequest("POST", "/api/conversations", { subject });
       
       if (!response.ok) {
@@ -235,6 +242,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       const newConversation = await response.json();
+      console.log("Successfully created conversation:", newConversation);
       
       // Add the new conversation to the list
       setConversations(prev => [newConversation, ...prev]);
@@ -250,6 +258,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       });
       throw error;
     } finally {
+      // Make sure we always reset the creating state
       setIsCreatingConversation(false);
     }
   };
