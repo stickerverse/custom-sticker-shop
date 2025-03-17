@@ -11,6 +11,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useChat } from "@/hooks/use-chat";
 import { apiRequest } from "@/lib/queryClient";
 import AdvancedEditor from "@/components/customizer/AdvancedEditor";
+import { ImageProcessor } from "@/components/customizer/ImageProcessor";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 
 // Sticker size options
@@ -399,25 +400,13 @@ export default function Customizer() {
                     />
                   </div>
                   
-                  <ImageProcessor
-                    onImageProcessed={(url) => {
-                      if (url) {
-                        setUploadedImage(url);
-                      } else {
-                        setUploadedImage(null);
-                      }
-                    }}
-                    onBorderDetected={(data) => {
-                      // Handle border detection data if needed
-                    }}
-                    selectedShape={selectedShape}
-                    borderWidth={borderWidth}
-                    borderColor={borderColor}
-                  />
-                  
                   <AdvancedEditor
                     onImageProcessed={(url) => {
                       setUploadedImage(url);
+                      toast({
+                        title: "Image Processed",
+                        description: "Your image has been successfully processed and is ready for customization.",
+                      });
                     }}
                     onOriginalImageUpload={(url) => {
                       setUploadedImage(url);
