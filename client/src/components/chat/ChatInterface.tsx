@@ -155,15 +155,15 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
   
   if (!activeConversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center h-screen bg-gradient-to-br from-slate-50/80 to-white/60 backdrop-blur-xs">
-        <div className="text-center p-8 glass-card rounded-2xl shadow-lg max-w-md floating-card">
-          <div className="bg-primary/10 rounded-full w-24 h-24 flex items-center justify-center mx-auto glow">
-            <span className="material-icons text-6xl neon-text">chat</span>
+      <div className="flex-1 flex flex-col items-center justify-center h-screen bg-white">
+        <div className="text-center p-8 glass-card rounded-xl shadow-sm max-w-md idx-floating-card">
+          <div className="bg-primary/5 rounded-full w-20 h-20 flex items-center justify-center mx-auto">
+            <span className="material-icons text-5xl text-primary">chat</span>
           </div>
-          <h2 className="mt-6 text-2xl font-semibold gradient-text">No Conversation Selected</h2>
+          <h2 className="mt-6 text-2xl font-medium gradient-text">No Conversation Selected</h2>
           <p className="mt-3 text-slate-600">Select a conversation from the sidebar or start a new one from your orders.</p>
           <Button 
-            className="mt-6 neon-btn bg-primary/90 hover:bg-primary text-white px-6 py-2" 
+            className="mt-6 modern-btn" 
             onClick={() => setLocation("/shop")}
           >
             Browse Products
@@ -178,28 +178,28 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
   return (
     <div className="flex-1 flex flex-col h-screen md:border-r border-white/20 overflow-hidden">
       {/* Chat Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-white/20 glass-panel backdrop-blur-md">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 glass-panel">
         <div className="flex items-center">
           <div className="md:hidden mr-2">
-            <Button variant="ghost" size="sm" onClick={() => setLocation("/chat")} className="text-slate-700 hover:bg-white/20">
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/chat")} className="text-slate-700 hover:bg-slate-50">
               <span className="material-icons">menu</span>
             </Button>
           </div>
           <div className="flex items-center">
             <div className="relative">
-              <Avatar className="h-10 w-10 border border-white/30 glow">
+              <Avatar className="h-10 w-10 border border-slate-100 shadow-sm">
                 <AvatarImage src={product?.imageUrl} alt={product?.title} />
-                <AvatarFallback className="bg-primary/20 text-primary">{product?.title?.charAt(0) || "S"}</AvatarFallback>
+                <AvatarFallback className="bg-slate-100 text-primary">{product?.title?.charAt(0) || "S"}</AvatarFallback>
               </Avatar>
-              <span className="absolute bottom-0 right-0 bg-green-500 w-3 h-3 rounded-full border-2 border-white animate-pulse"></span>
+              <span className="absolute bottom-0 right-0 bg-green-500 w-2 h-2 rounded-full border-2 border-white"></span>
             </div>
             <div className="ml-3">
-              <h2 className="font-semibold text-slate-800 neon-text">
+              <h2 className="font-medium text-slate-800">
                 {activeConversation.isDirectChat 
                   ? activeConversation.subject 
                   : user?.isAdmin ? "Customer" : "Seller"}
               </h2>
-              <div className="flex items-center text-sm text-slate-600">
+              <div className="flex items-center text-sm text-slate-500">
                 {activeConversation.isDirectChat ? (
                   <span>Online now</span>
                 ) : (
@@ -217,24 +217,24 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
             variant="outline" 
             size="sm"
             onClick={() => setShowNewChatDialog(true)}
-            className="hidden md:flex glass-panel hover:bg-white/30 border-white/30 neon-btn"
+            className="hidden md:flex hover:bg-slate-50 border-slate-200 text-slate-700"
           >
             <span className="material-icons text-sm mr-1">add</span>
             New Chat
           </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-600 hover:bg-white/20">
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:bg-slate-50">
             <span className="material-icons text-lg">more_vert</span>
           </Button>
         </div>
       </div>
 
       {/* Chat Messages */}
-      <ScrollArea className="flex-1 p-4 bg-gradient-to-br from-slate-50/80 to-white/60 backdrop-blur-xs">
+      <ScrollArea className="flex-1 p-4 clean-gradient">
         {groupedMessages.map(group => (
           <div key={group.date}>
             {/* Date Separator */}
             <div className="flex justify-center my-4">
-              <span className="text-xs text-slate-600 bg-white/40 px-3 py-1 rounded-full glass-panel">
+              <span className="text-xs text-slate-500 bg-white/70 px-3 py-1 rounded-full shadow-sm">
                 {formatRelative(new Date(group.date), new Date()).split('at')[0].trim()}
               </span>
             </div>
@@ -252,10 +252,10 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
         
         {/* Order Details Card */}
         {order && (
-          <div className="glass-card p-4 rounded-xl mb-4 glow-blue">
+          <div className="glass-card p-4 rounded-xl mb-4 clean-shadow">
             <div className="flex items-center text-sm text-slate-700">
               <span className="material-icons text-primary mr-2">assignment</span>
-              <span className="font-medium neon-text-blue">Order #{order?.id} Details</span>
+              <span className="font-medium text-primary">Order #{order?.id} Details</span>
             </div>
             <div className="mt-3 text-sm space-y-2">
               <p><span className="font-medium">Product:</span> {product?.title}</p>
@@ -278,7 +278,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
               )}
             </div>
             <div className="mt-3 flex justify-end">
-              <Button variant="link" className="text-primary text-sm p-0 font-medium hover:underline neon-text-blue">
+              <Button variant="link" className="text-primary text-sm p-0 font-medium hover:underline">
                 View Full Order
               </Button>
             </div>
@@ -290,7 +290,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
       </ScrollArea>
 
       {/* Chat Input */}
-      <div className="p-3 border-t border-white/20 glass-panel backdrop-blur-md">
+      <div className="p-3 border-t border-slate-100 glass-panel">
         <form onSubmit={handleSubmit} className="flex items-end">
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -301,12 +301,12 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 onChange={handleFileChange}
               />
-              <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-600 hover:bg-white/20">
+              <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:bg-slate-50">
                 <span className="material-icons text-lg">add_photo_alternate</span>
               </Button>
             </div>
             
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-600 hover:bg-white/20">
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:bg-slate-50">
               <span className="material-icons text-lg">emoji_emotions</span>
             </Button>
           </div>
@@ -317,25 +317,25 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
                 <img 
                   src={imagePreview} 
                   alt="Preview" 
-                  className="max-h-32 rounded-xl shadow-md"
+                  className="max-h-32 rounded-lg shadow-sm"
                 />
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 h-6 w-6 rounded-full bg-slate-800/70 hover:bg-slate-900/90 text-white"
+                  className="absolute top-1 right-1 h-6 w-6 rounded-full bg-white shadow-sm hover:bg-slate-50"
                   onClick={() => {
                     setImage(null);
                     setImagePreview(null);
                   }}
                 >
-                  <span className="material-icons text-sm">close</span>
+                  <span className="material-icons text-sm text-slate-600">close</span>
                 </Button>
               </div>
             )}
             <textarea
               placeholder="Type a message..."
-              className="w-full glass-input rounded-[20px] py-2 px-4 resize-none text-slate-800"
+              className="w-full floating-input rounded-md py-2 px-4 resize-none text-slate-800"
               rows={1}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
@@ -344,7 +344,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
           
           <Button
             type="submit"
-            className="bg-primary text-white p-3 rounded-full hover:bg-primary/90 neon-btn glow"
+            className="bg-primary text-white p-2 rounded-full hover:bg-primary/90 clean-shadow"
             disabled={(!messageText.trim() && !image) || isMessageSending}
           >
             <span className="material-icons">send</span>
@@ -354,13 +354,13 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
 
       {/* New Chat Dialog */}
       <Dialog open={showNewChatDialog} onOpenChange={setShowNewChatDialog}>
-        <DialogContent className="sm:max-w-[425px] glass-panel backdrop-blur-lg border-white/30 shadow-lg">
+        <DialogContent className="sm:max-w-[425px] bg-white rounded-lg border border-slate-100 shadow-md">
           <DialogHeader>
-            <DialogTitle className="text-center gradient-text text-xl font-semibold">Start a New Conversation</DialogTitle>
+            <DialogTitle className="text-center text-primary text-xl font-medium">Start a New Conversation</DialogTitle>
           </DialogHeader>
           <div className="grid gap-5 py-6">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="subject" className="text-right text-slate-700">
+              <Label htmlFor="subject" className="text-right text-slate-600">
                 Subject
               </Label>
               <Input
@@ -368,7 +368,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
                 value={newChatSubject}
                 onChange={(e) => setNewChatSubject(e.target.value)}
                 placeholder="What would you like to discuss?"
-                className="col-span-3 glass-input text-slate-800"
+                className="col-span-3 floating-input text-slate-800"
               />
             </div>
           </div>
@@ -376,7 +376,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
             <Button
               variant="outline"
               onClick={() => setShowNewChatDialog(false)}
-              className="border-white/30 hover:bg-white/20 glass-panel"
+              className="border-slate-200 hover:bg-slate-50 text-slate-700"
             >
               Cancel
             </Button>
@@ -426,7 +426,7 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
                 }
               }}
               disabled={isCreatingConversation || !newChatSubject.trim()}
-              className="bg-primary/90 hover:bg-primary text-white font-medium neon-btn glow"
+              className="bg-primary hover:bg-primary/90 text-white font-medium"
             >
               {isCreatingConversation ? 'Creating...' : 'Create Conversation'}
             </Button>

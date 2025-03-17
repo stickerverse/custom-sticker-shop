@@ -19,25 +19,25 @@ const MessageBubble = ({ message, isOwnMessage, product }: MessageBubbleProps) =
   
   if (isOwnMessage) {
     return (
-      <div className="flex mb-6 justify-end">
+      <div className="flex mb-5 justify-end">
         <div className="flex flex-col items-end max-w-[75%]">
           {message.messageType === "text" ? (
-            <div className="chat-bubble chat-bubble-own bg-primary text-white p-3 rounded-2xl rounded-tr-sm glow">
+            <div className="chat-bubble chat-bubble-own bg-primary text-white p-3 rounded-xl rounded-tr-sm clean-shadow">
               <p className="text-sm leading-relaxed">{message.content}</p>
             </div>
           ) : (
-            <div className="chat-bubble chat-bubble-own bg-primary text-white p-2 rounded-2xl rounded-tr-sm glow">
+            <div className="chat-bubble chat-bubble-own bg-primary text-white p-2 rounded-xl rounded-tr-sm clean-shadow">
               <img 
                 src={message.imageUrl} 
                 alt="Shared image" 
-                className="w-full h-auto rounded-xl mb-1 shadow-md"
+                className="w-full h-auto rounded-lg mb-1 shadow-sm"
               />
               {message.content && <p className="text-sm mt-1 leading-relaxed">{message.content}</p>}
             </div>
           )}
           <div className="flex items-center mt-1">
-            <span className="text-xs text-slate-500">{formattedTime}</span>
-            <div className="ml-1 text-xs text-green-500 animate-pulse">✓✓</div>
+            <span className="text-xs text-slate-400">{formattedTime}</span>
+            <div className="ml-1 text-xs text-primary/70">✓✓</div>
           </div>
         </div>
       </div>
@@ -45,30 +45,30 @@ const MessageBubble = ({ message, isOwnMessage, product }: MessageBubbleProps) =
   }
   
   return (
-    <div className="flex mb-6">
+    <div className="flex mb-5">
       <div className="flex-shrink-0 mr-3">
-        <Avatar className="w-8 h-8 border border-white/30">
+        <Avatar className="w-8 h-8 border border-slate-100 shadow-sm">
           <AvatarImage src={product?.imageUrl} alt="Sender" />
-          <AvatarFallback className="bg-primary/20 text-primary">{product?.title?.charAt(0) || "S"}</AvatarFallback>
+          <AvatarFallback className="bg-slate-100 text-primary">{product?.title?.charAt(0) || "S"}</AvatarFallback>
         </Avatar>
       </div>
       <div className="flex flex-col max-w-[75%]">
         {message.messageType === "text" ? (
-          <div className="chat-bubble chat-bubble-other glass-card p-3 rounded-2xl rounded-tl-sm">
-            <p className="text-sm text-slate-800 leading-relaxed">{message.content}</p>
+          <div className="chat-bubble chat-bubble-other glass-card p-3 rounded-xl rounded-tl-sm clean-shadow">
+            <p className="text-sm text-slate-700 leading-relaxed">{message.content}</p>
           </div>
         ) : (
-          <div className="chat-bubble chat-bubble-other glass-card p-2 rounded-2xl rounded-tl-sm">
+          <div className="chat-bubble chat-bubble-other glass-card p-2 rounded-xl rounded-tl-sm clean-shadow">
             <img 
               src={message.imageUrl} 
               alt="Shared image" 
-              className="w-full h-auto rounded-xl mb-1 shadow-md" 
+              className="w-full h-auto rounded-lg mb-1 shadow-sm" 
             />
-            {message.content && <p className="text-sm mt-1 text-slate-800 leading-relaxed">{message.content}</p>}
-            <p className="text-xs text-slate-500">{message.imageUrl?.split("/").pop()}</p>
+            {message.content && <p className="text-sm mt-1 text-slate-700 leading-relaxed">{message.content}</p>}
+            <p className="text-xs text-slate-400">{message.imageUrl?.split("/").pop()}</p>
           </div>
         )}
-        <span className="text-xs text-slate-500 mt-1">{formattedTime}</span>
+        <span className="text-xs text-slate-400 mt-1">{formattedTime}</span>
       </div>
     </div>
   );
