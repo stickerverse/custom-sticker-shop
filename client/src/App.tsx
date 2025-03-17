@@ -59,6 +59,7 @@ function Router() {
           <Route path="/customizer" component={Customizer} />
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
+          <Route path="/order-confirmation" component={OrderConfirmation} />
           <Route path="/chat" component={Chat} />
           <Route path="/chat/:id" component={Chat} />
           <Route path="/admin" component={Admin} />
