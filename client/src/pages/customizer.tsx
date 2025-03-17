@@ -330,52 +330,61 @@ export default function Customizer() {
                   />
                 </div>
                 
-                <div>
-                  <Label>Upload Image</Label>
-                  <div className="mt-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full h-32 border-dashed"
-                      disabled={isUploading}
-                    >
-                      {isUploading ? (
-                        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-                      ) : (
-                        <div className="flex flex-col items-center">
-                          <span className="material-icons mb-2">file_upload</span>
-                          <span>Click to upload image</span>
-                          <span className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 5MB</span>
-                        </div>
-                      )}
-                    </Button>
-                  </div>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Advanced Image Processing</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Use our AI-powered tools to create professional sticker images
+                  </p>
+                  
+                  <ImageProcessor 
+                    onImageProcessed={(url) => {
+                      setProcessedImageUrl(url);
+                      setUploadedImage(url);
+                      setIsRemovedBg(true);
+                      
+                      toast({
+                        title: "Image Processed",
+                        description: "Your image has been successfully processed.",
+                      });
+                    }} 
+                  />
                 </div>
                 
-                {uploadedImage && (
-                  <div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleRemoveBackground}
-                      className="w-full"
-                      disabled={isRemovedBg}
-                    >
-                      {isRemovedBg ? "Background Removed" : "Remove Background"}
-                    </Button>
-                    <p className="text-xs text-gray-500 mt-1 text-center">
-                      +$1.00 for background removal
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10 -z-10 blur-xl opacity-50 rounded-lg"></div>
+                  <div className="border border-primary/20 rounded-lg p-4 bg-background/80 backdrop-blur-md">
+                    <h4 className="text-sm font-medium mb-2 text-primary">Traditional Upload</h4>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      If you prefer to upload an image directly without processing
                     </p>
+                    
+                    <div className="flex flex-col space-y-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full h-20 border-dashed"
+                        disabled={isUploading}
+                      >
+                        {isUploading ? (
+                          <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <span>Click to upload image</span>
+                            <span className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP up to 5MB</span>
+                          </div>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                )}
+                </div>
                 
                 <div>
                   <Label htmlFor="background-color">Background Color</Label>
