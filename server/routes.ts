@@ -38,6 +38,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
   console.log("WebSocket server initialized on path: /ws");
+
+  // Stripe Payment routes
+  app.post('/api/create-payment-intent', async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      const { amount } = req.body;
+      
+      if (!amount || typeof amount !== 'number' || amount <= 0) {
+        return res.status(400).json({ message: 'Invalid amount' });
+      }
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        // Verify your integration in this guide by including this parameter
+        metadata: { integration_check: 'accept_a_payment' },
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (error: any) {
+      console.error('Error creating payment intent:', error);
+      res.status(500).json({ 
+        message: 'Error creating payment intent',
+        error: error.message 
+      });
+    }
+  });
   
   // Heartbeat to detect and clean up dead connections
   function heartbeat() {

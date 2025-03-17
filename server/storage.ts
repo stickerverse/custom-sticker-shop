@@ -139,6 +139,7 @@ export class MemStorage implements IStorage {
         title: "Pink Leopard Sticker", 
         description: "Beautiful pink leopard sticker, perfect for laptops, water bottles, and more.",
         imageUrl: "https://images.unsplash.com/photo-1585914641050-fa9883c4e21c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        price: 500, // $5.00 in cents
         categoryId: 1,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -148,6 +149,7 @@ export class MemStorage implements IStorage {
         title: "Cute Cat Sticker", 
         description: "Adorable cat sticker for cat lovers. High-quality vinyl.",
         imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        price: 500, // $5.00 in cents
         categoryId: 1,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -157,6 +159,7 @@ export class MemStorage implements IStorage {
         title: "Mountain Landscape Sticker", 
         description: "Stunning mountain landscape sticker in vibrant colors.",
         imageUrl: "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        price: 500, // $5.00 in cents
         categoryId: 2,
         createdAt: new Date(),
         updatedAt: new Date()
