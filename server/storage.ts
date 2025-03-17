@@ -427,38 +427,53 @@ export class MemStorage implements IStorage {
   
   async getConversation(id: number): Promise<any | undefined> {
     const conversation = this.conversations.get(id);
-    if (!conversation) return undefined;
-    
-    // Handle direct conversations (not associated with orders)
-    if (conversation.isDirectChat) {
-      const user = await this.getUser(conversation.userId);
-      const messages = await this.getMessages(id);
-      
-      return {
-        ...conversation,
-        user,
-        messages
-      };
+    if (!conversation) {
+      return undefined;
     }
     
-    // Handle order-related conversations
-    if (conversation.orderId) {
-      const order = await this.getOrder(conversation.orderId);
-      const orderItems = await this.getOrderItems(conversation.orderId);
-      const firstItem = orderItems[0];
-      const product = firstItem ? await this.getProduct(firstItem.productId) : null;
+    try {
+      // Get messages for all conversation types
       const messages = await this.getMessages(id);
+      const result = { ...conversation, messages };
       
-      return {
-        ...conversation,
-        order,
-        product,
-        orderItems,
-        messages
-      };
+      // Handle direct conversations (not associated with orders)
+      if (conversation.isDirectChat) {
+        const user = await this.getUser(conversation.userId);
+        return {
+          ...result,
+          user
+        };
+      }
+      
+      // Handle order-related conversations
+      if (conversation.orderId) {
+        const order = await this.getOrder(conversation.orderId);
+        
+        // If order doesn't exist anymore, still return the conversation without the order details
+        if (!order) {
+          return result;
+        }
+        
+        const orderItems = await this.getOrderItems(conversation.orderId);
+        const firstItem = orderItems[0];
+        const product = firstItem ? await this.getProduct(firstItem.productId) : null;
+        
+        return {
+          ...result,
+          order,
+          product,
+          orderItems
+        };
+      }
+      
+      // Return the conversation even if it's not direct chat or order-related
+      // This is a more robust approach than returning undefined
+      return result;
+      
+    } catch (error) {
+      console.error(`Error in getConversation for id ${id}:`, error);
+      throw error;
     }
-    
-    return undefined;
   }
   
   async getConversationByOrder(orderId: number): Promise<any | undefined> {

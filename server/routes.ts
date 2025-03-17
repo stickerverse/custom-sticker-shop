@@ -556,18 +556,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if user is participant (owner or admin)
       const user = await storage.getUser(userId);
-      if (conversation.order.userId !== userId && !user?.isAdmin) {
-        return res.status(403).json({ message: 'Not authorized to view this conversation' });
+      
+      // Handle different conversation types
+      if (conversation.isDirectChat) {
+        // For direct chats, check if user is participant or admin
+        if (conversation.userId !== userId && !user?.isAdmin) {
+          return res.status(403).json({ message: 'Not authorized to view this conversation' });
+        }
+      } else if (conversation.order) {
+        // For order-related conversations, check if user owns the order or is admin
+        if (conversation.order.userId !== userId && !user?.isAdmin) {
+          return res.status(403).json({ message: 'Not authorized to view this conversation' });
+        }
       }
       
-      // Get messages
-      const messages = await storage.getMessages(conversationId);
-      
-      res.status(200).json({
-        ...conversation,
-        messages
-      });
+      // Return the conversation data
+      res.status(200).json(conversation);
     } catch (error) {
+      console.error('Error in /api/conversations/:id route:', error);
       res.status(500).json({ message: 'Error fetching conversation' });
     }
   });
