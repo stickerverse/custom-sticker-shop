@@ -432,18 +432,25 @@ export default function Customizer() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Editor */}
             <div className="lg:col-span-1 order-2 lg:order-1 space-y-4">
-              <Card className="overflow-hidden border-primary/10 shadow-md bg-background/80 backdrop-blur-sm">
-                <div className="p-4 border-b border-primary/10 bg-primary/5">
-                  <h2 className="text-lg font-semibold text-primary">Sticker Editor</h2>
+              <Card className="overflow-hidden border border-gray-200 shadow-sm rounded-md bg-white">
+                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                  <h2 className="text-lg font-semibold text-gray-700 flex items-center">
+                    <svg className="mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15.5 15.5L20 20" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M5 11C5 14.3137 7.68629 17 11 17C12.6597 17 14.1621 16.3261 15.2483 15.2336C16.3308 14.1447 17 12.654 17 11C17 7.68629 14.3137 5 11 5C7.68629 5 5 7.68629 5 11Z" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Sticker Details
+                  </h2>
                 </div>
-                <div className="p-4 space-y-4">
+                <div className="p-5 space-y-5">
                   <div>
-                    <Label htmlFor="sticker-name" className="text-sm text-muted-foreground">Sticker Name</Label>
+                    <Label htmlFor="sticker-name" className="text-sm font-medium text-gray-700 mb-1.5 block">Sticker Name</Label>
                     <Input 
                       id="sticker-name" 
                       value={stickerName}
                       onChange={(e) => setStickerName(e.target.value)}
-                      className="mt-1"
+                      className="border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary"
+                      placeholder="Enter a name for your sticker"
                     />
                   </div>
                   
@@ -466,63 +473,107 @@ export default function Customizer() {
                     borderColor={borderColor}
                   />
                   
-                  <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                      <Label htmlFor="material" className="text-sm text-muted-foreground">Material</Label>
+                      <Label htmlFor="material" className="text-sm font-medium text-gray-700 mb-1.5 block">Sticker Material</Label>
                       <Select
                         value={selectedMaterial}
                         onValueChange={setSelectedMaterial}
                       >
-                        <SelectTrigger className="mt-1">
+                        <SelectTrigger id="material" className="border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary bg-white">
                           <SelectValue placeholder="Select material" />
                         </SelectTrigger>
                         <SelectContent>
                           {MATERIALS.map((material) => (
-                            <SelectItem key={material.id} value={material.id}>
-                              {material.label} {material.price > 0 && `(+$${material.price.toFixed(2)})`}
+                            <SelectItem key={material.id} value={material.id} className="text-gray-700">
+                              <div className="flex justify-between items-center w-full">
+                                <span>{material.label}</span>
+                                {material.price > 0 && <span className="text-gray-500 text-xs">(+${material.price.toFixed(2)})</span>}
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      <p className="text-xs text-gray-500 mt-1">Material affects durability and appearance</p>
                     </div>
                     
                     <div>
-                      <Label htmlFor="size" className="text-sm text-muted-foreground">Size</Label>
+                      <Label htmlFor="size" className="text-sm font-medium text-gray-700 mb-1.5 block">Sticker Size</Label>
                       <Select
                         value={selectedSize}
                         onValueChange={setSelectedSize}
                       >
-                        <SelectTrigger className="mt-1">
+                        <SelectTrigger id="size" className="border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary bg-white">
                           <SelectValue placeholder="Select size" />
                         </SelectTrigger>
                         <SelectContent>
                           {SIZES.map((size) => (
-                            <SelectItem key={size.id} value={size.id}>
-                              {size.label} - ${size.price.toFixed(2)}
+                            <SelectItem key={size.id} value={size.id} className="text-gray-700">
+                              <div className="flex justify-between items-center w-full">
+                                <span>{size.label}</span>
+                                <span className="text-gray-500 text-xs">${size.price.toFixed(2)}</span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      <p className="text-xs text-gray-500 mt-1">Diameter of your finished sticker</p>
                     </div>
                   </div>
                   
                   <div>
                     <div className="flex justify-between items-center">
-                      <Label htmlFor="quantity" className="text-sm text-muted-foreground">Quantity</Label>
-                      <span className="text-xs font-medium text-primary">{quantity} stickers</span>
+                      <Label htmlFor="quantity" className="text-sm font-medium text-gray-700 mb-1.5 block">Quantity</Label>
+                      <span className="text-sm font-medium text-primary rounded-full bg-blue-50 px-2 py-0.5">{quantity} stickers</span>
                     </div>
-                    <Slider
-                      id="quantity"
-                      min={1}
-                      max={50}
-                      step={1}
-                      value={[quantity]}
-                      onValueChange={(value) => setQuantity(value[0])}
-                      className="mt-2"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>1</span>
-                      <span>50</span>
+                    <div className="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-3 items-center mb-1.5">
+                      <div className="w-full">
+                        <Slider
+                          id="quantity"
+                          min={1}
+                          max={50}
+                          step={1}
+                          value={[quantity]}
+                          onValueChange={(value) => setQuantity(value[0])}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="flex items-center border border-gray-300 rounded-md bg-white">
+                        <button 
+                          type="button"
+                          className="flex-none w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-100 border-r border-gray-300"
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          disabled={quantity <= 1}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        <input
+                          type="number"
+                          min="1"
+                          max="50"
+                          value={quantity}
+                          onChange={(e) => setQuantity(Math.min(50, Math.max(1, parseInt(e.target.value) || 1)))}
+                          className="w-full text-center border-0 focus:ring-0"
+                        />
+                        <button 
+                          type="button"
+                          className="flex-none w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-100 border-l border-gray-300"
+                          onClick={() => setQuantity(Math.min(50, quantity + 1))}
+                          disabled={quantity >= 50}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>Min: 1</span>
+                      <p className="text-xs text-gray-500">Higher quantities = lower cost per sticker</p>
+                      <span>Max: 50</span>
                     </div>
                   </div>
                 </div>
@@ -531,23 +582,33 @@ export default function Customizer() {
             
             {/* Center Column - Preview */}
             <div className="lg:col-span-2 order-1 lg:order-2">
-              <Card className="border-primary/10 shadow-md overflow-hidden bg-gradient-to-br from-background/90 to-background/40 backdrop-blur-md">
-                <div className="p-4 border-b border-primary/10 flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-primary">Live Preview</h2>
-                  <div className="text-lg font-bold text-primary flex items-center">
-                    <span>${price.toFixed(2)} × {quantity} = ${totalPrice.toFixed(2)}</span>
+              <Card className="border border-gray-200 shadow-sm rounded-md overflow-hidden bg-white">
+                <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                  <h2 className="text-lg font-semibold text-gray-700 flex items-center">
+                    <svg className="mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 8V16" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M8 12L16 12" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <rect x="3" y="3" width="18" height="18" rx="2" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Live Preview
+                  </h2>
+                  <div className="text-lg font-bold text-gray-700 flex items-center bg-blue-50 px-3 py-1 rounded-md">
+                    <span className="text-primary">${totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
                 
-                <div className="p-6 flex flex-col items-center">
-                  <div className="relative mb-6 w-full max-w-md">
-                    <div className="w-full aspect-square bg-black/5 rounded-lg flex items-center justify-center overflow-hidden">
+                <div className="p-8 flex flex-col items-center">
+                  <div className="mb-8 w-full max-w-md">
+                    <div className="w-full aspect-square bg-gray-100 rounded-md border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
                       {!uploadedImage ? (
                         <div className="text-center p-6">
-                          <div className="bg-primary/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                            <span className="material-icons text-primary" style={{ fontSize: '40px' }}>add_photo_alternate</span>
+                          <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 6V18" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M6 12H18" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
                           </div>
-                          <p className="text-muted-foreground">Upload an image to customize your sticker</p>
+                          <p className="text-gray-500">Upload an image above to design your sticker</p>
                         </div>
                       ) : (
                         <canvas 
@@ -556,27 +617,58 @@ export default function Customizer() {
                         />
                       )}
                     </div>
-                    
-                    {/* Decorative elements */}
-                    <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-primary/10 rounded-full blur-xl"></div>
-                    <div className="absolute -top-3 -left-3 w-10 h-10 bg-primary/20 rounded-full blur-xl"></div>
                   </div>
                   
-                  <div className="text-center mb-8">
-                    <p className="text-sm text-muted-foreground mb-1">Preview</p>
-                    <h3 className="text-xl font-semibold">{stickerName}</h3>
-                    <p className="text-sm mt-1">
-                      <span className="text-muted-foreground">{MATERIALS.find(m => m.id === selectedMaterial)?.label} • </span>
-                      <span className="text-muted-foreground">{SIZES.find(s => s.id === selectedSize)?.label}</span>
-                    </p>
+                  <div className="text-center mb-8 bg-gray-50 p-4 rounded-md border border-gray-200 w-full max-w-md">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <svg className="mr-2" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M21 5H3V19H21V5Z" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M3 9H21" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M9 17V13" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span className="text-sm font-medium text-gray-700">Order Summary</span>
+                      </div>
+                      <div className="text-xs text-gray-500">Unit price: ${price.toFixed(2)}</div>
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-800 mb-1">{stickerName}</h3>
+                    <div className="flex justify-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <svg className="mr-1" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 8L16 12L12 16L8 12L12 8Z" fill="#0078D4"/>
+                        </svg>
+                        <span>{MATERIALS.find(m => m.id === selectedMaterial)?.label}</span>
+                      </div>
+                      <div>•</div>
+                      <div className="flex items-center">
+                        <svg className="mr-1" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="12" cy="12" r="9" stroke="#0078D4" strokeWidth="2"/>
+                        </svg>
+                        <span>{SIZES.find(s => s.id === selectedSize)?.label}</span>
+                      </div>
+                      <div>•</div>
+                      <div className="flex items-center">
+                        <svg className="mr-1" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6 2L18 2" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M6 22L18 22" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M3 8C3 6.34315 4.34315 5 6 5H18C19.6569 5 21 6.34315 21 8V16C21 17.6569 19.6569 19 18 19H6C4.34315 19 3 17.6569 3 16V8Z" stroke="#0078D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span>Qty: {quantity}</span>
+                      </div>
+                    </div>
                   </div>
                   
                   {uploadedImage && (
                     <Button 
-                      className="bg-primary hover:bg-primary/90 text-white px-8"
+                      className="bg-primary hover:bg-primary/90 text-white font-medium px-8 h-12 rounded-md shadow-sm"
                       onClick={handleAddToCart}
                     >
-                      <span className="material-icons mr-2 text-lg">add_shopping_cart</span>
+                      <svg className="mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 20C9 21.1046 8.10457 22 7 22C5.89543 22 5 21.1046 5 20C5 18.8954 5.89543 18 7 18C8.10457 18 9 18.8954 9 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M20 20C20 21.1046 19.1046 22 18 22C16.8954 22 16 21.1046 16 20C16 18.8954 16.8954 18 18 18C19.1046 18 20 18.8954 20 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M3 4H5L7 17H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M7 7H20L18 15H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                       Add to Cart
                     </Button>
                   )}
