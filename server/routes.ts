@@ -859,11 +859,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Image processing routes
   app.post('/api/image/remove-background', requireReplicateToken, async (req: Request, res: Response) => {
-    const userId = req.session.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
+    // Allow anonymous access to image processing
+    // No authentication required
     
     try {
       const { imageUrl } = req.body;
@@ -884,11 +881,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post('/api/image/detect-borders', requireReplicateToken, async (req: Request, res: Response) => {
-    const userId = req.session.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
+    // Allow anonymous access to image processing
+    // No authentication required
     
     try {
       const { imageUrl, lowThreshold, highThreshold } = req.body;
