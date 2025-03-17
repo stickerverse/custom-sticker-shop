@@ -16,6 +16,7 @@ import Shop from "@/pages/shop";
 import Product from "@/pages/product";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
+import Customizer from "@/pages/customizer";
 import Chat from "@/pages/chat";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
@@ -54,6 +55,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/shop" component={Shop} />
           <Route path="/product/:id" component={Product} />
+          <Route path="/customizer" component={Customizer} />
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/chat" component={Chat} />

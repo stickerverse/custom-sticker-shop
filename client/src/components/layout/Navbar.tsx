@@ -99,6 +99,7 @@ const Navbar = () => {
             </Link>
             <div className="hidden md:flex space-x-4">
               <Link href="/shop" className="hover:text-primary">Shop</Link>
+              <Link href="/customizer" className="hover:text-primary">Create Your Own</Link>
               <Link href="/#about" className="hover:text-primary">About</Link>
               <Link href="/#contact" className="hover:text-primary">Contact</Link>
             </div>
@@ -158,6 +159,9 @@ const Navbar = () => {
                 <div className="py-4 flex flex-col space-y-3">
                   <Link href="/shop" className="block p-2 hover:bg-gray-100 rounded">
                     Shop
+                  </Link>
+                  <Link href="/customizer" className="block p-2 hover:bg-gray-100 rounded">
+                    Create Your Own
                   </Link>
                   <Link href="/#about" className="block p-2 hover:bg-gray-100 rounded">
                     About
@@ -390,10 +394,10 @@ const Navbar = () => {
             <span className={`material-icons ${location === '/shop' ? 'text-primary' : 'text-gray-500'}`}>store</span>
             <span className="block text-xs mt-1">Shop</span>
           </Link>
-          <button className="p-3 text-center" onClick={() => document.getElementById('mobile-search')?.focus()}>
-            <span className="material-icons text-gray-500">search</span>
-            <span className="block text-xs mt-1">Search</span>
-          </button>
+          <Link href="/customizer" className="p-3 text-center">
+            <span className={`material-icons ${location === '/customizer' ? 'text-primary' : 'text-gray-500'}`}>add_photo_alternate</span>
+            <span className="block text-xs mt-1">Create</span>
+          </Link>
           <Link href="/chat" className="p-3 text-center">
             <span className={`material-icons ${location === '/chat' ? 'text-primary' : 'text-gray-500'}`}>chat</span>
             <span className="block text-xs mt-1">Messages</span>
