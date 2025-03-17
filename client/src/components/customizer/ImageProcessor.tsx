@@ -1,25 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { apiRequest } from '@/lib/queryClient';
-import { Loader2, Upload, Trash2, Sparkles, Scissors } from 'lucide-react';
+import { Loader2, Upload, Trash2, Sparkles } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 
 interface ImageProcessorProps {
   onImageProcessed: (url: string) => void;
+  onBorderDetected?: (borderData: any) => void;
+  selectedShape: string;
+  borderWidth: number;
+  borderColor: string;
 }
 
-export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
+export function ImageProcessor({ 
+  onImageProcessed, 
+  onBorderDetected, 
+  selectedShape,
+  borderWidth,
+  borderColor
+}: ImageProcessorProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
-  const [lowThreshold, setLowThreshold] = useState<number>(100);
-  const [highThreshold, setHighThreshold] = useState<number>(200);
-  const [activeTab, setActiveTab] = useState<string>('removeBackground');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // For file upload and preview
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,6 +37,11 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
       const fileUrl = URL.createObjectURL(file);
       setImagePreview(fileUrl);
       setProcessedImage(null); // Reset processed image when new file is selected
+      
+      // Automatically process the image when selected
+      setTimeout(() => {
+        processImage(file);
+      }, 500);
     }
   };
 
@@ -48,6 +59,15 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
     onSuccess: (data) => {
       setProcessedImage(data.url);
       onImageProcessed(data.url);
+      
+      // After removing background, detect borders
+      if (data.url) {
+        detectBordersMutation.mutate({ 
+          imageUrl: data.url, 
+          lowThreshold: 50,  // Default values
+          highThreshold: 150
+        });
+      }
     },
   });
 
@@ -63,46 +83,35 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
       return response.json();
     },
     onSuccess: (data) => {
-      setProcessedImage(data.url);
-      onImageProcessed(data.url);
-    },
-  });
-
-  // Upload image to a temporary storage and get URL
-  const uploadImageMutation = useMutation({
-    mutationFn: async (file: File) => {
-      // For demo purposes, we're using a fake upload service
-      // Replace with your actual image upload endpoint
-      const formData = new FormData();
-      formData.append('image', file);
-      
-      // Simulate upload - in a real app, replace with actual upload API
-      // const response = await fetch('/api/upload', { method: 'POST', body: formData });
-      // return await response.json();
-      
-      // For now, we'll just use the object URL
-      return { url: URL.createObjectURL(file) };
-    },
-    onSuccess: (data) => {
-      // Process the image based on active tab
-      if (activeTab === 'removeBackground') {
-        removeBackgroundMutation.mutate(data.url);
-      } else if (activeTab === 'detectBorders') {
-        detectBordersMutation.mutate({ 
-          imageUrl: data.url, 
-          lowThreshold, 
-          highThreshold 
-        });
+      // Don't replace the processed image, just notify about borders
+      if (onBorderDetected) {
+        onBorderDetected(data);
       }
+      setIsProcessing(false);
     },
   });
 
-  const handleProcessImage = () => {
-    if (selectedFile) {
-      uploadImageMutation.mutate(selectedFile);
-    }
+  // Process image function that handles both operations
+  const processImage = (file: File) => {
+    if (!file) return;
+    
+    setIsProcessing(true);
+    
+    // Create an object URL for the file
+    const objectUrl = URL.createObjectURL(file);
+    
+    // First remove background
+    removeBackgroundMutation.mutate(objectUrl);
   };
 
+  // Watch for changes in shape, border width, or color and reprocess if needed
+  useEffect(() => {
+    if (processedImage && selectedShape && (borderWidth > 0 || selectedShape !== 'rectangle')) {
+      // The image is already processed, we just need to apply the new shape/border
+      // This would be handled in the parent component with canvas manipulations
+    }
+  }, [selectedShape, borderWidth, borderColor, processedImage]);
+  
   const clearImage = () => {
     setSelectedFile(null);
     setImagePreview(null);
@@ -111,117 +120,67 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
   };
 
   const isLoading = 
-    uploadImageMutation.isPending || 
     removeBackgroundMutation.isPending || 
-    detectBordersMutation.isPending;
+    detectBordersMutation.isPending ||
+    isProcessing;
 
   return (
     <Card className="p-6 bg-background/80 backdrop-blur-md border-primary/20 shadow-lg relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background/20 z-0" />
       
       <div className="relative z-10">
-        <h3 className="text-2xl font-bold mb-4 text-primary">Image Customizer</h3>
-        
-        <Tabs defaultValue="removeBackground" onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="removeBackground" className="relative">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Remove Background
-              <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform scale-x-0 transition-transform group-data-[state=active]:scale-x-100"></span>
-            </TabsTrigger>
-            <TabsTrigger value="detectBorders" className="relative">
-              <Scissors className="mr-2 h-4 w-4" />
-              Detect Borders
-              <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform scale-x-0 transition-transform group-data-[state=active]:scale-x-100"></span>
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-primary flex items-center">
+            <Sparkles className="mr-2 h-5 w-5 text-primary" />
+            AI Image Processor
+          </h3>
           
-          <TabsContent value="removeBackground" className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Upload an image to automatically remove its background. Perfect for creating custom stickers!
-            </p>
-          </TabsContent>
-          
-          <TabsContent value="detectBorders" className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Detect edges in your image to create outline effects for your stickers.
-            </p>
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Low Threshold: {lowThreshold}</Label>
-                </div>
-                <Slider
-                  value={[lowThreshold]}
-                  min={1}
-                  max={255}
-                  step={1}
-                  onValueChange={(value) => setLowThreshold(value[0])}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>High Threshold: {highThreshold}</Label>
-                </div>
-                <Slider
-                  value={[highThreshold]}
-                  min={1}
-                  max={255}
-                  step={1}
-                  onValueChange={(value) => setHighThreshold(value[0])}
-                />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+          <div className="flex-shrink-0">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => selectedFile && processImage(selectedFile)}
+              disabled={!selectedFile || isLoading}
+              className="text-xs"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="mr-1 h-3 w-3" />
+              )}
+              Reprocess
+            </Button>
+          </div>
+        </div>
         
-        <div className="mt-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <Label htmlFor="image-upload">Upload Image</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="image-upload"
-                  type="file"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="flex-1"
-                />
-                {selectedFile && (
-                  <Button 
-                    variant="destructive" 
-                    size="icon" 
-                    onClick={clearImage}
-                    className="flex-shrink-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex items-end space-y-0 gap-4">
+        <p className="text-sm text-muted-foreground mb-4">
+          Upload an image to automatically remove the background and prepare it for your custom sticker.
+        </p>
+        
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Input
+              id="image-upload"
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*"
+              className="flex-1"
+            />
+            {selectedFile && (
               <Button 
-                onClick={handleProcessImage} 
-                disabled={!selectedFile || isLoading}
-                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground group relative overflow-hidden"
+                variant="destructive" 
+                size="icon" 
+                onClick={clearImage}
+                className="flex-shrink-0"
               >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
-                )}
-                Process Image
-                <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary-foreground/0 via-primary-foreground/30 to-primary-foreground/0 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
+                <Trash2 className="h-4 w-4" />
               </Button>
-            </div>
+            )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Original Image Preview */}
-            <div className="border rounded-lg p-4 bg-background/50 backdrop-blur-sm">
+            <div className="border rounded-lg p-3 bg-background/50 backdrop-blur-sm">
               <h4 className="text-sm font-medium mb-2 text-muted-foreground">Original</h4>
               <div className="aspect-square flex items-center justify-center bg-black/5 rounded-md overflow-hidden">
                 {imagePreview ? (
@@ -237,7 +196,7 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
             </div>
             
             {/* Processed Image Preview */}
-            <div className="border rounded-lg p-4 bg-background/50 backdrop-blur-sm">
+            <div className="border rounded-lg p-3 bg-background/50 backdrop-blur-sm">
               <h4 className="text-sm font-medium mb-2 text-muted-foreground">Processed</h4>
               <div className="aspect-square flex items-center justify-center bg-black/5 rounded-md overflow-hidden relative">
                 {isLoading && (
@@ -257,7 +216,7 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
                   />
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    {isLoading ? 'Processing...' : 'No processed image yet'}
+                    {isLoading ? 'Processing...' : 'Select an image to process'}
                   </p>
                 )}
               </div>

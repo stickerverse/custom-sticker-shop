@@ -161,7 +161,7 @@ export default function Customizer() {
     }
   };
 
-  // Preview rendering
+  // Preview rendering for processed images with shape transformations
   useEffect(() => {
     if (!uploadedImage || !canvasRef.current) return;
 
@@ -172,7 +172,7 @@ export default function Customizer() {
       imageRef.current = img;
       renderPreview();
     };
-  }, [uploadedImage]);
+  }, [uploadedImage, processedImageUrl]);
 
   // Update preview when options change
   useEffect(() => {
@@ -200,69 +200,192 @@ export default function Customizer() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Calculate dimensions to maintain aspect ratio
-    const size = Math.min(canvas.width, canvas.height) * scale;
-    const x = (canvas.width - size) / 2;
-    const y = (canvas.height - size) / 2;
-
-    // Apply background if not removed
-    if (!isRemovedBg && backgroundColor !== "transparent") {
-      ctx.fillStyle = backgroundColor;
-      if (selectedShape === "circle") {
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, size / 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (selectedShape === "heart" || selectedShape === "star") {
-        // For complex shapes, we just use a rectangle for the demo
-        ctx.fillRect(x, y, size, size);
-      } else {
-        const radius = selectedShape === "squircle" ? 20 : selectedShape === "square" ? 5 : 0;
-        ctx.beginPath();
-        ctx.roundRect(x, y, size, size, radius);
-        ctx.fill();
-      }
-    }
-
-    // Draw the image
-    if (selectedShape === "circle") {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, size / 2 - borderWidth, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.drawImage(img, x + borderWidth, y + borderWidth, size - borderWidth * 2, size - borderWidth * 2);
-      ctx.restore();
-    } else if (selectedShape === "heart" || selectedShape === "star") {
-      // For complex shapes, we just use a rectangle for the demo
-      ctx.drawImage(img, x + borderWidth, y + borderWidth, size - borderWidth * 2, size - borderWidth * 2);
+    // Calculate dimensions to maintain aspect ratio while preserving the image aspect ratio
+    const imgAspect = img.width / img.height;
+    const canvasSize = Math.min(canvas.width, canvas.height) * scale;
+    
+    let drawWidth, drawHeight;
+    if (imgAspect >= 1) {
+      // Image is wider than tall
+      drawWidth = canvasSize;
+      drawHeight = canvasSize / imgAspect;
     } else {
-      const radius = selectedShape === "squircle" ? 20 : selectedShape === "square" ? 5 : 0;
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(x + borderWidth, y + borderWidth, size - borderWidth * 2, size - borderWidth * 2, radius);
-      ctx.clip();
-      ctx.drawImage(img, x + borderWidth, y + borderWidth, size - borderWidth * 2, size - borderWidth * 2);
-      ctx.restore();
+      // Image is taller than wide
+      drawHeight = canvasSize;
+      drawWidth = canvasSize * imgAspect;
     }
+    
+    const x = (canvas.width - drawWidth) / 2;
+    const y = (canvas.height - drawHeight) / 2;
 
+    // Apply shape transformations using path clipping
+    ctx.save();
+    
+    // Define the clipping path based on the selected shape
+    applyShapeClipping(ctx, selectedShape, x, y, drawWidth, drawHeight, borderWidth);
+    
+    // Draw the image inside the clipping path
+    ctx.drawImage(img, x, y, drawWidth, drawHeight);
+    ctx.restore();
+    
     // Draw border if specified
     if (borderWidth > 0) {
       ctx.strokeStyle = borderColor;
-      ctx.lineWidth = borderWidth * 2;
-
-      if (selectedShape === "circle") {
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, size / 2 - borderWidth, 0, Math.PI * 2);
-        ctx.stroke();
-      } else if (selectedShape === "heart" || selectedShape === "star") {
-        // For complex shapes, we just use a rectangle for the demo
-        ctx.strokeRect(x + borderWidth, y + borderWidth, size - borderWidth * 2, size - borderWidth * 2);
-      } else {
-        const radius = selectedShape === "squircle" ? 20 : selectedShape === "square" ? 5 : 0;
-        ctx.beginPath();
-        ctx.roundRect(x + borderWidth, y + borderWidth, size - borderWidth * 2, size - borderWidth * 2, radius);
-        ctx.stroke();
-      }
+      ctx.lineWidth = borderWidth;
+      
+      // Draw the stroke along the same path used for clipping
+      drawShapePath(ctx, selectedShape, x, y, drawWidth, drawHeight, borderWidth / 2);
+      ctx.stroke();
     }
+  };
+  
+  // Helper function to create a clipping path based on the selected shape
+  const applyShapeClipping = (
+    ctx: CanvasRenderingContext2D, 
+    shape: string, 
+    x: number, 
+    y: number, 
+    width: number, 
+    height: number,
+    borderOffset: number
+  ) => {
+    const inset = borderOffset;
+    
+    ctx.beginPath();
+    switch (shape) {
+      case "circle":
+        const radius = Math.min(width, height) / 2 - inset;
+        ctx.arc(x + width / 2, y + height / 2, radius, 0, Math.PI * 2);
+        break;
+        
+      case "square":
+        const size = Math.min(width, height) - inset * 2;
+        const squareX = x + (width - size) / 2;
+        const squareY = y + (height - size) / 2;
+        ctx.rect(squareX, squareY, size, size);
+        break;
+        
+      case "squircle":
+        const squircleSize = Math.min(width, height) - inset * 2;
+        const squircleX = x + (width - squircleSize) / 2;
+        const squircleY = y + (height - squircleSize) / 2;
+        const radius2 = squircleSize * 0.25; // 25% radius for rounded corners
+        ctx.roundRect(squircleX, squircleY, squircleSize, squircleSize, radius2);
+        break;
+        
+      case "heart":
+        drawHeart(ctx, x + width / 2, y + height / 2, Math.min(width, height) / 2 - inset);
+        break;
+        
+      case "star":
+        drawStar(ctx, x + width / 2, y + height / 2, Math.min(width, height) / 2 - inset);
+        break;
+        
+      default: // rectangle or default
+        ctx.rect(x + inset, y + inset, width - inset * 2, height - inset * 2);
+        break;
+    }
+    ctx.closePath();
+    ctx.clip();
+  };
+  
+  // Duplicate function for stroke drawing (same as clipping path)
+  const drawShapePath = (
+    ctx: CanvasRenderingContext2D, 
+    shape: string, 
+    x: number, 
+    y: number, 
+    width: number, 
+    height: number,
+    inset: number
+  ) => {
+    ctx.beginPath();
+    switch (shape) {
+      case "circle":
+        const radius = Math.min(width, height) / 2 - inset;
+        ctx.arc(x + width / 2, y + height / 2, radius, 0, Math.PI * 2);
+        break;
+        
+      case "square":
+        const size = Math.min(width, height) - inset * 2;
+        const squareX = x + (width - size) / 2;
+        const squareY = y + (height - size) / 2;
+        ctx.rect(squareX, squareY, size, size);
+        break;
+        
+      case "squircle":
+        const squircleSize = Math.min(width, height) - inset * 2;
+        const squircleX = x + (width - squircleSize) / 2;
+        const squircleY = y + (height - squircleSize) / 2;
+        const radius2 = squircleSize * 0.25; // 25% radius for rounded corners
+        ctx.roundRect(squircleX, squircleY, squircleSize, squircleSize, radius2);
+        break;
+        
+      case "heart":
+        drawHeart(ctx, x + width / 2, y + height / 2, Math.min(width, height) / 2 - inset);
+        break;
+        
+      case "star":
+        drawStar(ctx, x + width / 2, y + height / 2, Math.min(width, height) / 2 - inset);
+        break;
+        
+      default: // rectangle or default
+        ctx.rect(x + inset, y + inset, width - inset * 2, height - inset * 2);
+        break;
+    }
+    ctx.closePath();
+  };
+  
+  // Draw a heart shape
+  const drawHeart = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
+    const width = radius * 2;
+    const height = radius * 2;
+    
+    // Start at the top center of the heart
+    ctx.moveTo(x, y - height / 4);
+    
+    // Draw the left curve
+    ctx.bezierCurveTo(
+      x - width / 2, y - height / 2,  // Control point 1
+      x - width / 2, y + height / 4,  // Control point 2
+      x, y + height / 2               // End point
+    );
+    
+    // Draw the right curve
+    ctx.bezierCurveTo(
+      x + width / 2, y + height / 4,  // Control point 1
+      x + width / 2, y - height / 2,  // Control point 2
+      x, y - height / 4               // End point (back to start)
+    );
+  };
+  
+  // Draw a star shape
+  const drawStar = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
+    const spikes = 5;
+    const innerRadius = radius * 0.4;
+    const outerRadius = radius;
+    
+    let rot = Math.PI / 2 * 3;
+    let step = Math.PI / spikes;
+    
+    ctx.moveTo(x, y - outerRadius);
+    
+    for (let i = 0; i < spikes; i++) {
+      // Outer point
+      let x1 = x + Math.cos(rot) * outerRadius;
+      let y1 = y + Math.sin(rot) * outerRadius;
+      ctx.lineTo(x1, y1);
+      rot += step;
+      
+      // Inner point
+      let x2 = x + Math.cos(rot) * innerRadius;
+      let y2 = y + Math.sin(rot) * innerRadius;
+      ctx.lineTo(x2, y2);
+      rot += step;
+    }
+    
+    // Close the path back to the first point
+    ctx.lineTo(x, y - outerRadius);
   };
 
   return (
@@ -344,9 +467,18 @@ export default function Customizer() {
                       
                       toast({
                         title: "Image Processed",
-                        description: "Your image has been successfully processed.",
+                        description: "Your image has been successfully processed with background removed.",
                       });
-                    }} 
+                    }}
+                    onBorderDetected={(data) => {
+                      toast({
+                        title: "Border Detection Complete",
+                        description: "Shape adjustments can now be applied to your image.",
+                      });
+                    }}
+                    selectedShape={selectedShape}
+                    borderWidth={borderWidth}
+                    borderColor={borderColor}
                   />
                 </div>
                 
