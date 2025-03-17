@@ -19,6 +19,7 @@ import Checkout from "@/pages/checkout";
 import Customizer from "@/pages/customizer";
 import Chat from "@/pages/chat";
 import Admin from "@/pages/admin";
+import OrderConfirmation from "@/pages/order-confirmation";
 import NotFound from "@/pages/not-found";
 
 function Router() {
