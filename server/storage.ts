@@ -485,27 +485,50 @@ export class MemStorage implements IStorage {
   }
   
   async createNewConversation(userId: number, subject: string): Promise<any> {
-    const id = this.currentConversationId++;
-    
-    // Create a direct conversation without an order
-    const conversation = {
-      id,
-      subject,
-      userId,
-      isDirectChat: true,
-      createdAt: new Date()
-    };
-    
-    this.conversations.set(id, conversation);
-    this.messages.set(id, []);
-    
-    // Get user info
-    const user = await this.getUser(userId);
-    
-    return {
-      ...conversation,
-      user
-    };
+    try {
+      console.log(`Creating new conversation for user ${userId} with subject: "${subject}"`);
+      
+      // Validate inputs
+      if (!userId) {
+        throw new Error("User ID is required to create a conversation");
+      }
+      
+      if (!subject || subject.trim() === '') {
+        throw new Error("Subject is required to create a conversation");
+      }
+      
+      // Verify user exists
+      const user = await this.getUser(userId);
+      if (!user) {
+        throw new Error(`User with ID ${userId} not found`);
+      }
+      
+      const id = this.currentConversationId++;
+      
+      // Create a direct conversation without an order
+      const conversation = {
+        id,
+        subject,
+        userId,
+        isDirectChat: true,
+        createdAt: new Date()
+      };
+      
+      // Store in memory maps
+      this.conversations.set(id, conversation);
+      this.messages.set(id, []);
+      
+      console.log(`Successfully created conversation with ID: ${id}`);
+      
+      // Return with user info included
+      return {
+        ...conversation,
+        user
+      };
+    } catch (error) {
+      console.error("Error in createNewConversation:", error);
+      throw error;
+    }
   }
   
   async getMessages(conversationId: number): Promise<Message[]> {

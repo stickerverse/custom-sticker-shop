@@ -28,7 +28,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
-  wss.on('connection', (ws) => {
+  console.log("WebSocket server initialized on path: /ws");
+  
+  // Heartbeat to detect and clean up dead connections
+  function heartbeat() {
+    // @ts-ignore - adding custom property for ping tracking
+    this.isAlive = true;
+  }
+  
+  const interval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      // @ts-ignore - accessing custom property for ping tracking
+      if (ws.isAlive === false) {
+        console.log("Terminating inactive WebSocket connection");
+        return ws.terminate();
+      }
+      
+      // @ts-ignore - setting custom property for ping tracking
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+  
+  wss.on('close', () => {
+    clearInterval(interval);
+  });
+  
+  wss.on('connection', (ws, req) => {
+    console.log(`New WebSocket connection from ${req.socket.remoteAddress}`);
+    
+    // @ts-ignore - setting custom property for ping tracking
+    ws.isAlive = true;
+    
+    // Handle pong response as heartbeat
+    ws.on('pong', heartbeat);
+    
     let userId: number | null = null;
     
     ws.on('message', async (message) => {
@@ -38,17 +72,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle authentication
         if (parsedMessage.type === 'authenticate') {
           userId = parsedMessage.data.userId;
+          console.log(`WebSocket authenticated for user ID: ${userId}`);
+          
           // Add to connections map
           if (userId) {
             const userConnections = connections.get(userId) || [];
-            userConnections.push(ws);
-            connections.set(userId, userConnections);
+            
+            // Clean up any dead connections for this user
+            const activeConnections = userConnections.filter(conn => 
+              conn.readyState === WebSocket.OPEN
+            );
+            
+            // Add this connection
+            activeConnections.push(ws);
+            connections.set(userId, activeConnections);
+            
+            // Confirm successful authentication
+            ws.send(JSON.stringify({
+              type: 'auth_success',
+              data: { userId }
+            }));
           }
         }
         
         // Handle chat message
         if (parsedMessage.type === 'chat_message' && userId) {
           const validatedData = insertMessageSchema.parse(parsedMessage.data);
+          console.log(`Received chat message from user ${userId} for conversation ${validatedData.conversationId}`);
           
           // Store the message
           const message = await storage.createMessage(validatedData);
@@ -67,30 +117,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ...adminUsers.map(admin => admin.id) // All admins
             ]);
             
+            console.log(`Broadcasting message to ${notifyUserIds.size} users`);
+            
             // Broadcast to all connected clients for those users
             for (const notifyUserId of notifyUserIds) {
               const userConnections = connections.get(notifyUserId) || [];
+              let sentCount = 0;
+              
               for (const conn of userConnections) {
                 if (conn.readyState === WebSocket.OPEN) {
                   conn.send(JSON.stringify({
                     type: 'new_message',
                     data: message
                   }));
+                  sentCount++;
                 }
               }
+              
+              console.log(`Sent message to ${sentCount}/${userConnections.length} connections for user ${notifyUserId}`);
             }
           }
         }
       } catch (error) {
         console.error('WebSocket message error:', error);
-        ws.send(JSON.stringify({ 
-          type: 'error', 
-          data: { message: 'Invalid message format' } 
-        }));
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ 
+            type: 'error', 
+            data: { message: 'Invalid message format' } 
+          }));
+        }
       }
     });
     
-    ws.on('close', () => {
+    ws.on('close', (code, reason) => {
+      console.log(`WebSocket closed with code ${code}, reason: ${reason}`);
+      
       // Remove from connections when disconnected
       if (userId) {
         const userConnections = connections.get(userId) || [];
@@ -99,8 +160,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userConnections.splice(index, 1);
           if (userConnections.length === 0) {
             connections.delete(userId);
+            console.log(`Removed all connections for user ${userId}`);
           } else {
             connections.set(userId, userConnections);
+            console.log(`User ${userId} has ${userConnections.length} remaining connections`);
           }
         }
       }
@@ -619,23 +682,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post('/api/conversations', async (req: Request, res: Response) => {
     const userId = req.session.userId;
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    console.log(`Conversation creation request from IP: ${clientIp}, user ID: ${userId || 'not authenticated'}`);
     
     if (!userId) {
+      console.log('Rejecting conversation creation: not authenticated');
       return res.status(401).json({ message: 'Not authenticated' });
     }
     
     try {
       const { subject } = req.body;
       
-      if (!subject) {
+      console.log(`Creating conversation with subject: "${subject}"`);
+      
+      if (!subject || subject.trim() === '') {
+        console.log('Rejecting conversation creation: subject is missing or empty');
         return res.status(400).json({ message: 'Subject is required' });
       }
       
+      // Attempt to create the conversation
       const conversation = await storage.createNewConversation(userId, subject);
+      
+      console.log(`Successfully created conversation with ID: ${conversation.id}`);
+      
+      // Return the newly created conversation
       res.status(201).json(conversation);
     } catch (error) {
       console.error('Error creating conversation:', error);
-      res.status(500).json({ message: 'Error creating conversation' });
+      
+      // More specific error message based on the error
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Unknown error creating conversation';
+        
+      res.status(500).json({ 
+        message: 'Error creating conversation', 
+        details: errorMessage
+      });
     }
   });
   

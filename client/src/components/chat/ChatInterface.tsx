@@ -385,19 +385,29 @@ const ChatInterface = ({ conversationId }: ChatInterfaceProps) => {
                 
                 try {
                   // Disable multiple submissions by checking if already creating
-                  if (isCreatingConversation) return;
+                  if (isCreatingConversation) {
+                    console.log("Creation already in progress, ignoring click");
+                    return;
+                  }
                   
-                  const newConversationId = await createNewConversation(newChatSubject);
-                  console.log("Successfully created conversation with ID:", newConversationId);
-                  
-                  // Clear input and close dialog first
+                  // First close dialog and clear input before API call
+                  // This prevents UI freezing
                   setNewChatSubject('');
                   setShowNewChatDialog(false);
                   
-                  // Use setTimeout to delay navigation and prevent React state update loops
-                  setTimeout(() => {
-                    setLocation(`/chat/${newConversationId}`);
-                  }, 100);
+                  console.log("Starting conversation creation from chat interface");
+                  const newConversationId = await createNewConversation(newChatSubject);
+                  console.log("Successfully created conversation with ID:", newConversationId);
+                  
+                  // Use a longer delay to ensure all state updates are complete
+                  // This prevents React state update loops
+                  if (newConversationId) {
+                    console.log(`Scheduling navigation to /chat/${newConversationId} after 300ms`);
+                    setTimeout(() => {
+                      console.log(`Navigating to /chat/${newConversationId}`);
+                      setLocation(`/chat/${newConversationId}`);
+                    }, 300);
+                  }
                 } catch (error) {
                   console.error('Error creating conversation:', error);
                   toast({

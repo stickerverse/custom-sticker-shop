@@ -33,9 +33,10 @@ const Chat = () => {
   // Load conversation when ID changes
   useEffect(() => {
     if (conversationId) {
-      // Just load conversation data when ID changes
-      loadConversation(conversationId);
-      // Set active conversation ID without triggering loadConversation again
+      console.log(`Setting up conversation with ID: ${conversationId}`);
+      
+      // First activate the ID, then the loadConversation will be triggered
+      // by useEffect in useChat.tsx
       activateConversation(conversationId);
     }
   }, [conversationId]);
