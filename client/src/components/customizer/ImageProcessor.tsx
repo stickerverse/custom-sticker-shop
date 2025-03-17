@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { apiRequest } from '@/lib/queryClient';
-import { Loader2, Upload, Trash2, Sparkles, VectorSelect } from 'lucide-react';
+import { Loader2, Upload, Trash2, Sparkles, Scissors } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 
 interface ImageProcessorProps {
@@ -37,12 +37,13 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
   // Remove background mutation
   const removeBackgroundMutation = useMutation({
     mutationFn: async (imageUrl: string) => {
-      const response = await apiRequest('/api/image/remove-background', {
+      const response = await fetch('/api/image/remove-background', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl }),
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to remove background');
+      return response.json();
     },
     onSuccess: (data) => {
       setProcessedImage(data.url);
@@ -53,12 +54,13 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
   // Detect borders mutation
   const detectBordersMutation = useMutation({
     mutationFn: async (params: { imageUrl: string; lowThreshold: number; highThreshold: number }) => {
-      const response = await apiRequest('/api/image/detect-borders', {
+      const response = await fetch('/api/image/detect-borders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to detect borders');
+      return response.json();
     },
     onSuccess: (data) => {
       setProcessedImage(data.url);
@@ -128,7 +130,7 @@ export function ImageProcessor({ onImageProcessed }: ImageProcessorProps) {
               <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform scale-x-0 transition-transform group-data-[state=active]:scale-x-100"></span>
             </TabsTrigger>
             <TabsTrigger value="detectBorders" className="relative">
-              <VectorSelect className="mr-2 h-4 w-4" />
+              <Scissors className="mr-2 h-4 w-4" />
               Detect Borders
               <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform scale-x-0 transition-transform group-data-[state=active]:scale-x-100"></span>
             </TabsTrigger>

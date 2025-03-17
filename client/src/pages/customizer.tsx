@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/use-cart";
 import { apiRequest } from "@/lib/queryClient";
+import { ImageProcessor } from "@/components/customizer/ImageProcessor";
 
 // Sticker shape options
 const SHAPES = [
@@ -53,6 +54,7 @@ export default function Customizer() {
   const [quantity, setQuantity] = useState(1);
   const [backgroundColor, setBackgroundColor] = useState("transparent");
   const [isRemovedBg, setIsRemovedBg] = useState(false);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
