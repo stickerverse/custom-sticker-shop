@@ -74,7 +74,21 @@ const CheckoutForm = () => {
 export default function Checkout() {
   const [clientSecret, setClientSecret] = useState("");
   const { cart } = useCart();
-  const total = cart.reduce((sum, item) => sum + (item.product.price || 0) * item.quantity, 0);
+  
+  // Calculate total price from cart items, handling both regular products and custom products
+  const total = cart.reduce((sum, item) => {
+    // For regular products that might be missing price in the type
+    const productPrice = typeof item.product.price === 'number' 
+      ? item.product.price 
+      : 0;
+    
+    // For custom stickers or any item with price in options
+    const optionPrice = item.options?.price 
+      ? parseFloat(item.options.price as string) 
+      : 0;
+    
+    return sum + (productPrice || optionPrice) * item.quantity;
+  }, 0);
 
   useEffect(() => {
     const createPaymentIntent = async () => {
