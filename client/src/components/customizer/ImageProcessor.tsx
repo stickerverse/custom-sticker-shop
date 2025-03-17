@@ -10,7 +10,8 @@ import {
   Trash2, 
   Sparkles, 
   Wand2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  CheckCircle2
 } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -164,19 +165,19 @@ export function ImageProcessor({
     isProcessing;
 
   return (
-    <Card className="p-4 bg-background/95 backdrop-blur-md border-primary/20 shadow-lg">
+    <Card className="p-4 bg-white border-gray-200 shadow-sm rounded-md">
       {!imagePreview ? (
         // Upload section - shown only when no image is uploaded
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-base font-medium flex items-center">
+            <h3 className="text-base font-medium text-gray-700 flex items-center">
               <ImageIcon className="h-4 w-4 mr-2 text-primary" />
-              Upload Image
+              Upload Your Design
             </h3>
           </div>
           
           <div 
-            className="border-2 border-dashed border-primary/20 rounded-lg p-6 cursor-pointer hover:bg-primary/5 transition-colors"
+            className="border-2 border-dashed border-gray-300 rounded-md p-6 cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={handleUploadClick}
           >
             <input
@@ -188,25 +189,25 @@ export function ImageProcessor({
             />
             
             <div className="flex flex-col items-center justify-center py-4">
-              <div className="bg-primary/10 p-4 rounded-full mb-3">
+              <div className="bg-blue-50 p-4 rounded-full mb-3">
                 <Upload className="h-6 w-6 text-primary" />
               </div>
-              <h4 className="text-base font-medium mb-1">Select Image</h4>
-              <p className="text-sm text-muted-foreground text-center">
+              <h4 className="text-base font-medium mb-1 text-gray-800">Upload Your Image</h4>
+              <p className="text-sm text-gray-500 text-center">
                 Click to browse your files<br/>or drag and drop
               </p>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-gray-400 mt-2">
                 JPG, PNG, WEBP up to 5MB
               </p>
             </div>
           </div>
           
-          <div className="rounded-lg p-3 bg-primary/5 text-sm space-y-1">
+          <div className="rounded-md p-3 bg-blue-50 text-sm space-y-1">
             <div className="flex items-center">
               <Sparkles className="h-4 w-4 text-primary mr-2" />
-              <span className="font-medium">AI-Powered Tools</span>
+              <span className="font-medium text-gray-700">AI-Powered Tools</span>
             </div>
-            <ul className="text-xs text-muted-foreground pl-6 mt-1 space-y-1 list-disc">
+            <ul className="text-xs text-gray-600 pl-6 mt-1 space-y-1 list-disc">
               <li>Background removal</li>
               <li>Edge detection</li>
               <li>Custom shapes</li>
@@ -218,15 +219,15 @@ export function ImageProcessor({
         // Customization tools - shown after image is uploaded
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-medium flex items-center">
+            <h3 className="text-base font-medium text-gray-700 flex items-center">
               <Wand2 className="h-4 w-4 mr-2 text-primary" />
-              AI Enhancements
+              AI Image Processing
             </h3>
             <div className="flex space-x-2">
               <Button 
                 size="sm" 
                 variant="outline"
-                className="text-xs"
+                className="text-xs border-gray-300 text-gray-600"
                 onClick={handleUploadClick}
               >
                 <Upload className="h-3 w-3 mr-1" />
@@ -235,7 +236,7 @@ export function ImageProcessor({
               <Button 
                 size="sm" 
                 variant="outline"
-                className="text-xs text-red-500"
+                className="text-xs text-red-500 border-red-200"
                 onClick={clearImage}
               >
                 <Trash2 className="h-3 w-3 mr-1" />
@@ -244,35 +245,35 @@ export function ImageProcessor({
             </div>
           </div>
           
-          <div className="relative rounded-lg overflow-hidden bg-black/5">
+          <div className="relative rounded-md overflow-hidden bg-gray-100 border border-gray-200">
             <img 
               src={processedImage || imagePreview} 
               alt="Preview" 
               className="w-full max-h-[120px] object-contain"
             />
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
-                <div className="flex items-center space-x-2 bg-background/80 px-3 py-2 rounded-full">
+              <div className="absolute inset-0 flex items-center justify-center bg-white/60">
+                <div className="flex items-center space-x-2 bg-white px-3 py-2 rounded-full shadow-sm">
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span className="text-xs font-medium">Processing...</span>
+                  <span className="text-xs font-medium text-gray-700">Processing...</span>
                 </div>
               </div>
             )}
           </div>
           
           {!processedImage && (
-            <div className="rounded-lg border border-primary/20 p-3 space-y-2">
+            <div className="rounded-md border border-gray-200 p-4 space-y-2 bg-blue-50">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-semibold flex items-center">
+                <Label className="text-sm font-semibold flex items-center text-gray-700">
                   <Wand2 className="h-4 w-4 mr-2 text-primary" />
-                  Background Removal
+                  AI Background Removal
                 </Label>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Remove background to create professional stickers
+              <p className="text-xs text-gray-600">
+                Create professional stickers with transparent backgrounds
               </p>
               <Button 
-                className="w-full bg-primary"
+                className="w-full bg-primary hover:bg-primary/90 text-white"
                 size="sm"
                 onClick={removeBackground}
                 disabled={isLoading}
@@ -293,13 +294,13 @@ export function ImageProcessor({
           )}
           
           {processedImage && (
-            <div className="rounded-lg border border-primary/20 bg-green-50/20 p-3">
-              <div className="flex items-center text-green-600">
-                <Sparkles className="h-4 w-4 mr-2" />
-                <span className="text-sm font-medium">Background Removed</span>
+            <div className="rounded-md border border-green-200 bg-green-50 p-4">
+              <div className="flex items-center text-green-700">
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <span className="text-sm font-medium">Background Removed Successfully</span>
               </div>
-              <p className="text-xs text-green-600/80 pl-6 mt-1">
-                Your image has been processed and is ready for customization
+              <p className="text-xs text-green-600 pl-6 mt-1">
+                Your image is now ready for customization
               </p>
             </div>
           )}
