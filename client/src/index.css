@@ -2,12 +2,182 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @layer base {
+  :root {
+    --neon-purple: 124, 58, 237;      /* #7C3AED - Our primary */
+    --neon-blue: 59, 130, 246;        /* #3B82F6 */
+    --neon-cyan: 45, 212, 191;        /* #2DD4BF */
+    --neon-pink: 236, 72, 153;        /* #EC4899 */
+    --glass-bg: 255, 255, 255;        /* White base for glass */
+    --glass-border: 255, 255, 255;    /* White borders */
+    --glass-shadow: 0, 0, 0;          /* Black for shadows */
+  }
+
   * {
     @apply border-border;
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800;
+    font-family: 'Inter', sans-serif;
+    background-attachment: fixed;
+    background-size: 400% 400%;
+    animation: subtle-bg-shift 15s ease infinite;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Card Effect */
+  .glass-card {
+    @apply bg-white bg-opacity-70 backdrop-blur-lg border border-white/30 shadow-lg;
+  }
+
+  /* Glassmorphism Panel Effect */
+  .glass-panel {
+    @apply bg-white bg-opacity-40 backdrop-blur-md border border-white/20 shadow-md;
+  }
+
+  /* Neon Button Effect */
+  .neon-btn {
+    @apply relative overflow-hidden transition-all duration-300 ease-out;
+  }
+  
+  .neon-btn:hover {
+    @apply shadow-lg transform -translate-y-0.5;
+    box-shadow: 0 0 25px rgba(var(--neon-purple), 0.5);
+  }
+
+  .neon-btn::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 bg-gradient-to-r from-primary/40 to-primary/0 transition-opacity duration-300;
+  }
+  
+  .neon-btn:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Neon Text Effect */
+  .neon-text {
+    @apply font-semibold;
+    text-shadow: 0 0 8px rgba(var(--neon-purple), 0.7);
+  }
+
+  .neon-text-blue {
+    color: rgb(var(--neon-blue));
+    text-shadow: 0 0 8px rgba(var(--neon-blue), 0.7);
+  }
+
+  .neon-text-cyan {
+    color: rgb(var(--neon-cyan));
+    text-shadow: 0 0 8px rgba(var(--neon-cyan), 0.7);
+  }
+
+  .neon-text-pink {
+    color: rgb(var(--neon-pink));
+    text-shadow: 0 0 8px rgba(var(--neon-pink), 0.7);
+  }
+
+  /* Glassmorphism Input */
+  .glass-input {
+    @apply bg-white/50 backdrop-blur-sm border border-white/30 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 shadow-inner transition-all duration-300;
+  }
+
+  /* Floating Card */
+  .floating-card {
+    @apply transition-transform duration-700 ease-in-out;
+    animation: floating 6s ease-in-out infinite;
+  }
+
+  /* Chat Bubble */
+  .chat-bubble {
+    @apply rounded-2xl px-4 py-3 max-w-[80%] break-words;
+    transform-origin: bottom left;
+    animation: bubble-in 0.3s ease-out forwards;
+  }
+
+  .chat-bubble-own {
+    @apply bg-primary text-white;
+    transform-origin: bottom right;
+  }
+
+  .chat-bubble-other {
+    @apply glass-card;
+  }
+}
+
+@layer utilities {
+  /* Gradients */
+  .gradient-border {
+    border-image: linear-gradient(to right, rgb(var(--neon-purple)), rgb(var(--neon-blue))) 1;
+  }
+
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--neon-purple))] to-[rgb(var(--neon-blue))];
+  }
+
+  /* Pulse Animation */
+  .pulse {
+    animation: pulse 2s infinite;
+  }
+
+  /* Glowing Effect */
+  .glow {
+    box-shadow: 0 0 15px rgba(var(--neon-purple), 0.5);
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 15px rgba(var(--neon-blue), 0.5);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 15px rgba(var(--neon-cyan), 0.5);
+  }
+}
+
+/* Keyframe Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bubble-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes subtle-bg-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
