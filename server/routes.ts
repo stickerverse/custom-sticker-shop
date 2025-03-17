@@ -6,6 +6,7 @@ import { z } from "zod";
 import { insertUserSchema, insertMessageSchema, insertCartItemSchema, insertOrderSchema } from "@shared/schema";
 import session from 'express-session';
 import Stripe from "stripe";
+import { removeBackground, detectBorders, requireReplicateToken } from "./services/replicate";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
