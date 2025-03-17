@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { CartProvider } from "@/hooks/use-cart";
 import { ChatProvider } from "@/hooks/use-chat";
 import { WebSocketProvider } from "@/lib/socket";
+import AnimatedBackground from "@/components/ui/animated-background";
 
 import Navbar from "@/components/layout/Navbar";
 import Home from "@/pages/home";
@@ -43,18 +44,25 @@ function Router() {
 
   return (
     <>
-      {!location.startsWith('/chat') && <Navbar />}
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/shop" component={Shop} />
-        <Route path="/product/:id" component={Product} />
-        <Route path="/cart" component={Cart} />
-        <Route path="/checkout" component={Checkout} />
-        <Route path="/chat" component={Chat} />
-        <Route path="/chat/:id" component={Chat} />
-        <Route path="/admin" component={Admin} />
-        <Route component={NotFound} />
-      </Switch>
+      {/* Animated glassmorphism background with moving glow */}
+      <AnimatedBackground />
+      
+      {/* Main content with higher z-index */}
+      <div className="relative z-0">
+        {!location.startsWith('/chat') && <Navbar />}
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/shop" component={Shop} />
+          <Route path="/product/:id" component={Product} />
+          <Route path="/cart" component={Cart} />
+          <Route path="/checkout" component={Checkout} />
+          <Route path="/chat" component={Chat} />
+          <Route path="/chat/:id" component={Chat} />
+          <Route path="/admin" component={Admin} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
+      
       <Toaster />
     </>
   );
