@@ -1,30 +1,32 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from '@/components/ui/separator';
 import { 
   Loader2, 
   Upload, 
   Trash2, 
   Sparkles, 
-  Plus, 
   Brush, 
   Layers, 
-  Filter, 
   Palette, 
-  Image, 
+  Image as ImageIcon, 
   Circle, 
   Square, 
-  Heart
+  Heart,
+  Star,
+  LayoutGrid,
+  Wand2
 } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedEditorProps {
   onImageProcessed: (url: string) => void;
+  onOriginalImageUpload: (url: string) => void;
   onShapeSelected: (shape: string) => void;
   onBorderWidthChanged: (width: number) => void;
   onBorderColorChanged: (color: string) => void;
@@ -35,6 +37,7 @@ interface AdvancedEditorProps {
 
 export function AdvancedEditor({
   onImageProcessed,
+  onOriginalImageUpload,
   onShapeSelected,
   onBorderWidthChanged,
   onBorderColorChanged,
@@ -44,9 +47,7 @@ export function AdvancedEditor({
 }: AdvancedEditorProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("upload");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
@@ -59,12 +60,14 @@ export function AdvancedEditor({
       // Create a preview URL
       const fileUrl = URL.createObjectURL(file);
       setImagePreview(fileUrl);
-      setProcessedImage(null); // Reset processed image when new file is selected
       
-      // Automatically process the image when selected
-      setTimeout(() => {
-        processImage(file);
-      }, 500);
+      // Pass the original image to the parent component
+      onOriginalImageUpload(fileUrl);
+      
+      toast({
+        title: "Image Uploaded",
+        description: "Your image is ready for customization.",
+      });
     }
   };
 
@@ -80,7 +83,6 @@ export function AdvancedEditor({
       return response.json();
     },
     onSuccess: (data) => {
-      setProcessedImage(data.url);
       onImageProcessed(data.url);
       
       // After removing background, detect borders
@@ -116,33 +118,33 @@ export function AdvancedEditor({
     },
     onSuccess: (data) => {
       toast({
-        title: "Image Ready",
-        description: "Your image is now ready for customization!",
+        title: "Image Enhanced",
+        description: "Background removed and edges detected!",
       });
       setIsProcessing(false);
     },
     onError: (error) => {
       console.error("Error detecting borders:", error);
-      // Don't show an error to the user for this step
       setIsProcessing(false);
+      toast({
+        title: "Image Ready",
+        description: "Your image is ready for customization!",
+      });
     }
   });
 
-  // Process image function that handles both operations
-  const processImage = (file: File) => {
-    if (!file) return;
+  // Process image function - remove background with AI
+  const removeBackground = () => {
+    if (!imagePreview) return;
     
     setIsProcessing(true);
     toast({
-      title: "Processing Image",
-      description: "Your image is being prepared for customization...",
+      title: "Removing Background",
+      description: "Our AI is removing the background from your image...",
     });
     
-    // Create an object URL for the file
-    const objectUrl = URL.createObjectURL(file);
-    
-    // First remove background
-    removeBackgroundMutation.mutate(objectUrl);
+    // Use the AI to remove background
+    removeBackgroundMutation.mutate(imagePreview);
   };
 
   // Trigger file input click
@@ -153,8 +155,13 @@ export function AdvancedEditor({
   const clearImage = () => {
     setSelectedFile(null);
     setImagePreview(null);
-    setProcessedImage(null);
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    
+    // Reset the parent's image as well
+    onOriginalImageUpload('');
   };
 
   const isLoading = 
@@ -164,186 +171,214 @@ export function AdvancedEditor({
 
   // Shape selection options with icons
   const shapes = [
-    { id: "rectangle", label: "Rectangle", icon: <Square className="h-5 w-5" /> },
+    { id: "rectangle", label: "Rectangle", icon: <LayoutGrid className="h-5 w-5" /> },
     { id: "circle", label: "Circle", icon: <Circle className="h-5 w-5" /> },
-    { id: "square", label: "Square", icon: <Square className="h-5 w-5 rounded-sm" /> },
+    { id: "square", label: "Square", icon: <Square className="h-5 w-5" /> },
     { id: "heart", label: "Heart", icon: <Heart className="h-5 w-5" /> },
-    { id: "star", label: "Star", icon: <Sparkles className="h-5 w-5" /> }
+    { id: "star", label: "Star", icon: <Star className="h-5 w-5" /> }
   ];
 
   return (
     <Card className="p-4 bg-background/95 backdrop-blur-md border-primary/20 shadow-lg">
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-        <TabsList className="grid grid-cols-2 bg-primary/5">
-          <TabsTrigger value="upload" className="data-[state=active]:bg-primary/10">
-            <Image className="h-4 w-4 mr-2" />
-            Upload
-          </TabsTrigger>
-          <TabsTrigger value="customize" className="data-[state=active]:bg-primary/10">
-            <Brush className="h-4 w-4 mr-2" />
-            Customize
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="upload" className="space-y-4">
-          <div className="text-center">
-            <div 
-              className="border-2 border-dashed border-primary/20 rounded-lg p-6 cursor-pointer hover:bg-primary/5 transition-colors"
-              onClick={handleUploadClick}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              
-              {!imagePreview ? (
-                <div className="flex flex-col items-center justify-center py-4">
-                  <div className="bg-primary/10 p-4 rounded-full mb-3">
-                    <Upload className="h-6 w-6 text-primary" />
-                  </div>
-                  <h4 className="text-base font-medium mb-1">Upload Image</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Click to browse or drag and drop
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    JPG, PNG, WEBP up to 5MB
-                  </p>
-                </div>
-              ) : (
-                <div className="relative">
-                  <img 
-                    src={processedImage || imagePreview} 
-                    alt="Preview" 
-                    className="max-h-40 mx-auto rounded-md"
-                  />
-                  {isLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px] rounded-md">
-                      <div className="flex items-center space-x-2 bg-background/80 px-3 py-1 rounded-full">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        <span className="text-xs font-medium">Processing...</span>
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex justify-center mt-3 space-x-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUploadClick();
-                      }}
-                    >
-                      <Upload className="h-3 w-3 mr-1" />
-                      Change
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="text-xs text-red-500"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        clearImage();
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+      {!imagePreview ? (
+        // Upload section - shown only when no image is uploaded
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-medium flex items-center">
+              <ImageIcon className="h-4 w-4 mr-2 text-primary" />
+              Upload Image
+            </h3>
+          </div>
+          
+          <div 
+            className="border-2 border-dashed border-primary/20 rounded-lg p-6 cursor-pointer hover:bg-primary/5 transition-colors"
+            onClick={handleUploadClick}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
             
-            {imagePreview && (
-              <Button 
-                className="mt-4 bg-primary"
-                size="sm"
-                onClick={() => selectedFile && processImage(selectedFile)}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Apply AI Enhancement
-                  </>
-                )}
-              </Button>
-            )}
+            <div className="flex flex-col items-center justify-center py-4">
+              <div className="bg-primary/10 p-4 rounded-full mb-3">
+                <Upload className="h-6 w-6 text-primary" />
+              </div>
+              <h4 className="text-base font-medium mb-1">Select Image</h4>
+              <p className="text-sm text-muted-foreground text-center">
+                Click to browse your files<br/>or drag and drop
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                JPG, PNG, WEBP up to 5MB
+              </p>
+            </div>
           </div>
           
           <div className="rounded-lg p-3 bg-primary/5 text-sm space-y-1">
             <div className="flex items-center">
               <Sparkles className="h-4 w-4 text-primary mr-2" />
-              <span className="font-medium">AI Image Processing</span>
+              <span className="font-medium">AI-Powered Tools</span>
             </div>
-            <p className="text-xs text-muted-foreground pl-6">
-              Automatically removes backgrounds and detects edges for professional sticker creation.
-            </p>
+            <ul className="text-xs text-muted-foreground pl-6 mt-1 space-y-1 list-disc">
+              <li>Background removal</li>
+              <li>Edge detection</li>
+              <li>Custom shapes</li>
+              <li>Border customization</li>
+            </ul>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="customize" className="space-y-4">
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm flex items-center">
-                <Filter className="h-4 w-4 mr-2 text-primary" />
-                Shape
-              </Label>
-              <div className="grid grid-cols-5 gap-2 mt-2">
-                {shapes.map(shape => (
-                  <Button
-                    key={shape.id}
-                    type="button"
-                    variant={selectedShape === shape.id ? "default" : "outline"}
-                    className={`flex flex-col items-center justify-center p-2 h-auto aspect-square ${
-                      selectedShape === shape.id 
-                        ? "bg-primary text-primary-foreground border-primary" 
-                        : "bg-background hover:bg-primary/5 text-foreground border-primary/20"
-                    }`}
-                    onClick={() => onShapeSelected(shape.id)}
-                  >
-                    {shape.icon}
-                    <span className="text-[10px] mt-1">{shape.label}</span>
-                  </Button>
-                ))}
-              </div>
+        </div>
+      ) : (
+        // Customization tools - shown after image is uploaded
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-medium flex items-center">
+              <Brush className="h-4 w-4 mr-2 text-primary" />
+              Customize Sticker
+            </h3>
+            <div className="flex space-x-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-xs"
+                onClick={handleUploadClick}
+              >
+                <Upload className="h-3 w-3 mr-1" />
+                Change
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-xs text-red-500"
+                onClick={clearImage}
+              >
+                <Trash2 className="h-3 w-3 mr-1" />
+                Remove
+              </Button>
             </div>
-            
-            <div>
-              <Label className="text-sm flex items-center">
-                <Layers className="h-4 w-4 mr-2 text-primary" />
-                Border Width
-              </Label>
-              <div className="flex items-center mt-2">
-                <Slider
-                  min={0}
-                  max={20}
-                  step={1}
-                  value={[borderWidth]}
-                  onValueChange={(value) => onBorderWidthChanged(value[0])}
-                  className="flex-1"
-                />
-                <span className="ml-2 text-sm min-w-[40px] text-right">
-                  {borderWidth}px
-                </span>
+          </div>
+          
+          <div className="relative rounded-lg overflow-hidden bg-black/5">
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              className="w-full max-h-[120px] object-contain"
+            />
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
+                <div className="flex items-center space-x-2 bg-background/80 px-3 py-2 rounded-full">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-xs font-medium">Processing...</span>
+                </div>
               </div>
+            )}
+          </div>
+          
+          <div className="rounded-lg border border-primary/20 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold flex items-center">
+                <Wand2 className="h-4 w-4 mr-2 text-primary" />
+                AI Enhancements
+              </Label>
             </div>
-            
-            {borderWidth > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Remove background to create professional stickers
+            </p>
+            <Button 
+              className="w-full bg-primary"
+              size="sm"
+              onClick={removeBackground}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Remove Background
+                </>
+              )}
+            </Button>
+          </div>
+          
+          <Separator className="my-2 bg-primary/10" />
+          
+          <div>
+            <Label className="text-sm font-semibold flex items-center mb-2">
+              <LayoutGrid className="h-4 w-4 mr-2 text-primary" />
+              Shape
+            </Label>
+            <div className="grid grid-cols-5 gap-2">
+              {shapes.map(shape => (
+                <Button
+                  key={shape.id}
+                  type="button"
+                  variant={selectedShape === shape.id ? "default" : "outline"}
+                  className={`flex flex-col items-center justify-center py-1 px-1 h-auto aspect-square ${
+                    selectedShape === shape.id 
+                      ? "bg-primary/90 text-primary-foreground border-primary" 
+                      : "bg-background hover:bg-primary/5 text-foreground border-primary/20"
+                  }`}
+                  onClick={() => onShapeSelected(shape.id)}
+                >
+                  {shape.icon}
+                  <span className="text-[9px] mt-1 leading-tight">{shape.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+          
+          <Separator className="my-2 bg-primary/10" />
+          
+          <div>
+            <Label className="text-sm font-semibold flex items-center">
+              <Layers className="h-4 w-4 mr-2 text-primary" />
+              Border Width
+            </Label>
+            <div className="flex items-center mt-2">
+              <Slider
+                min={0}
+                max={20}
+                step={1}
+                value={[borderWidth]}
+                onValueChange={(value) => onBorderWidthChanged(value[0])}
+                className="flex-1"
+              />
+              <span className="ml-2 text-sm min-w-[40px] text-right">
+                {borderWidth}px
+              </span>
+            </div>
+          </div>
+          
+          {borderWidth > 0 && (
+            <>
+              <Separator className="my-2 bg-primary/10" />
+              
               <div>
-                <Label className="text-sm flex items-center">
+                <Label className="text-sm font-semibold flex items-center mb-2">
                   <Palette className="h-4 w-4 mr-2 text-primary" />
                   Border Color
                 </Label>
-                <div className="flex items-center mt-2">
+                <div className="grid grid-cols-7 gap-2">
+                  {['#FF3366', '#3399FF', '#33CC66', '#FFCC33', '#9966FF', '#FF6633', '#000000'].map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => onBorderColorChanged(color)}
+                      className={`w-full aspect-square rounded-full border-2 ${
+                        borderColor.toUpperCase() === color.toUpperCase()
+                          ? 'border-white ring-2 ring-primary shadow-lg'
+                          : 'border-white/50'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center mt-3">
                   <div 
                     className="w-10 h-10 rounded-md border border-primary/20 relative overflow-hidden flex items-center justify-center"
                     style={{ background: `linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), 
@@ -372,32 +407,10 @@ export function AdvancedEditor({
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-          
-          {!processedImage && (
-            <div className="rounded-lg p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 text-sm flex items-start space-x-2">
-              <Sparkles className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">Upload an image first</p>
-                <p className="text-xs">Switch to the Upload tab to add your image.</p>
-              </div>
-            </div>
+            </>
           )}
-          
-          <div className="flex justify-end">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="text-xs"
-              onClick={() => setSelectedTab("upload")}
-            >
-              <Upload className="h-3 w-3 mr-1" />
-              Back to Upload
-            </Button>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </Card>
   );
 }

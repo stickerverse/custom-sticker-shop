@@ -99,7 +99,7 @@ export default function Customizer() {
         shape: selectedShape,
         size: selectedSize,
         material: selectedMaterial,
-        borderWidth: borderWidth,
+        borderWidth: String(borderWidth), // Convert to string to match Record<string, string> type
         borderColor: borderColor,
         backgroundColor: backgroundColor,
         previewImage: previewImageUrl,
@@ -399,13 +399,28 @@ export default function Customizer() {
                     />
                   </div>
                   
+                  <ImageProcessor
+                    onImageProcessed={(url) => {
+                      if (url) {
+                        setUploadedImage(url);
+                      } else {
+                        setUploadedImage(null);
+                      }
+                    }}
+                    onBorderDetected={(data) => {
+                      // Handle border detection data if needed
+                    }}
+                    selectedShape={selectedShape}
+                    borderWidth={borderWidth}
+                    borderColor={borderColor}
+                  />
+                  
                   <AdvancedEditor
                     onImageProcessed={(url) => {
                       setUploadedImage(url);
-                      toast({
-                        title: "Image Processed",
-                        description: "Your image has been successfully processed and is ready for customization.",
-                      });
+                    }}
+                    onOriginalImageUpload={(url) => {
+                      setUploadedImage(url);
                     }}
                     onShapeSelected={setSelectedShape}
                     onBorderWidthChanged={setBorderWidth}

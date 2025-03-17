@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Loader2, Upload, Trash2, Sparkles } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Loader2, 
+  Upload, 
+  Trash2, 
+  Sparkles, 
+  Wand2,
+  Image as ImageIcon
+} from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 
 interface ImageProcessorProps {
   onImageProcessed: (url: string) => void;
@@ -26,6 +34,8 @@ export function ImageProcessor({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   // For file upload and preview
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,10 +48,13 @@ export function ImageProcessor({
       setImagePreview(fileUrl);
       setProcessedImage(null); // Reset processed image when new file is selected
       
-      // Automatically process the image when selected
-      setTimeout(() => {
-        processImage(file);
-      }, 500);
+      // Pass the original image to the parent component immediately
+      onImageProcessed(fileUrl);
+      
+      toast({
+        title: "Image Uploaded",
+        description: "Your image is ready for customization.",
+      });
     }
   };
 
@@ -69,6 +82,15 @@ export function ImageProcessor({
         });
       }
     },
+    onError: (error) => {
+      console.error("Error removing background:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove image background. Please try again.",
+        variant: "destructive"
+      });
+      setIsProcessing(false);
+    }
   });
 
   // Detect borders mutation
@@ -87,36 +109,53 @@ export function ImageProcessor({
       if (onBorderDetected) {
         onBorderDetected(data);
       }
+      
+      toast({
+        title: "Image Enhanced",
+        description: "Background removed and edges detected!",
+      });
       setIsProcessing(false);
     },
+    onError: (error) => {
+      console.error("Error detecting borders:", error);
+      setIsProcessing(false);
+      toast({
+        title: "Image Ready",
+        description: "Your image is ready for customization!",
+      });
+    }
   });
 
-  // Process image function that handles both operations
-  const processImage = (file: File) => {
-    if (!file) return;
+  // Process image function - removes background on demand
+  const removeBackground = () => {
+    if (!imagePreview) return;
     
     setIsProcessing(true);
+    toast({
+      title: "Removing Background",
+      description: "Our AI is removing the background from your image...",
+    });
     
-    // Create an object URL for the file
-    const objectUrl = URL.createObjectURL(file);
-    
-    // First remove background
-    removeBackgroundMutation.mutate(objectUrl);
+    // Use the AI to remove background
+    removeBackgroundMutation.mutate(imagePreview);
   };
 
-  // Watch for changes in shape, border width, or color and reprocess if needed
-  useEffect(() => {
-    if (processedImage && selectedShape && (borderWidth > 0 || selectedShape !== 'rectangle')) {
-      // The image is already processed, we just need to apply the new shape/border
-      // This would be handled in the parent component with canvas manipulations
-    }
-  }, [selectedShape, borderWidth, borderColor, processedImage]);
+  // Trigger file input click
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
   
   const clearImage = () => {
     setSelectedFile(null);
     setImagePreview(null);
     setProcessedImage(null);
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    
+    // Reset the parent component's image
+    onImageProcessed('');
   };
 
   const isLoading = 
@@ -125,105 +164,147 @@ export function ImageProcessor({
     isProcessing;
 
   return (
-    <Card className="p-6 bg-background/80 backdrop-blur-md border-primary/20 shadow-lg relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background/20 z-0" />
-      
-      <div className="relative z-10">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-primary flex items-center">
-            <Sparkles className="mr-2 h-5 w-5 text-primary" />
-            AI Image Processor
-          </h3>
+    <Card className="p-4 bg-background/95 backdrop-blur-md border-primary/20 shadow-lg">
+      {!imagePreview ? (
+        // Upload section - shown only when no image is uploaded
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-base font-medium flex items-center">
+              <ImageIcon className="h-4 w-4 mr-2 text-primary" />
+              Upload Image
+            </h3>
+          </div>
           
-          <div className="flex-shrink-0">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => selectedFile && processImage(selectedFile)}
-              disabled={!selectedFile || isLoading}
-              className="text-xs"
-            >
-              {isLoading ? (
-                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-              ) : (
-                <Sparkles className="mr-1 h-3 w-3" />
-              )}
-              Reprocess
-            </Button>
+          <div 
+            className="border-2 border-dashed border-primary/20 rounded-lg p-6 cursor-pointer hover:bg-primary/5 transition-colors"
+            onClick={handleUploadClick}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            <div className="flex flex-col items-center justify-center py-4">
+              <div className="bg-primary/10 p-4 rounded-full mb-3">
+                <Upload className="h-6 w-6 text-primary" />
+              </div>
+              <h4 className="text-base font-medium mb-1">Select Image</h4>
+              <p className="text-sm text-muted-foreground text-center">
+                Click to browse your files<br/>or drag and drop
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                JPG, PNG, WEBP up to 5MB
+              </p>
+            </div>
+          </div>
+          
+          <div className="rounded-lg p-3 bg-primary/5 text-sm space-y-1">
+            <div className="flex items-center">
+              <Sparkles className="h-4 w-4 text-primary mr-2" />
+              <span className="font-medium">AI-Powered Tools</span>
+            </div>
+            <ul className="text-xs text-muted-foreground pl-6 mt-1 space-y-1 list-disc">
+              <li>Background removal</li>
+              <li>Edge detection</li>
+              <li>Custom shapes</li>
+              <li>Border customization</li>
+            </ul>
           </div>
         </div>
-        
-        <p className="text-sm text-muted-foreground mb-4">
-          Upload an image to automatically remove the background and prepare it for your custom sticker.
-        </p>
-        
-        <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Input
-              id="image-upload"
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*"
-              className="flex-1"
-            />
-            {selectedFile && (
+      ) : (
+        // Customization tools - shown after image is uploaded
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-medium flex items-center">
+              <Wand2 className="h-4 w-4 mr-2 text-primary" />
+              AI Enhancements
+            </h3>
+            <div className="flex space-x-2">
               <Button 
-                variant="destructive" 
-                size="icon" 
-                onClick={clearImage}
-                className="flex-shrink-0"
+                size="sm" 
+                variant="outline"
+                className="text-xs"
+                onClick={handleUploadClick}
               >
-                <Trash2 className="h-4 w-4" />
+                <Upload className="h-3 w-3 mr-1" />
+                Change
               </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-xs text-red-500"
+                onClick={clearImage}
+              >
+                <Trash2 className="h-3 w-3 mr-1" />
+                Remove
+              </Button>
+            </div>
+          </div>
+          
+          <div className="relative rounded-lg overflow-hidden bg-black/5">
+            <img 
+              src={processedImage || imagePreview} 
+              alt="Preview" 
+              className="w-full max-h-[120px] object-contain"
+            />
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
+                <div className="flex items-center space-x-2 bg-background/80 px-3 py-2 rounded-full">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-xs font-medium">Processing...</span>
+                </div>
+              </div>
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Original Image Preview */}
-            <div className="border rounded-lg p-3 bg-background/50 backdrop-blur-sm">
-              <h4 className="text-sm font-medium mb-2 text-muted-foreground">Original</h4>
-              <div className="aspect-square flex items-center justify-center bg-black/5 rounded-md overflow-hidden">
-                {imagePreview ? (
-                  <img 
-                    src={imagePreview} 
-                    alt="Original" 
-                    className="max-h-full max-w-full object-contain"
-                  />
-                ) : (
-                  <p className="text-sm text-muted-foreground">No image selected</p>
-                )}
+          {!processedImage && (
+            <div className="rounded-lg border border-primary/20 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold flex items-center">
+                  <Wand2 className="h-4 w-4 mr-2 text-primary" />
+                  Background Removal
+                </Label>
               </div>
-            </div>
-            
-            {/* Processed Image Preview */}
-            <div className="border rounded-lg p-3 bg-background/50 backdrop-blur-sm">
-              <h4 className="text-sm font-medium mb-2 text-muted-foreground">Processed</h4>
-              <div className="aspect-square flex items-center justify-center bg-black/5 rounded-md overflow-hidden relative">
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm">
-                    <div className="flex flex-col items-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                      <p className="text-sm mt-2">Processing image...</p>
-                    </div>
-                  </div>
-                )}
-                
-                {processedImage ? (
-                  <img 
-                    src={processedImage} 
-                    alt="Processed" 
-                    className="max-h-full max-w-full object-contain"
-                  />
+              <p className="text-xs text-muted-foreground">
+                Remove background to create professional stickers
+              </p>
+              <Button 
+                className="w-full bg-primary"
+                size="sm"
+                onClick={removeBackground}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {isLoading ? 'Processing...' : 'Select an image to process'}
-                  </p>
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Remove Background
+                  </>
                 )}
-              </div>
+              </Button>
             </div>
-          </div>
+          )}
+          
+          {processedImage && (
+            <div className="rounded-lg border border-primary/20 bg-green-50/20 p-3">
+              <div className="flex items-center text-green-600">
+                <Sparkles className="h-4 w-4 mr-2" />
+                <span className="text-sm font-medium">Background Removed</span>
+              </div>
+              <p className="text-xs text-green-600/80 pl-6 mt-1">
+                Your image has been processed and is ready for customization
+              </p>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </Card>
   );
 }
