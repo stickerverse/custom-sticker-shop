@@ -30,7 +30,13 @@ export async function removeBackground(imageUrl: string): Promise<string> {
     );
 
     // Replicate returns the URL as the first item in the output array or as a direct string
-    return typeof output === 'string' ? output : Array.isArray(output) ? output[0] : String(output);
+    const resultUrl = typeof output === 'string' 
+      ? output 
+      : Array.isArray(output) 
+        ? output[0] 
+        : String(output as unknown);
+    
+    return resultUrl;
   } catch (error) {
     console.error('Error removing background:', error);
     throw new Error('Failed to remove background from image');
@@ -60,7 +66,13 @@ export async function detectBorders(imageUrl: string, lowThreshold = 100, highTh
     );
 
     // Replicate returns the URL as the first item in the output array or as a direct string
-    return typeof output === 'string' ? output : Array.isArray(output) ? output[0] : String(output);
+    const resultUrl = typeof output === 'string' 
+      ? output 
+      : Array.isArray(output) 
+        ? output[0] 
+        : String(output as unknown);
+    
+    return resultUrl;
   } catch (error) {
     console.error('Error detecting borders:', error);
     throw new Error('Failed to detect borders in image');

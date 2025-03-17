@@ -857,5 +857,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Image processing routes
+  app.post('/api/image/remove-background', requireReplicateToken, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      const { imageUrl } = req.body;
+      
+      if (!imageUrl) {
+        return res.status(400).json({ message: 'Image URL is required' });
+      }
+      
+      const resultUrl = await removeBackground(imageUrl);
+      res.status(200).json({ url: resultUrl });
+    } catch (error: any) {
+      console.error('Error removing background:', error);
+      res.status(500).json({ 
+        message: 'Error removing background', 
+        error: error.message 
+      });
+    }
+  });
+  
+  app.post('/api/image/detect-borders', requireReplicateToken, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      const { imageUrl, lowThreshold, highThreshold } = req.body;
+      
+      if (!imageUrl) {
+        return res.status(400).json({ message: 'Image URL is required' });
+      }
+      
+      const resultUrl = await detectBorders(
+        imageUrl, 
+        lowThreshold ? parseInt(lowThreshold) : undefined, 
+        highThreshold ? parseInt(highThreshold) : undefined
+      );
+      
+      res.status(200).json({ url: resultUrl });
+    } catch (error: any) {
+      console.error('Error detecting borders:', error);
+      res.status(500).json({ 
+        message: 'Error detecting borders', 
+        error: error.message 
+      });
+    }
+  });
+
   return httpServer;
 }
