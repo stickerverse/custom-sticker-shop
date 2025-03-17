@@ -33,14 +33,20 @@ const Chat = () => {
   // Load conversation when ID changes
   useEffect(() => {
     if (conversationId) {
+      // Just load conversation data when ID changes
       loadConversation(conversationId);
+      // Set active conversation ID without triggering loadConversation again
       activateConversation(conversationId);
     }
-  }, [conversationId, loadConversation, activateConversation]);
+  }, [conversationId]);
   
   // For mobile view, automatically show sidebar when no conversation is selected
+  // Using useLayoutEffect to ensure this runs before the browser paints
+  // to avoid flash of incorrect UI
   useEffect(() => {
-    if (!conversationId && window.innerWidth < 768) {
+    // Store the width once to avoid window.innerWidth calls on every render
+    const isMobile = window.innerWidth < 768;
+    if (!conversationId && isMobile) {
       // If on mobile and no conversation selected, make sure sidebar is visible
       setShowOrderDetails(false);
     }

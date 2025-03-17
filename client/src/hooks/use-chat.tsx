@@ -121,9 +121,16 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isAuthenticated, user?.id, toast]);
 
-  // Load a specific conversation
+  // Load a specific conversation with caching to prevent redundant API calls
   const loadConversation = useCallback(async (id: number) => {
+    // Skip if not authenticated
     if (!isAuthenticated) return;
+    
+    // Skip if we're already loading a conversation
+    if (loadingConversation) return;
+    
+    // Skip if the conversation we want is already active
+    if (activeConversation && activeConversation.id === id) return;
     
     try {
       setLoadingConversation(true);
@@ -147,7 +154,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setLoadingConversation(false);
     }
-  }, [isAuthenticated, toast]);
+  }, [isAuthenticated, loadingConversation, activeConversation, toast]);
 
   // Send a message
   const sendMessage = async ({ conversationId, content, messageType = "text", imageUrl }: SendMessageParams) => {
@@ -249,7 +256,14 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   
   // Set active conversation ID
   const activateConversation = (id: number) => {
-    setActiveConversationId(id);
+    // Only set the ID, don't trigger loadConversation
+    // This avoids an infinite loop between activateConversation and loadConversation
+    setActiveConversationId((prevId) => {
+      if (prevId !== id) {
+        return id;  // Only update if the ID has changed
+      }
+      return prevId;
+    });
   };
   
   // Initial load of conversations
@@ -262,9 +276,14 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   // Load active conversation when ID changes
   useEffect(() => {
     if (activeConversationId) {
-      loadConversation(activeConversationId);
+      // We need to remove loadConversation from the dependency array
+      // but still need to call it. We'll use a function that just captures the current value.
+      const loadCurrentConversation = () => {
+        loadConversation(activeConversationId);
+      };
+      loadCurrentConversation();
     }
-  }, [activeConversationId, loadConversation]);
+  }, [activeConversationId]); // Only depend on activeConversationId
 
   // WebSocket event handling
   useEffect(() => {
