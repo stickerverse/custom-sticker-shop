@@ -1,8 +1,16 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface CustomizerFormProps {
   optionsByType: Record<string, any[]>;
@@ -19,6 +27,10 @@ const CustomizerForm = ({
   quantity,
   onQuantityChange
 }: CustomizerFormProps) => {
+  // State for custom size switch
+  const [useCustomSize, setUseCustomSize] = useState(false);
+  const [customWidth, setCustomWidth] = useState("3");
+  const [customHeight, setCustomHeight] = useState("3");
   
   // Format price modifier for display
   const formatPriceModifier = (priceModifier: number) => {
@@ -35,6 +47,27 @@ const CustomizerForm = ({
     // Enforce minimum of 1 and maximum of 1000
     const clampedQuantity = Math.max(1, Math.min(1000, newQuantity));
     onQuantityChange(clampedQuantity);
+  };
+  
+  // Handle custom size changes
+  const handleCustomSizeToggle = (checked: boolean) => {
+    setUseCustomSize(checked);
+    if (checked) {
+      // When switching to custom size, set a custom size value
+      const customSizeStr = `${customWidth}" × ${customHeight}"`;
+      onOptionSelect("size", customSizeStr);
+    } else {
+      // When switching back to predefined sizes, select the first option if available
+      if (optionsByType.size && optionsByType.size.length > 0) {
+        onOptionSelect("size", optionsByType.size[0].optionValue);
+      }
+    }
+  };
+  
+  // Update the custom size when dimensions change
+  const updateCustomSize = () => {
+    const customSizeStr = `${customWidth}" × ${customHeight}"`;
+    onOptionSelect("size", customSizeStr);
   };
   
   return (

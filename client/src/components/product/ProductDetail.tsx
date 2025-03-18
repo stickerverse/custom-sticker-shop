@@ -16,11 +16,28 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   const { addToCart } = useCart();
   
   // Fetch product details
+  interface ProductOption {
+    id: number;
+    productId: number;
+    optionType: string;
+    optionValue: string;
+    priceModifier: number;
+  }
+  
+  interface Product {
+    id: number;
+    title: string;
+    description: string;
+    imageUrl: string;
+    price?: number;
+    options?: ProductOption[];
+  }
+  
   const { 
     data: product, 
     isLoading, 
     error 
-  } = useQuery({
+  } = useQuery<Product>({
     queryKey: [`/api/products/${productId}`]
   });
   
@@ -144,29 +161,51 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:space-x-8">
-        {/* Product Image */}
+        {/* Product Image with hover effects */}
         <div className="md:w-1/2">
-          <div className="rounded-lg overflow-hidden border border-gray-200">
-            <img 
-              src={product.imageUrl} 
-              alt={product.title} 
-              className="w-full h-auto object-cover"
-            />
-          </div>
-          
-          {/* Additional product views would go here */}
-          <div className="grid grid-cols-5 gap-2 mt-4">
-            <div className="border border-primary rounded-md p-1">
+          <div className="rounded-lg overflow-hidden border border-gray-200 relative group">
+            <div className="absolute inset-0 bg-gradient-radial from-transparent to-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            
+            {/* Main image with floating animation */}
+            <div className="relative overflow-hidden">
               <img 
                 src={product.imageUrl} 
                 alt={product.title} 
-                className="w-full h-auto object-cover aspect-square"
+                className="w-full h-auto object-cover transition-all duration-500 group-hover:scale-110"
+              />
+              
+              {/* Floating effect elements */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
+                <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse delay-300" />
+              </div>
+              
+              {/* Product badges that appear on hover */}
+              <div className="absolute bottom-4 left-4 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                <Badge className="bg-primary text-white border-0 shadow-md mr-2">
+                  Premium Quality
+                </Badge>
+                <Badge className="bg-white text-primary border-primary shadow-md">
+                  Waterproof
+                </Badge>
+              </div>
+            </div>
+          </div>
+          
+          {/* Thumbnail gallery with hover effects */}
+          <div className="grid grid-cols-5 gap-2 mt-4">
+            <div className="border border-primary rounded-md p-1 overflow-hidden">
+              <img 
+                src={product.imageUrl} 
+                alt={product.title} 
+                className="w-full h-auto object-cover aspect-square hover:scale-110 transition-transform duration-300"
               />
             </div>
-            {/* Placeholders for additional views */}
+            
+            {/* Placeholder thumbnails with hover effects */}
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="border border-gray-200 rounded-md p-1 bg-gray-50 opacity-50">
-                <div className="w-full aspect-square bg-gray-200" />
+              <div key={i} className="border border-gray-200 rounded-md p-1 bg-gray-50 opacity-70 hover:opacity-100 hover:border-primary/30 transition-all duration-300 cursor-pointer overflow-hidden">
+                <div className="w-full aspect-square bg-gray-200 hover:bg-gray-100 transition-colors duration-300" />
               </div>
             ))}
           </div>
