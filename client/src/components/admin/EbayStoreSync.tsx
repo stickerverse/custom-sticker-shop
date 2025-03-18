@@ -20,10 +20,7 @@ const EbayStoreSync: React.FC = () => {
     setIsImporting(true);
     
     try {
-      const response = await apiRequest({
-        method: 'POST',
-        url: '/api/ebay/import-products',
-      });
+      const response = await apiRequest('POST', '/api/ebay/import-products', {});
       
       const data = await response.json();
       
@@ -52,10 +49,7 @@ const EbayStoreSync: React.FC = () => {
     setIsSyncing(true);
     
     try {
-      const response = await apiRequest({
-        method: 'POST',
-        url: '/api/ebay/sync',
-      });
+      const response = await apiRequest('POST', '/api/ebay/sync');
       
       const data = await response.json();
       setLastSyncResult(data);
@@ -95,10 +89,7 @@ const EbayStoreSync: React.FC = () => {
     setIsLoadingLogs(true);
     
     try {
-      const response = await apiRequest({
-        method: 'GET',
-        url: '/api/ebay/sync-logs',
-      });
+      const response = await apiRequest('GET', '/api/ebay/sync-logs');
       
       const data = await response.json();
       setLogs(data.logs || 'No logs available');

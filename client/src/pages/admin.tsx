@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import EbayStoreSync from "@/components/admin/EbayStoreSync";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -742,6 +743,32 @@ const Admin = () => {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+            
+            <TabsContent value="integrations">
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Integrations</h1>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>eBay Store Migration</CardTitle>
+                    <CardDescription>Import and manage products from your eBay store</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Import EbayStoreSync component here */}
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Sync your eBay store with your custom sticker shop. Import products, export data, and manage your store integration.
+                      </p>
+                      
+                      {/* eBay Store Sync Component */}
+                      <EbayStoreSync />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
             </Tabs>
           </div>
