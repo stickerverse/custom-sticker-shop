@@ -35,7 +35,7 @@ interface AdvancedEditorProps {
   borderColor: string;
 }
 
-export function AdvancedEditor({
+function AdvancedEditorComponent({
   onImageProcessed,
   onOriginalImageUpload,
   onShapeSelected,
@@ -424,4 +424,4 @@ export function AdvancedEditor({
   );
 }
 
-export default AdvancedEditor;
+export { AdvancedEditorComponent as AdvancedEditor };

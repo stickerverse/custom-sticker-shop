@@ -59,7 +59,7 @@ import {
 } from "lucide-react";
 
 // Import your editor components
-import AdvancedEditor from "@/components/customizer/AdvancedEditor";
+import { AdvancedEditor } from "@/components/customizer/AdvancedEditor";
 import { ImageProcessor } from "@/components/customizer/ImageProcessor";
 import { RemoveBackgroundTool } from "@/components/customizer/RemoveBackgroundTool";
 
