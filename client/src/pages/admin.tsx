@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import EbayStoreSync from "@/components/admin/EbayStoreSync";
+import ProductCustomizer from "@/components/admin/ProductCustomizer";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -284,492 +285,521 @@ const Admin = () => {
                 <TabsTrigger value="products">Products</TabsTrigger>
                 <TabsTrigger value="integrations">Integrations</TabsTrigger>
               </TabsList>
+              
               <TabsContent value="dashboard">
-              <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-              
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">
-                      Total Orders
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {ordersLoading ? "..." : orders?.length || 0}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      +12% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">
-                      Pending Approvals
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {ordersLoading ? "..." : orders?.filter((o: any) => o.status === "awaiting_approval").length || 0}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Needs your attention
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">
-                      Unread Messages
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {conversationsLoading ? "..." : "5"}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      From 3 conversations
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">
-                      Total Revenue
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {ordersLoading ? "..." : formatPrice(orders?.reduce((sum: number, order: any) => sum + order.total, 0) || 0)}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      +18% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {ordersLoading ? (
-                      <p className="text-center py-4 text-gray-500">Loading activity...</p>
-                    ) : orders?.slice(0, 5).map((order: any) => (
-                      <div key={order.id} className="flex items-start">
-                        <span className={`w-2 h-2 mt-2 rounded-full ${statusColorMap[order.status] || "bg-gray-400"} mr-3`}></span>
-                        <div>
-                          <p className="text-sm">
-                            <span className="font-medium">Order #{order.id}</span> status changed to {" "}
-                            <span className="font-medium">{statusTextMap[order.status] || order.status}</span>
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(order.updatedAt), { addSuffix: true })}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="orders">
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Orders</h1>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Orders</SelectItem>
-                    <SelectItem value="awaiting_approval">Awaiting Approval</SelectItem>
-                    <SelectItem value="in_production">In Production</SelectItem>
-                    <SelectItem value="shipped">Shipped</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Orders List */}
-                <div className="md:w-2/5 lg:w-1/3">
+                <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   <Card>
-                    <CardHeader>
-                      <CardTitle>Orders List</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <ScrollArea className="h-[500px]">
-                        {ordersLoading ? (
-                          <div className="p-4 text-center text-gray-500">
-                            Loading orders...
-                          </div>
-                        ) : ordersError ? (
-                          <div className="p-4 text-center text-red-500">
-                            Error loading orders
-                          </div>
-                        ) : orders?.length === 0 ? (
-                          <div className="p-4 text-center text-gray-500">
-                            No orders found
-                          </div>
-                        ) : (
-                          <div className="divide-y">
-                            {orders?.map((order: any) => (
-                              <div 
-                                key={order.id} 
-                                className={`p-4 cursor-pointer hover:bg-gray-50 ${selectedOrder === order.id ? 'bg-gray-50' : ''}`}
-                                onClick={() => setSelectedOrder(order.id)}
-                              >
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <div className="font-medium">Order #{order.id}</div>
-                                    <div className="text-sm text-gray-500">
-                                      {format(new Date(order.createdAt), "MMM d, yyyy")}
-                                    </div>
-                                  </div>
-                                  <Badge className={`${statusColorMap[order.status] || "bg-gray-400"} text-white`}>
-                                    {statusTextMap[order.status] || order.status}
-                                  </Badge>
-                                </div>
-                                <div className="mt-2 text-sm">
-                                  <span className="font-medium">{formatPrice(order.total)}</span>
-                                  <span className="text-gray-500 ml-2">{order.itemCount} items</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                {/* Order Details */}
-                <div className="md:w-3/5 lg:w-2/3">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Order Details</CardTitle>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-500">
+                        Total Orders
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {!selectedOrder ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <span className="material-icons text-gray-300 text-4xl mb-2">receipt</span>
-                          <p>Select an order to view details</p>
-                        </div>
-                      ) : orderDetailsLoading ? (
-                        <div className="text-center py-8 text-gray-500">
-                          Loading order details...
-                        </div>
-                      ) : !orderDetails ? (
-                        <div className="text-center py-8 text-gray-500">
-                          Order not found
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="flex justify-between items-start mb-6">
-                            <div>
-                              <h2 className="text-xl font-semibold">Order #{orderDetails.id}</h2>
-                              <p className="text-sm text-gray-500">
-                                Placed on {format(new Date(orderDetails.createdAt), "MMMM d, yyyy 'at' h:mm a")}
-                              </p>
-                            </div>
-                            <Select 
-                              value={orderDetails.status}
-                              onValueChange={(value) => handleStatusChange(orderDetails.id, value)}
-                            >
-                              <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Change status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="processing">Processing</SelectItem>
-                                <SelectItem value="awaiting_approval">Awaiting Approval</SelectItem>
-                                <SelectItem value="in_production">In Production</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                              <h3 className="font-medium mb-2">Shipping Address</h3>
-                              <div className="bg-gray-50 p-3 rounded text-sm whitespace-pre-line">
-                                {orderDetails.shippingAddress}
-                              </div>
-                            </div>
-                            <div>
-                              <h3 className="font-medium mb-2">Payment Information</h3>
-                              <div className="bg-gray-50 p-3 rounded text-sm">
-                                <div className="flex justify-between mb-1">
-                                  <span>Subtotal:</span>
-                                  <span>{formatPrice(orderDetails.total * 0.9)}</span>
-                                </div>
-                                <div className="flex justify-between mb-1">
-                                  <span>Shipping:</span>
-                                  <span>{formatPrice(orderDetails.total * 0.1)}</span>
-                                </div>
-                                <div className="flex justify-between font-medium">
-                                  <span>Total:</span>
-                                  <span>{formatPrice(orderDetails.total)}</span>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-500">
-                                  Paid with Credit Card
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <h3 className="font-medium mb-2">Order Items</h3>
-                          <div className="bg-gray-50 p-3 rounded mb-6">
-                            {orderDetails.items?.map((item: any) => (
-                              <div key={item.id} className="flex items-center py-2 border-b border-gray-200 last:border-0">
-                                <div className="w-12 h-12 rounded bg-white border border-gray-200 overflow-hidden flex-shrink-0">
-                                  <img 
-                                    src={item.product?.imageUrl} 
-                                    alt={item.product?.title} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="ml-3 flex-grow">
-                                  <div className="font-medium">{item.product?.title}</div>
-                                  <div className="text-xs text-gray-500">
-                                    {Object.entries(item.options)
-                                      .map(([key, value]) => `${key}: ${value}`)
-                                      .join(", ")}
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="font-medium">{formatPrice(item.price)}</div>
-                                  <div className="text-xs text-gray-500">Qty: {item.quantity}</div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          
-                          <div className="flex gap-3">
-                            <Button 
-                              className="bg-secondary text-white hover:bg-secondary/90"
-                              onClick={() => setLocation(`/chat/${orderDetails.conversationId || 1}`)}
-                            >
-                              <span className="material-icons mr-2 text-sm">chat</span>
-                              Message Customer
-                            </Button>
-                            
-                            {orderDetails.status === "awaiting_approval" && (
-                              <Button 
-                                className="bg-success text-white hover:bg-success/90"
-                                onClick={() => handleStatusChange(orderDetails.id, "in_production")}
-                                disabled={updateStatusMutation.isPending}
-                              >
-                                Approve Design
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      <div className="text-2xl font-bold">
+                        {ordersLoading ? "..." : orders?.length || 0}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        +12% from last month
+                      </p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-500">
+                        Pending Approvals
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {ordersLoading ? "..." : orders?.filter((o: any) => o.status === "awaiting_approval").length || 0}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Needs your attention
+                      </p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-500">
+                        Unread Messages
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {conversationsLoading ? "..." : "5"}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        From 3 conversations
+                      </p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-500">
+                        Total Revenue
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {ordersLoading ? "..." : formatPrice(orders?.reduce((sum: number, order: any) => sum + order.total, 0) || 0)}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        +18% from last month
+                      </p>
                     </CardContent>
                   </Card>
                 </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="conversations">
-              <h1 className="text-2xl font-bold mb-6">Customer Messages</h1>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Active Conversations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {conversationsLoading ? (
-                    <div className="text-center py-8 text-gray-500">
-                      Loading conversations...
-                    </div>
-                  ) : conversationsError ? (
-                    <div className="text-center py-8 text-red-500">
-                      Error loading conversations
-                    </div>
-                  ) : conversations?.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <span className="material-icons text-gray-300 text-4xl mb-2">chat</span>
-                      <p>No active conversations</p>
-                    </div>
-                  ) : (
-                    <div className="divide-y">
-                      {conversations?.map((conversation: any) => (
-                        <div key={conversation.id} className="py-4 first:pt-0 last:pb-0">
-                          <div className="flex items-start">
-                            <Avatar className="mr-3">
-                              <AvatarImage src={conversation.product?.imageUrl} />
-                              <AvatarFallback>
-                                {conversation.product?.title?.charAt(0) || "P"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-grow">
-                              <div className="flex justify-between">
-                                <div>
-                                  <div className="font-medium">Customer</div>
-                                  <div className="text-sm text-gray-500">
-                                    Order #{conversation.orderId} - {conversation.product?.title}
-                                  </div>
-                                </div>
-                                <Badge variant="outline" className="text-xs">
-                                  {statusTextMap[conversation.order?.status] || conversation.order?.status}
-                                </Badge>
-                              </div>
-                              <p className="text-sm mt-1 text-gray-600">
-                                {conversation.lastMessage?.content || "No messages yet"}
-                              </p>
-                              <div className="mt-2">
-                                <Button 
-                                  size="sm"
-                                  onClick={() => setLocation(`/chat/${conversation.id}`)}
-                                >
-                                  Reply
-                                </Button>
-                              </div>
-                            </div>
+                
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {ordersLoading ? (
+                        <p className="text-center py-4 text-gray-500">Loading activity...</p>
+                      ) : orders?.slice(0, 5).map((order: any) => (
+                        <div key={order.id} className="flex items-start">
+                          <span className={`w-2 h-2 mt-2 rounded-full ${statusColorMap[order.status] || "bg-gray-400"} mr-3`}></span>
+                          <div>
+                            <p className="text-sm">
+                              <span className="font-medium">Order #{order.id}</span> status changed to {" "}
+                              <span className="font-medium">{statusTextMap[order.status] || order.status}</span>
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatDistanceToNow(new Date(order.updatedAt), { addSuffix: true })}
+                            </p>
                           </div>
                         </div>
                       ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="products">
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Products</h1>
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleEbayImport}
-                    className="bg-blue-600 text-white hover:bg-blue-700"
-                    disabled={ebayImportMutation.isPending}
-                  >
-                    {ebayImportMutation.isPending ? (
-                      <span className="animate-spin mr-2">⏳</span>
-                    ) : (
-                      <span className="material-icons mr-2 text-sm">sync</span>
-                    )}
-                    Import from eBay
-                  </Button>
-                  <Button className="bg-primary text-white hover:bg-primary/90">
-                    <span className="material-icons mr-2 text-sm">add</span>
-                    Add Product
-                  </Button>
-                </div>
-              </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product Catalog</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {productsLoading ? (
-                    <div className="text-center py-8 text-gray-500">
-                      Loading products...
-                    </div>
-                  ) : productsError ? (
-                    <div className="text-center py-8 text-red-500">
-                      Error loading products
-                    </div>
-                  ) : products?.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <span className="material-icons text-gray-300 text-4xl mb-2">inventory_2</span>
-                      <p>No products found</p>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left p-2 font-medium">Product</th>
-                            <th className="text-left p-2 font-medium">Category</th>
-                            <th className="text-left p-2 font-medium">Price</th>
-                            <th className="text-left p-2 font-medium">Status</th>
-                            <th className="text-right p-2 font-medium">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {products?.map((product: any) => (
-                            <tr key={product.id} className="border-b last:border-0 hover:bg-gray-50">
-                              <td className="p-2">
-                                <div className="flex items-center">
-                                  <div className="w-10 h-10 rounded overflow-hidden bg-gray-100 mr-3">
+              <TabsContent value="orders">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-2xl font-bold">Orders</h1>
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Orders</SelectItem>
+                      <SelectItem value="awaiting_approval">Awaiting Approval</SelectItem>
+                      <SelectItem value="in_production">In Production</SelectItem>
+                      <SelectItem value="shipped">Shipped</SelectItem>
+                      <SelectItem value="delivered">Delivered</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Orders List */}
+                  <div className="md:w-2/5 lg:w-1/3">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Recent Orders</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <ScrollArea className="h-[500px]">
+                          {ordersLoading ? (
+                            <div className="text-center py-8 text-gray-500">
+                              Loading orders...
+                            </div>
+                          ) : ordersError ? (
+                            <div className="text-center py-8 text-red-500">
+                              Error loading orders
+                            </div>
+                          ) : orders?.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                              <span className="material-icons text-gray-300 text-4xl mb-2">inbox</span>
+                              <p>No orders found</p>
+                            </div>
+                          ) : (
+                            <div className="divide-y">
+                              {orders?.map((order: any) => (
+                                <div 
+                                  key={order.id}
+                                  className={`p-4 hover:bg-gray-50 cursor-pointer ${selectedOrder === order.id ? 'bg-gray-50' : ''}`}
+                                  onClick={() => setSelectedOrder(order.id)}
+                                >
+                                  <div className="flex justify-between items-center mb-1">
+                                    <div className="font-medium">Order #{order.id}</div>
+                                    <Badge className={statusColorMap[order.status] || "bg-gray-400"}>
+                                      {statusTextMap[order.status] || order.status}
+                                    </Badge>
+                                  </div>
+                                  <div className="text-sm text-gray-500 mb-1">
+                                    {format(new Date(order.createdAt), 'MMM dd, yyyy')}
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <div className="text-sm">{order.customer?.name || "Customer"}</div>
+                                    <div className="font-medium">{formatPrice(order.total)}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  {/* Order Details */}
+                  <div className="md:w-3/5 lg:w-2/3">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Order Details</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {!selectedOrder ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <span className="material-icons text-gray-300 text-4xl mb-2">info</span>
+                            <p>Select an order to view details</p>
+                          </div>
+                        ) : orderDetailsLoading ? (
+                          <div className="text-center py-8 text-gray-500">
+                            Loading order details...
+                          </div>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500 mb-1">Customer</h3>
+                                <p className="font-medium">{orderDetails?.customer?.name || "Customer"}</p>
+                                <p className="text-sm text-gray-600">{orderDetails?.customer?.email || "No email provided"}</p>
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500 mb-1">Shipping Address</h3>
+                                <p className="text-sm">{orderDetails?.shippingAddress || "No address provided"}</p>
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500 mb-1">Order Status</h3>
+                                <div className="flex items-center mt-1">
+                                  <Badge className={`mr-3 ${statusColorMap[orderDetails?.status] || "bg-gray-400"}`}>
+                                    {statusTextMap[orderDetails?.status] || orderDetails?.status}
+                                  </Badge>
+                                  <Select defaultValue={orderDetails?.status} onValueChange={(value) => handleStatusChange(orderDetails.id, value)}>
+                                    <SelectTrigger className="w-[180px]">
+                                      <SelectValue placeholder="Change status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="processing">Processing</SelectItem>
+                                      <SelectItem value="awaiting_approval">Awaiting Approval</SelectItem>
+                                      <SelectItem value="in_production">In Production</SelectItem>
+                                      <SelectItem value="shipped">Shipped</SelectItem>
+                                      <SelectItem value="delivered">Delivered</SelectItem>
+                                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500 mb-1">Order Total</h3>
+                                <p className="text-xl font-medium">{formatPrice(orderDetails?.total || 0)}</p>
+                                <div className="flex text-sm text-gray-500 mt-1">
+                                  <div className="mr-3">Subtotal: {formatPrice((orderDetails?.total || 0) * 0.85)}</div>
+                                  <div>Tax: {formatPrice((orderDetails?.total || 0) * 0.15)}</div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <Separator className="my-6" />
+                            
+                            <h3 className="font-medium mb-4">Order Items</h3>
+                            
+                            <div className="space-y-3">
+                              {orderDetails?.items?.map((item: any) => (
+                                <div key={item.id} className="flex items-center p-3 border rounded-lg">
+                                  <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden mr-4">
                                     <img 
-                                      src={product.imageUrl} 
-                                      alt={product.title} 
+                                      src={item.product?.imageUrl || "https://placehold.co/64x64"} 
+                                      alt={item.product?.title || "Product"} 
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <div className="font-medium">{product.title}</div>
+                                  <div className="flex-1">
+                                    <h4 className="font-medium">{item.product?.title || "Product"}</h4>
+                                    <div className="flex text-sm text-gray-500">
+                                      <div className="mr-3">Qty: {item.quantity}</div>
+                                      <div>{Object.entries(item.options || {}).map(([key, value]) => `${key}: ${value}`).join(', ')}</div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-medium">{formatPrice(item.price || 0)}</div>
+                                    <div className="text-sm text-gray-500">
+                                      {item.customized ? 'Customized' : 'Standard'}
+                                    </div>
+                                  </div>
                                 </div>
-                              </td>
-                              <td className="p-2">
-                                <Badge variant="outline">
-                                  {product.categoryId === 1 ? 'Decorative' : 
-                                   product.categoryId === 2 ? 'Laptop' : 
-                                   product.categoryId === 3 ? 'Water Bottle' : 'Other'}
-                                </Badge>
-                              </td>
-                              <td className="p-2">{formatPrice(499)}</td>
-                              <td className="p-2">
-                                <Badge className="bg-green-500 text-white">Active</Badge>
-                              </td>
-                              <td className="p-2 text-right">
-                                <Button variant="ghost" size="sm">
-                                  <span className="material-icons text-gray-500 text-sm">edit</span>
+                              ))}
+                            </div>
+                            
+                            <div className="mt-6 flex justify-between">
+                              <Button variant="outline" onClick={() => {
+                                // Open conversation for this order
+                                setActiveTab("conversations");
+                                // Set conversation to this order's conversation ID
+                                // We would need to fetch or set this conversation ID
+                                // let conversationId = orderDetails?.conversationId;
+                              }}>
+                                <span className="material-icons mr-2 text-sm">chat</span>
+                                Open Communication
+                              </Button>
+                              
+                              <div className="space-x-2">
+                                <Button variant="outline">
+                                  <span className="material-icons mr-2 text-sm">print</span>
+                                  Print Order
                                 </Button>
-                                <Button variant="ghost" size="sm">
-                                  <span className="material-icons text-gray-500 text-sm">delete</span>
+                                <Button 
+                                  className={orderDetails?.status === "cancelled" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+                                  onClick={() => handleStatusChange(orderDetails?.id, orderDetails?.status === "cancelled" ? "pending" : "cancelled")}
+                                >
+                                  <span className="material-icons mr-2 text-sm">{orderDetails?.status === "cancelled" ? "restore" : "cancel"}</span>
+                                  {orderDetails?.status === "cancelled" ? "Reactivate" : "Cancel Order"}
                                 </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="integrations">
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Integrations</h1>
-              </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
               
-              <div className="grid grid-cols-1 gap-6">
+              <TabsContent value="conversations">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-2xl font-bold">Customer Messages</h1>
+                </div>
+                
                 <Card>
                   <CardHeader>
-                    <CardTitle>eBay Store Migration</CardTitle>
-                    <CardDescription>Import and manage products from your eBay store</CardDescription>
+                    <CardTitle>Conversations</CardTitle>
+                    <CardDescription>Manage customer inquiries and order communications</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {/* Import EbayStoreSync component here */}
-                    <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        Sync your eBay store with your custom sticker shop. Import products, export data, and manage your store integration.
-                      </p>
-                      
-                      {/* eBay Store Sync Component */}
-                      <EbayStoreSync />
-                    </div>
+                    {conversationsLoading ? (
+                      <div className="text-center py-8 text-gray-500">
+                        Loading conversations...
+                      </div>
+                    ) : conversationsError ? (
+                      <div className="text-center py-8 text-red-500">
+                        Error loading conversations
+                      </div>
+                    ) : conversations?.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <span className="material-icons text-gray-300 text-4xl mb-2">chat</span>
+                        <p>No conversations found</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y">
+                        {conversations?.map((conversation: any) => (
+                          <div key={conversation.id} className="py-4 first:pt-0 last:pb-0">
+                            <div className="flex justify-between mb-2">
+                              <div className="font-medium">{conversation.subject || `Conversation #${conversation.id}`}</div>
+                              <Badge variant="outline">{conversation.isDirectChat ? 'Direct Chat' : 'Order Chat'}</Badge>
+                            </div>
+                            <div className="text-sm text-gray-500 mb-2">
+                              {conversation.order ? (
+                                <span>Related to Order #{conversation.order.id}</span>
+                              ) : (
+                                <span>Started {formatDistanceToNow(new Date(conversation.createdAt), { addSuffix: true })}</span>
+                              )}
+                            </div>
+                            <div className="flex justify-between">
+                              <div className="text-sm">
+                                Last message: {formatDistanceToNow(new Date(conversation.lastMessage?.createdAt || conversation.createdAt), { addSuffix: true })}
+                              </div>
+                              <Button size="sm" variant="ghost" onClick={() => {
+                                // Redirect to chat interface with this conversation open
+                                setLocation(`/chat?conversation=${conversation.id}`);
+                              }}>
+                                <span className="material-icons text-gray-500 text-sm">arrow_forward</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
-              </div>
-            </TabsContent>
+              </TabsContent>
+              
+              <TabsContent value="products">
+                <Tabs defaultValue="list">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="list">Product List</TabsTrigger>
+                    <TabsTrigger value="customize">Customize Imported</TabsTrigger>
+                    <TabsTrigger value="add">Add New</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="list">
+                    <div className="flex justify-between items-center mb-6">
+                      <h1 className="text-2xl font-bold">Products</h1>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={handleEbayImport}
+                          className="bg-blue-600 text-white hover:bg-blue-700"
+                          disabled={ebayImportMutation.isPending}
+                        >
+                          {ebayImportMutation.isPending ? (
+                            <span className="animate-spin mr-2">⏳</span>
+                          ) : (
+                            <span className="material-icons mr-2 text-sm">sync</span>
+                          )}
+                          Import from eBay
+                        </Button>
+                        <Button className="bg-primary text-white hover:bg-primary/90">
+                          <span className="material-icons mr-2 text-sm">add</span>
+                          Add Product
+                        </Button>
+                      </div>
+                    </div>
+                
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Product Catalog</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {productsLoading ? (
+                          <div className="text-center py-8 text-gray-500">
+                            Loading products...
+                          </div>
+                        ) : productsError ? (
+                          <div className="text-center py-8 text-red-500">
+                            Error loading products
+                          </div>
+                        ) : products?.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <span className="material-icons text-gray-300 text-4xl mb-2">inventory_2</span>
+                            <p>No products found</p>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b">
+                                  <th className="text-left p-2 font-medium">Product</th>
+                                  <th className="text-left p-2 font-medium">Category</th>
+                                  <th className="text-left p-2 font-medium">Price</th>
+                                  <th className="text-left p-2 font-medium">Status</th>
+                                  <th className="text-right p-2 font-medium">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {products?.map((product: any) => (
+                                  <tr key={product.id} className="border-b last:border-0 hover:bg-gray-50">
+                                    <td className="p-2">
+                                      <div className="flex items-center">
+                                        <div className="w-10 h-10 rounded overflow-hidden bg-gray-100 mr-3">
+                                          <img 
+                                            src={product.imageUrl} 
+                                            alt={product.title} 
+                                            className="w-full h-full object-cover"
+                                          />
+                                        </div>
+                                        <div className="font-medium">{product.title}</div>
+                                      </div>
+                                    </td>
+                                    <td className="p-2">
+                                      <Badge variant="outline">
+                                        {product.categoryId === 1 ? 'Decorative' : 
+                                         product.categoryId === 2 ? 'Laptop' : 
+                                         product.categoryId === 3 ? 'Water Bottle' : 'Other'}
+                                      </Badge>
+                                    </td>
+                                    <td className="p-2">{formatPrice(499)}</td>
+                                    <td className="p-2">
+                                      <Badge className="bg-green-500 text-white">Active</Badge>
+                                    </td>
+                                    <td className="p-2 text-right">
+                                      <Button variant="ghost" size="sm">
+                                        <span className="material-icons text-gray-500 text-sm">edit</span>
+                                      </Button>
+                                      <Button variant="ghost" size="sm">
+                                        <span className="material-icons text-gray-500 text-sm">delete</span>
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  
+                  <TabsContent value="customize">
+                    <div className="flex justify-between items-center mb-6">
+                      <h1 className="text-2xl font-bold">Customize Imported Products</h1>
+                    </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Product Customizer</CardTitle>
+                        <CardDescription>Customize imported products before publishing them to your store</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ProductCustomizer />
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  
+                  <TabsContent value="add">
+                    <div className="flex justify-between items-center mb-6">
+                      <h1 className="text-2xl font-bold">Add New Product</h1>
+                    </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Create Product</CardTitle>
+                        <CardDescription>Add a new product to your store</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          <span className="material-icons text-gray-300 text-4xl mb-2">add_box</span>
+                          <p>Product creation form coming soon</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </TabsContent>
+              
+              <TabsContent value="integrations">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-2xl font-bold">Integrations</h1>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>eBay Store Migration</CardTitle>
+                      <CardDescription>Import and manage products from your eBay store</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {/* Import EbayStoreSync component here */}
+                      <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                          Sync your eBay store with your custom sticker shop. Import products, export data, and manage your store integration.
+                        </p>
+                        
+                        {/* eBay Store Sync Component */}
+                        <EbayStoreSync />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
             </Tabs>
           </div>
         </div>
