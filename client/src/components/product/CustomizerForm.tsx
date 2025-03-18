@@ -75,25 +75,107 @@ const CustomizerForm = ({
       {/* Size Options */}
       {optionsByType.size && (
         <div>
-          <Label className="block mb-2 font-medium">Size</Label>
-          <div className="grid grid-cols-2 gap-2">
-            {optionsByType.size.map((option) => (
-              <Button
-                key={option.id}
-                type="button"
-                variant="outline"
-                className={`justify-between h-auto py-3 px-4 font-normal ${
-                  selectedOptions.size === option.optionValue ? selectedClass : defaultClass
-                }`}
-                onClick={() => onOptionSelect("size", option.optionValue)}
-              >
-                <span>{option.optionValue}</span>
-                <span className="text-xs text-gray-500">
-                  {formatPriceModifier(option.priceModifier)}
-                </span>
-              </Button>
-            ))}
+          <div className="flex justify-between items-center mb-3">
+            <Label className="font-medium">Size</Label>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="custom-size-toggle" className="text-sm text-gray-500 cursor-pointer">
+                Custom Size
+              </Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Switch 
+                      id="custom-size-toggle" 
+                      checked={useCustomSize}
+                      onCheckedChange={handleCustomSizeToggle}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Enter your own custom dimensions</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
+          
+          {!useCustomSize ? (
+            // Standard predefined sizes
+            <div className="grid grid-cols-2 gap-2">
+              {optionsByType.size.map((option) => (
+                <Button
+                  key={option.id}
+                  type="button"
+                  variant="outline"
+                  className={`justify-between h-auto py-3 px-4 font-normal ${
+                    selectedOptions.size === option.optionValue ? selectedClass : defaultClass
+                  }`}
+                  onClick={() => onOptionSelect("size", option.optionValue)}
+                  disabled={useCustomSize}
+                >
+                  <span>{option.optionValue}</span>
+                  <span className="text-xs text-gray-500">
+                    {formatPriceModifier(option.priceModifier)}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          ) : (
+            // Custom size inputs
+            <div className="border border-primary rounded-md p-4 bg-primary/5 animate-bubble-in">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="custom-width" className="text-sm mb-1 block">Width (inches)</Label>
+                  <div className="relative">
+                    <Input
+                      id="custom-width"
+                      type="number"
+                      value={customWidth}
+                      min="0.5"
+                      max="24"
+                      step="0.1"
+                      className="pr-8"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCustomWidth(value);
+                        setTimeout(updateCustomSize, 0);
+                      }}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">in</span>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="custom-height" className="text-sm mb-1 block">Height (inches)</Label>
+                  <div className="relative">
+                    <Input
+                      id="custom-height"
+                      type="number"
+                      value={customHeight}
+                      min="0.5"
+                      max="24"
+                      step="0.1"
+                      className="pr-8"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCustomHeight(value);
+                        setTimeout(updateCustomSize, 0);
+                      }}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">in</span>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-3">
+                <span className="inline-block bg-primary/20 rounded-full w-4 h-4 text-center mr-1">i</span>
+                Custom sizes are priced at $0.15 per square inch with a $2.99 minimum
+              </p>
+              
+              <div className="mt-3 text-center">
+                <span className="text-sm font-medium">Your sticker will be: </span>
+                <span className="text-sm text-primary font-bold">{customWidth}" × {customHeight}"</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
       

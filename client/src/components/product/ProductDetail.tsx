@@ -61,17 +61,40 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
     // Base price (example: $4.99 = 499 cents)
     let basePrice = 499;
     
-    // Add price modifiers from selected options
+    // Check for custom size
+    if (selectedOptions.size && selectedOptions.size.includes('"') && selectedOptions.size.includes('×')) {
+      // Extract width and height from a string like '3" × 4"'
+      const dimensions = selectedOptions.size.replace(/"/g, '').split('×').map(d => parseFloat(d.trim()));
+      if (dimensions.length === 2 && !isNaN(dimensions[0]) && !isNaN(dimensions[1])) {
+        const [width, height] = dimensions;
+        // $0.15 per square inch = 15 cents, with a minimum of $2.99 (299 cents)
+        const area = width * height;
+        const customPrice = Math.round(area * 15);
+        basePrice = Math.max(customPrice, 299);
+        
+        // Return directly as custom sizes override other price modifiers
+        return basePrice * quantity;
+      }
+    }
+    
+    // Add price modifiers from selected options for non-custom sizes
     if (product.options) {
       Object.entries(selectedOptions).forEach(([optionType, selectedValue]) => {
-        const matchingOption = product.options.find(
-          (opt: any) => opt.optionType === optionType && opt.optionValue === selectedValue
-        );
-        
-        if (matchingOption) {
-          basePrice += matchingOption.priceModifier;
+        if (optionType !== 'size' || !selectedValue.includes('×')) {
+          const matchingOption = product.options.find(
+            (opt: any) => opt.optionType === optionType && opt.optionValue === selectedValue
+          );
+          
+          if (matchingOption) {
+            basePrice += matchingOption.priceModifier;
+          }
         }
       });
+    }
+    
+    // Apply quantity discount for orders of 10 or more (10% off)
+    if (quantity >= 10) {
+      basePrice = Math.round(basePrice * 0.9);
     }
     
     return basePrice * quantity;
@@ -85,6 +108,10 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   // Handle add to cart
   const handleAddToCart = async () => {
     try {
+      if (!product) {
+        throw new Error("Product information not available");
+      }
+      
       setIsAddingToCart(true);
       
       // Make sure we have all required options
@@ -259,18 +286,40 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             </ul>
           </div>
           
-          {/* Add to Cart Button */}
+          {/* Add to Cart Button with Animation */}
           <div className="mt-8">
             <Button 
-              className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-base"
+              className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-base relative overflow-hidden group transition-all duration-300"
               onClick={handleAddToCart}
               disabled={isAddingToCart}
             >
-              {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-primary/0 via-white/30 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></span>
+              <span className="relative flex items-center justify-center gap-2">
+                {isAddingToCart ? (
+                  <>
+                    <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin"></div>
+                    <span>Adding to Cart...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons text-base">shopping_cart</span>
+                    <span>Add to Cart</span>
+                  </>
+                )}
+              </span>
             </Button>
-            <p className="text-center text-sm text-gray-500 mt-2">
-              Free shipping on orders over $35
-            </p>
+            
+            {/* Price guarantee and shipping info */}
+            <div className="flex items-center justify-center gap-4 mt-3">
+              <div className="flex items-center text-xs text-gray-500">
+                <span className="material-icons text-green-500 text-sm mr-1">verified</span>
+                <span>Price Match Guarantee</span>
+              </div>
+              <div className="flex items-center text-xs text-gray-500">
+                <span className="material-icons text-primary text-sm mr-1">local_shipping</span>
+                <span>Free shipping over $35</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
