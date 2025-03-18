@@ -1,4 +1,4 @@
-import type { Express, Request as ExpressRequest, Response } from "express";
+import type { Express, Request as ExpressRequest, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
@@ -7,6 +7,7 @@ import { insertUserSchema, insertMessageSchema, insertCartItemSchema, insertOrde
 import session from 'express-session';
 import Stripe from "stripe";
 import { removeBackground, detectBorders, requireReplicateToken } from "./services/replicate";
+import { importEbayProductsToApp, getSimulatedEbayProducts } from "./services/ebay";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -557,7 +558,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Add option modifiers
           const options = await storage.getProductOptions(product.id);
-          for (const selectedOption of Object.values(item.options)) {
+          const itemOptions = item.options as Record<string, string>;
+          for (const selectedOption of Object.values(itemOptions)) {
             const option = options.find(
               opt => opt.optionValue === selectedOption
             );
@@ -902,6 +904,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error detecting borders:', error);
       res.status(500).json({ 
         message: 'Error detecting borders', 
+        error: error.message 
+      });
+    }
+  });
+  
+  // eBay Integration routes
+  
+  // Check if eBay credentials are present
+  const requireEbayCredentials = (req: Request, res: Response, next: NextFunction) => {
+    if (!process.env.EBAY_APP_ID || !process.env.EBAY_SECRET) {
+      return res.status(400).json({ 
+        message: 'eBay API credentials are required',
+        missingCredentials: true
+      });
+    }
+    next();
+  };
+  
+  // Import products from eBay
+  app.post('/api/ebay/import-products', requireEbayCredentials, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can import products' });
+      }
+      
+      try {
+        // Try to import from eBay API
+        const importedProducts = await importEbayProductsToApp();
+        res.status(200).json({ 
+          message: `Successfully imported ${importedProducts.length} products from eBay`,
+          products: importedProducts
+        });
+      } catch (ebayError) {
+        console.error('Error importing from eBay API:', ebayError);
+        
+        // Fallback to sample products if API fails
+        const simulatedProducts = await getSimulatedEbayProducts();
+        res.status(200).json({ 
+          message: `eBay API failed. Added ${simulatedProducts.length} sample products instead`,
+          products: simulatedProducts,
+          usingFallback: true,
+          originalError: (ebayError as Error).message
+        });
+      }
+    } catch (error: any) {
+      console.error('Error in import eBay products endpoint:', error);
+      res.status(500).json({ 
+        message: 'Error importing eBay products', 
         error: error.message 
       });
     }
