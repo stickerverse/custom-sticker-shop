@@ -304,6 +304,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update user profile
+  app.patch('/api/auth/profile', async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Validate input
+      const { displayName, email } = req.body;
+      
+      if (!displayName && !email) {
+        return res.status(400).json({ message: 'No valid fields to update' });
+      }
+      
+      // Update user in storage
+      const updatedUser = { ...user };
+      
+      if (displayName !== undefined) {
+        updatedUser.displayName = displayName;
+      }
+      
+      if (email !== undefined) {
+        updatedUser.email = email;
+      }
+      
+      // In a real database, we would do something like:
+      // await storage.updateUser(userId, { displayName, email });
+      // Since we're using memory storage, we just mutate the user object directly
+      if (typeof storage.updateUser === 'function') {
+        await storage.updateUser(userId, { displayName, email });
+      } else {
+        // Fallback for MemStorage
+        user.displayName = updatedUser.displayName;
+        user.email = updatedUser.email;
+      }
+      
+      // Don't return password in response
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      res.status(500).json({ message: 'Error updating user profile' });
+    }
+  });
+  
   // Product routes
   app.get('/api/products', async (req: Request, res: Response) => {
     try {

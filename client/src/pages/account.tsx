@@ -185,31 +185,34 @@ const Account = () => {
               <CardDescription className="text-center">{user.email}</CardDescription>
             </CardHeader>
             <CardContent>
-              <TabsList className="grid w-full grid-cols-1 mb-4">
-                <TabsTrigger 
-                  value="profile" 
+              <div className="grid w-full grid-cols-1 mb-4 space-y-2">
+                <Button 
+                  variant={activeTab === "profile" ? "default" : "outline"}
                   onClick={() => setActiveTab("profile")}
-                  className={activeTab === "profile" ? "bg-primary text-white" : ""}
+                  className="w-full justify-start"
                 >
+                  <span className="material-icons mr-2 text-sm">person</span>
                   Profile
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="orders" 
+                </Button>
+                <Button 
+                  variant={activeTab === "orders" ? "default" : "outline"}
                   onClick={() => setActiveTab("orders")}
-                  className={activeTab === "orders" ? "bg-primary text-white" : ""}
+                  className="w-full justify-start"
                 >
+                  <span className="material-icons mr-2 text-sm">receipt</span>
                   Orders
-                </TabsTrigger>
+                </Button>
                 {user.isAdmin && (
-                  <TabsTrigger 
-                    value="integrations" 
+                  <Button 
+                    variant={activeTab === "integrations" ? "default" : "outline"}
                     onClick={() => setActiveTab("integrations")}
-                    className={activeTab === "integrations" ? "bg-primary text-white" : ""}
+                    className="w-full justify-start"
                   >
+                    <span className="material-icons mr-2 text-sm">extension</span>
                     Integrations
-                  </TabsTrigger>
+                  </Button>
                 )}
-              </TabsList>
+              </div>
               <Separator className="my-4" />
               <Button onClick={handleLogout} variant="outline" className="w-full">
                 <span className="material-icons mr-2 text-sm">logout</span>
