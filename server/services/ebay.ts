@@ -33,7 +33,7 @@ async function getEbayToken(): Promise<string> {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': `Basic ${Buffer.from(`${EBAY_APP_ID || ''}:${EBAY_SECRET || ''}`).toString('base64')}`
       },
-      data: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope'
+      data: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.account'
     });
 
     // Store token and expiration
@@ -41,7 +41,11 @@ async function getEbayToken(): Promise<string> {
     const expiresIn = response.data.expires_in;
     tokenExpiration = new Date(Date.now() + expiresIn * 1000);
     
-    return ebayToken || '';
+    if (!ebayToken) {
+      throw new Error('No access token received from eBay API');
+    }
+    
+    return ebayToken;
   } catch (error) {
     console.error('Error getting eBay token:', error);
     throw new Error('Failed to authenticate with eBay API');
