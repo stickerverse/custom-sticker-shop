@@ -252,6 +252,14 @@ const Admin = () => {
                   <span className="material-icons mr-2 text-sm">inventory_2</span>
                   Products
                 </Button>
+                <Button 
+                  variant={activeTab === "integrations" ? "default" : "ghost"} 
+                  className="w-full justify-start"
+                  onClick={() => setActiveTab("integrations")}
+                >
+                  <span className="material-icons mr-2 text-sm">sync</span>
+                  Integrations
+                </Button>
                 <Separator className="my-2" />
                 <Button 
                   variant="ghost" 
@@ -273,6 +281,7 @@ const Admin = () => {
                 <TabsTrigger value="orders">Orders</TabsTrigger>
                 <TabsTrigger value="conversations">Conversations</TabsTrigger>
                 <TabsTrigger value="products">Products</TabsTrigger>
+                <TabsTrigger value="integrations">Integrations</TabsTrigger>
               </TabsList>
               <TabsContent value="dashboard">
               <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
