@@ -19,6 +19,7 @@ import Checkout from "@/pages/checkout";
 import Customizer from "@/pages/customizer";
 import Chat from "@/pages/chat";
 import Admin from "@/pages/admin";
+import Account from "@/pages/account";
 import OrderConfirmation from "@/pages/order-confirmation";
 import NotFound from "@/pages/not-found";
 
@@ -63,6 +64,7 @@ function Router() {
           <Route path="/chat" component={Chat} />
           <Route path="/chat/:id" component={Chat} />
           <Route path="/admin" component={Admin} />
+          <Route path="/account" component={Account} />
           <Route component={NotFound} />
         </Switch>
       </div>
