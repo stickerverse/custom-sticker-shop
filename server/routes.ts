@@ -8,6 +8,12 @@ import session from 'express-session';
 import Stripe from "stripe";
 import { removeBackground, detectBorders, requireReplicateToken } from "./services/replicate";
 import { importEbayProductsToApp, getSimulatedEbayProducts } from "./services/ebay";
+import { 
+  syncEbayProducts, 
+  getEbayProductsJsonDownload, 
+  getEbayProductsCsvDownload,
+  getSyncLogs 
+} from './services/ebay-store-sync';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -1015,6 +1021,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: 'Error importing eBay products', 
         error: error.message 
+      });
+    }
+  });
+  
+  // Sync eBay products and save to files
+  app.post('/api/ebay/sync', requireEbayCredentials, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can sync eBay products' });
+      }
+      
+      const result = await syncEbayProducts();
+      res.status(200).json({ 
+        success: true, 
+        message: `Successfully synced ${result.products.length} products from eBay`,
+        productsImported: result.products.length,
+        jsonFile: result.jsonPath,
+        csvFile: result.csvPath
+      });
+    } catch (error: any) {
+      console.error('Error syncing eBay products:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to sync eBay products',
+        error: error.message
+      });
+    }
+  });
+  
+  // Download eBay products as JSON
+  app.get('/api/ebay/export/json', requireEbayCredentials, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can export eBay products' });
+      }
+      
+      const filePath = await getEbayProductsJsonDownload();
+      res.download(filePath, 'ebay_products.json');
+    } catch (error: any) {
+      console.error('Error exporting eBay products as JSON:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to export eBay products as JSON',
+        error: error.message
+      });
+    }
+  });
+  
+  // Download eBay products as CSV
+  app.get('/api/ebay/export/csv', requireEbayCredentials, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can export eBay products' });
+      }
+      
+      const filePath = await getEbayProductsCsvDownload();
+      res.download(filePath, 'ebay_products.csv');
+    } catch (error: any) {
+      console.error('Error exporting eBay products as CSV:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to export eBay products as CSV',
+        error: error.message
+      });
+    }
+  });
+  
+  // Get eBay sync logs
+  app.get('/api/ebay/sync-logs', requireEbayCredentials, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can view sync logs' });
+      }
+      
+      const logs = getSyncLogs();
+      res.status(200).json({ 
+        success: true, 
+        logs 
+      });
+    } catch (error: any) {
+      console.error('Error getting eBay sync logs:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get eBay sync logs',
+        error: error.message
       });
     }
   });

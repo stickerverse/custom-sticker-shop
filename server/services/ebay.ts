@@ -22,7 +22,7 @@ let tokenExpiration: Date | null = new Date(Date.now() + 7200 * 1000); // Token 
  * Get OAuth token for eBay API
  * Uses the direct token provided by the user if available
  */
-async function getEbayToken(): Promise<string> {
+export async function getEbayToken(): Promise<string> {
   // If we have the direct token, always use it
   if (DIRECT_EBAY_TOKEN) {
     console.log("Using direct eBay token provided by user");

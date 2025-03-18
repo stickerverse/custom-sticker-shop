@@ -1,0 +1,126 @@
+Got it! Since you’re working inside Replit and want to guide the Replit AI Agent to build and integrate this into your existing application, here’s how you should structure your instructions for it:
+
+⸻
+
+How to Guide the Replit AI Agent to Build & Integrate the eBay Store Migration Tool
+
+Follow this step-by-step approach while working with the Replit AI Agent:
+
+⸻
+
+1. Provide Clear Context to Replit AI
+
+Start by explaining what you’re building and what the integration needs to do:
+
+Example Prompt for Replit AI:
+
+	“I am working on an application that needs to integrate an eBay store migration tool in Replit.
+This tool should:
+		•	Authenticate with the eBay API.
+	•	Fetch active product listings.
+	•	Save the data in a structured format (JSON/CSV).
+	•	Provide a function to sync eBay data regularly.
+I need you to generate modular, reusable code that fits into my existing application. Let’s break it down step by step.”
+
+⸻
+
+2. Set Up Environment & Dependencies
+
+Tell Replit AI to install dependencies.
+
+Prompt:
+
+	“First, install the required libraries. Since we’re using Python, add:	Create a .env file for storing API credentials.”
+
+Additional Command:
+
+	“Create a .env file in the root directory with:	Ensure the app loads these credentials securely.”
+
+⸻
+
+3. Authenticate with eBay API (OAuth 2.0)
+
+Now, instruct Replit AI to create a script for authentication.
+
+Prompt:
+
+	“Write a script get_token.py to fetch an OAuth token from eBay. It should:
+		•	Read CLIENT_ID and CLIENT_SECRET from .env.
+	•	Use Base64 encoding for authentication.
+	•	Request a token using requests.
+	•	Print the access_token on success.
+	•	Handle errors gracefully.”
+
+⸻
+
+4. Fetch eBay Product Listings
+
+Now, guide Replit AI to fetch products.
+
+Prompt:
+
+	“Create a script fetch_products.py to retrieve active product listings from eBay. It should:
+		•	Use the access_token from get_token.py.
+	•	Fetch inventory items from eBay.
+	•	Return product data as JSON.
+	•	Save the output to ebay_products.json.”
+
+⸻
+
+5. Store & Export Data
+
+Tell Replit AI to store data in a CSV format.
+
+Prompt:
+
+	“Modify fetch_products.py to:
+		•	Save product data as ebay_products.json.
+	•	Also export the data to ebay_products.csv with columns: Product ID, Title, Price, Quantity.”
+
+⸻
+
+6. Automate Product Sync
+
+Now, automate the tool to keep eBay data updated.
+
+Prompt:
+
+	“Create a script sync_ebay.py that:
+		•	Runs fetch_products.py on a schedule.
+	•	Uses cron to sync daily.
+	•	Logs updates to sync_log.txt.”
+
+⸻
+
+7. Integrate with Existing Application
+
+Now that the tool is built, integrate it into your app.
+
+Prompt:
+
+	“Modify our existing application to:
+		•	Call fetch_products.py when loading eBay products.
+	•	Display eBay products inside our app UI.
+	•	Provide a button to refresh/sync product data.”
+
+⸻
+
+8. Deploy & Test in Replit
+
+Finally, deploy and test everything.
+
+Prompt:
+
+	“Set up Replit’s Always On feature or a crontab to automate product sync.
+Test by running:	Verify that ebay_products.json and ebay_products.csv update correctly.”
+
+⸻
+
+Final Thoughts
+
+By following this step-by-step approach, you ensure that Replit AI:
+✅ Understands exactly what you need.
+✅ Writes modular & reusable code.
+✅ Seamlessly integrates with your existing app.
+
+Would you like help modifying your existing application code for this integration?
