@@ -326,11 +326,13 @@ const ProductCustomizer = () => {
   const getFilteredProducts = () => {
     if (!products) return [];
     
-    if (filterPublished === 'all') return products;
-    if (filterPublished === 'published') return products.filter((p: Product) => p.published);
-    if (filterPublished === 'unpublished') return products.filter((p: Product) => !p.published);
+    const productsArray = Array.isArray(products) ? products : [];
     
-    return products;
+    if (filterPublished === 'all') return productsArray;
+    if (filterPublished === 'published') return productsArray.filter((p: Product) => p.published);
+    if (filterPublished === 'unpublished') return productsArray.filter((p: Product) => !p.published);
+    
+    return productsArray;
   };
   
   // Toggle selection of all products

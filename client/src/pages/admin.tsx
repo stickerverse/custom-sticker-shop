@@ -298,7 +298,7 @@ const Admin = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {ordersLoading ? "..." : orders?.length || 0}
+                        {ordersLoading ? "..." : (Array.isArray(orders) ? orders.length : 0)}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         +12% from last month
@@ -314,7 +314,7 @@ const Admin = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {ordersLoading ? "..." : orders?.filter((o: any) => o.status === "awaiting_approval").length || 0}
+                        {ordersLoading ? "..." : (Array.isArray(orders) ? orders.filter((o: any) => o.status === "awaiting_approval").length : 0)}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         Needs your attention
@@ -346,7 +346,11 @@ const Admin = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {ordersLoading ? "..." : formatPrice(orders?.reduce((sum: number, order: any) => sum + order.total, 0) || 0)}
+                        {ordersLoading ? "..." : formatPrice(
+                          Array.isArray(orders) ? 
+                            orders.reduce((sum: number, order: any) => sum + (order.total || 0), 0) 
+                            : 0
+                        )}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         +18% from last month
