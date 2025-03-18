@@ -39,12 +39,27 @@ export function RemoveBackgroundTool({ onImageProcessed }: RemoveBackgroundToolP
 
   // Remove background mutation
   const removeBackgroundMutation = useMutation({
-    mutationFn: async (imageUrl: string) => {
+    mutationFn: async (file: File) => {
+      // Create a FormData object to handle file upload
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      // First, upload the image to get a publicly accessible URL
+      const uploadResponse = await fetch('/api/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) throw new Error('Failed to upload image');
+      const uploadResult = await uploadResponse.json();
+      
+      // Now remove the background using the public URL
       const response = await fetch('/api/image/remove-background', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl }),
+        body: JSON.stringify({ imageUrl: uploadResult.url }),
       });
+      
       if (!response.ok) throw new Error('Failed to remove background');
       return response.json();
     },
@@ -62,7 +77,7 @@ export function RemoveBackgroundTool({ onImageProcessed }: RemoveBackgroundToolP
       console.error("Error removing background:", error);
       toast({
         title: "Error",
-        description: "Failed to remove image background. Please try again.",
+        description: "Failed to remove image background. Please try again or use a different image format.",
         variant: "destructive"
       });
       setIsProcessing(false);
@@ -71,7 +86,14 @@ export function RemoveBackgroundTool({ onImageProcessed }: RemoveBackgroundToolP
 
   // Process image function - removes background on demand
   const removeBackground = () => {
-    if (!imagePreview) return;
+    if (!selectedFile) {
+      toast({
+        title: "No Image Selected",
+        description: "Please upload an image first.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsProcessing(true);
     toast({
@@ -80,7 +102,7 @@ export function RemoveBackgroundTool({ onImageProcessed }: RemoveBackgroundToolP
     });
     
     // Use the AI to remove background
-    removeBackgroundMutation.mutate(imagePreview);
+    removeBackgroundMutation.mutate(selectedFile);
   };
 
   // Trigger file input click
