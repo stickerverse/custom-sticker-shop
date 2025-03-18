@@ -88,6 +88,44 @@ const Admin = () => {
     updateStatusMutation.mutate({ orderId, status });
   };
   
+  // eBay product import mutation
+  const ebayImportMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/ebay/import-products", {});
+    },
+    onSuccess: (response: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({
+        title: "eBay Import Successful",
+        description: `${response.products?.length || 0} products imported from eBay`,
+      });
+      setActiveTab("products");
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || error?.message || "Unknown error";
+      const missingCredentials = error?.response?.data?.missingCredentials;
+      
+      if (missingCredentials) {
+        toast({
+          title: "eBay API Credentials Required",
+          description: "Please provide eBay API credentials in the server environment",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
+    }
+  });
+  
+  // Handle eBay import
+  const handleEbayImport = () => {
+    ebayImportMutation.mutate();
+  };
+  
   // If not authenticated or not admin, redirect to home
   useEffect(() => {
     if (isAuthenticated && !user?.isAdmin) {
@@ -603,10 +641,24 @@ const Admin = () => {
             <TabsContent value="products">
               <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Products</h1>
-                <Button className="bg-primary text-white hover:bg-primary/90">
-                  <span className="material-icons mr-2 text-sm">add</span>
-                  Add Product
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleEbayImport}
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                    disabled={ebayImportMutation.isPending}
+                  >
+                    {ebayImportMutation.isPending ? (
+                      <span className="animate-spin mr-2">⏳</span>
+                    ) : (
+                      <span className="material-icons mr-2 text-sm">sync</span>
+                    )}
+                    Import from eBay
+                  </Button>
+                  <Button className="bg-primary text-white hover:bg-primary/90">
+                    <span className="material-icons mr-2 text-sm">add</span>
+                    Add Product
+                  </Button>
+                </div>
               </div>
               
               <Card>
