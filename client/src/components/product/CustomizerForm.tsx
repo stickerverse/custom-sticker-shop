@@ -71,67 +71,7 @@ const CustomizerForm = ({
   };
   
   return (
-    <div className="space-y-6">
-      {/* Size Options */}
-      {optionsByType.size && (
-        <div>
-          <div className="flex justify-between items-center mb-3">
-            <Label className="font-medium">Size</Label>
-            <Label className="text-right text-sm font-medium">Custom Size</Label>
-          </div>
-          
-          <div className="rounded-lg bg-white border border-gray-200 mb-4">
-            <div className="grid grid-cols-2 gap-1 p-1">
-              <div className="relative">
-                <Label htmlFor="custom-width" className="text-sm font-medium text-gray-600 px-2 pt-1 block">Width (inches)</Label>
-                <Input
-                  id="custom-width"
-                  type="number"
-                  value={customWidth}
-                  min="0.5"
-                  max="24"
-                  step="0.1"
-                  className="border-0 focus:ring-0 h-10 rounded-none shadow-none pr-6"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setCustomWidth(value);
-                    setTimeout(updateCustomSize, 0);
-                  }}
-                />
-                <span className="absolute right-3 bottom-3 text-gray-400 text-sm">in</span>
-              </div>
-              <div className="relative">
-                <Label htmlFor="custom-height" className="text-sm font-medium text-gray-600 px-2 pt-1 block">Height (inches)</Label>
-                <Input
-                  id="custom-height"
-                  type="number"
-                  value={customHeight}
-                  min="0.5"
-                  max="24"
-                  step="0.1"
-                  className="border-0 focus:ring-0 h-10 rounded-none shadow-none pr-6"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setCustomHeight(value);
-                    setTimeout(updateCustomSize, 0);
-                  }}
-                />
-                <span className="absolute right-3 bottom-3 text-gray-400 text-sm">in</span>
-              </div>
-            </div>
-            <div className="text-xs px-3 py-2 bg-blue-50 text-center">
-              <span className="text-blue-600">
-                Priced at $1.99 per inch of vinyl (based on perimeter)
-              </span>
-            </div>
-            <div className="py-2 px-3 text-center border-t border-gray-200">
-              <span className="text-sm">Your sticker will be: </span>
-              <span className="text-sm text-primary font-bold">{customWidth}" × {customHeight}"</span>
-            </div>
-          </div>
-        </div>
-      )}
-      
+    <div className="space-y-6">      
       {/* Material Options */}
       {optionsByType.material && (
         <div>
@@ -255,27 +195,6 @@ const CustomizerForm = ({
               </div>
             </div>
           </div>
-        </div>
-      )}
-      
-      {/* Shape Options */}
-      {optionsByType.shape && (
-        <div>
-          <Label className="block mb-2 font-medium">Shape</Label>
-          <Select 
-            value={selectedOptions.shape || ""} 
-            onValueChange={(value) => onOptionSelect("shape", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select shape" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Circle">Circle</SelectItem>
-              <SelectItem value="Square">Square</SelectItem>
-              <SelectItem value="Rounded">Rounded Corners</SelectItem>
-              <SelectItem value="Custom">Custom Cut</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       )}
       

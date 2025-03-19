@@ -245,9 +245,30 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:space-x-8">
         {/* Product Image with simple display that matches the design */}
-        <div className="md:w-1/2">
-          <div className="rounded-lg overflow-hidden border border-gray-200 relative group bg-white">
-            {/* Main image */}
+        <div className="md:w-1/2 flex flex-row">
+          {/* Thumbnail gallery - now on the left */}
+          <div className="hidden md:flex flex-col gap-2 mr-4">
+            <div className="border border-blue-500 rounded-md p-1 overflow-hidden w-16">
+              <img 
+                src={product.imageUrl} 
+                alt={product.title} 
+                className="w-full h-auto object-cover aspect-square"
+              />
+            </div>
+            
+            {/* Placeholder thumbnails */}
+            {[1, 2, 3, 4].map(i => (
+              <div 
+                key={i} 
+                className="border border-gray-200 rounded-md p-1 bg-gray-50 cursor-pointer overflow-hidden w-16"
+              >
+                <div className="w-full aspect-square bg-gray-200" />
+              </div>
+            ))}
+          </div>
+          
+          {/* Main image */}
+          <div className="flex-1 rounded-lg overflow-hidden border border-gray-200 relative group bg-white">
             <div className="relative overflow-hidden">
               <img
                 src={product.imageUrl}
@@ -257,8 +278,8 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             </div>
           </div>
           
-          {/* Thumbnail gallery */}
-          <div className="grid grid-cols-5 gap-2 mt-4">
+          {/* Mobile thumbnails (horizontal) */}
+          <div className="grid grid-cols-5 gap-2 mt-4 md:hidden">
             <div className="border border-blue-500 rounded-md p-1 overflow-hidden">
               <img 
                 src={product.imageUrl} 
@@ -267,7 +288,6 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
               />
             </div>
             
-            {/* Placeholder thumbnails */}
             {[1, 2, 3, 4].map(i => (
               <div 
                 key={i} 
