@@ -82,8 +82,8 @@ export default function Checkout() {
   
   // Calculate total price from cart items
   const total = cart.reduce((sum, item) => {
-    // Get product price safely (if available)
-    const productPrice = (item.product as any).price || 0;
+    // Get product price safely (default to 500 cents if not available)
+    const productPrice = (item.product?.price !== undefined) ? item.product.price : 500;
     
     // Get option price (if available)
     const optionPrice = item.options?.price 
@@ -97,28 +97,59 @@ export default function Checkout() {
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        console.log("Creating payment intent for amount:", total);
+        console.log("Creating payment intent for cart:", { 
+          items: cart.length,
+          total,
+          cartDetails: cart.map(item => ({
+            id: item.id,
+            productId: item.productId,
+            productTitle: item.product?.title,
+            price: item.product?.price || 500,
+            quantity: item.quantity
+          }))
+        });
         
-        // Use direct fetch instead of apiRequest for better error handling
+        if (total <= 0) {
+          console.error("Cannot create payment intent with zero or negative amount");
+          throw new Error("Invalid cart total");
+        }
+
+        // Use direct fetch with minimum 1 as amount to avoid Stripe errors
+        const safeAmount = Math.max(1, total);
+        console.log("Using safe amount for payment intent:", safeAmount);
+        
         const response = await fetch("/api/create-payment-intent", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ amount: total }),
+          body: JSON.stringify({ amount: safeAmount }),
           credentials: "include"
         });
         
         console.log("Payment intent response status:", response.status);
         
+        // Try to get error details even for network errors
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Payment intent error data:", errorData);
-          throw new Error(errorData.message || "Failed to create payment intent");
+          let errorMessage = "Failed to create payment intent";
+          try {
+            const errorData = await response.json();
+            console.error("Payment intent error data:", errorData);
+            errorMessage = errorData.message || errorMessage;
+          } catch (parseError) {
+            console.error("Could not parse error response:", parseError);
+          }
+          throw new Error(errorMessage);
         }
         
         const data = await response.json();
-        console.log("Payment intent created successfully");
+        console.log("Payment intent created successfully with client secret");
+        
+        if (!data.clientSecret) {
+          console.error("No client secret in response:", data);
+          throw new Error("Invalid response from payment service");
+        }
+        
         setClientSecret(data.clientSecret);
       } catch (err: any) {
         console.error("Error creating payment intent:", err);
@@ -131,10 +162,10 @@ export default function Checkout() {
     };
 
     // Create payment intent for both guests and registered users
-    if (total > 0) {
+    if (cart.length > 0) {
       createPaymentIntent();
     }
-  }, [total, toast]);
+  }, [cart, toast]);
 
   // Handle shipping form submission
   const onSubmitShippingForm = (values: ShippingFormValues) => {

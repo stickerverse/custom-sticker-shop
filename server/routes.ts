@@ -56,46 +56,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     console.log('Payment intent requested:', {
       userId: userId || 'guest',
-      body: req.body
+      rawBody: req.body,
+      contentType: req.headers['content-type']
     });
     
     // Allow guests to create payment intents (no authentication required)
     try {
+      // Validate request body
+      if (!req.body) {
+        console.error('Payment intent called with empty body');
+        return res.status(400).json({ message: 'Request body is required' });
+      }
+      
+      // Extract amount
       const { amount } = req.body;
       
-      console.log('Processing payment intent with amount:', amount);
+      console.log('Processing payment intent with amount:', amount, 'type:', typeof amount);
+
+      // Validate amount (handle various formats that might be passed)
+      let validAmount = amount;
       
-      if (!amount || typeof amount !== 'number' || amount <= 0) {
-        console.error('Invalid amount for payment intent:', amount);
-        return res.status(400).json({ message: 'Invalid amount' });
+      if (typeof amount === 'string') {
+        try {
+          validAmount = parseFloat(amount);
+        } catch (e) {
+          console.error('Failed to parse string amount:', amount);
+          return res.status(400).json({ message: 'Invalid amount format' });
+        }
+      }
+      
+      if (!validAmount || typeof validAmount !== 'number' || isNaN(validAmount) || validAmount <= 0) {
+        console.error('Invalid amount for payment intent:', validAmount);
+        return res.status(400).json({ message: 'Amount must be a positive number' });
       }
 
-      const amountInCents = Math.round(amount * 100);
-      console.log('Amount in cents:', amountInCents);
+      // Ensure minimum amount for Stripe (at least $0.50 USD or 50 cents)
+      const minAmount = 50; // 50 cents minimum
+      const amountInCents = Math.max(minAmount, Math.round(validAmount * 100));
+      console.log('Final amount in cents:', amountInCents);
 
-      // Create a PaymentIntent with the order amount and currency
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amountInCents, // Convert to cents
-        currency: "usd",
-        // Verify your integration in this guide by including this parameter
-        metadata: { 
-          integration_check: 'accept_a_payment',
-          userId: userId || 'guest'
-        },
-      });
+      try {
+        // Create a PaymentIntent with the order amount and currency
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amountInCents,
+          currency: "usd",
+          automatic_payment_methods: {
+            enabled: true,
+          },
+          metadata: { 
+            integration_check: 'accept_a_payment',
+            userId: userId || 'guest'
+          },
+        });
 
-      console.log('Payment intent created successfully:', {
-        id: paymentIntent.id,
-        hasClientSecret: !!paymentIntent.client_secret
-      });
+        console.log('Payment intent created successfully:', {
+          id: paymentIntent.id,
+          hasClientSecret: !!paymentIntent.client_secret,
+          amount: paymentIntent.amount
+        });
 
-      res.json({
-        clientSecret: paymentIntent.client_secret,
-      });
+        return res.status(200).json({
+          clientSecret: paymentIntent.client_secret,
+        });
+      } catch (stripeError: any) {
+        console.error('Stripe API error:', stripeError);
+        return res.status(400).json({ 
+          message: 'Stripe API error', 
+          details: stripeError.message 
+        });
+      }
     } catch (error: any) {
       console.error('Error creating payment intent:', error);
       // Send detailed error for debugging
-      res.status(500).json({ 
+      return res.status(500).json({ 
         message: 'Error creating payment intent',
         error: error.message,
         stack: process.env.NODE_ENV === 'production' ? undefined : error.stack
