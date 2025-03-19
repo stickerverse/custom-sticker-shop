@@ -121,7 +121,7 @@ const CustomizerForm = ({
             </div>
             <div className="text-xs px-3 py-2 bg-blue-50 text-center">
               <span className="text-blue-600">
-                Custom sizes are priced at $0.15 per square inch with a $2.99 minimum
+                Priced at $1.99 per inch of vinyl (based on perimeter)
               </span>
             </div>
             <div className="py-2 px-3 text-center border-t border-gray-200">
@@ -146,6 +146,7 @@ const CustomizerForm = ({
               </div>
               <div className="text-center">
                 <div className="font-medium">Vinyl</div>
+                <div className="text-xs text-gray-500">Base price</div>
               </div>
             </div>
             <div 
@@ -157,6 +158,7 @@ const CustomizerForm = ({
               </div>
               <div className="text-center">
                 <div className="font-medium">Holographic</div>
+                <div className="text-xs text-gray-500">+50% cost</div>
               </div>
             </div>
             <div 
@@ -168,6 +170,7 @@ const CustomizerForm = ({
               </div>
               <div className="text-center">
                 <div className="font-medium">Transparent</div>
+                <div className="text-xs text-gray-500">+20% cost</div>
               </div>
             </div>
             <div 
@@ -179,6 +182,7 @@ const CustomizerForm = ({
               </div>
               <div className="text-center">
                 <div className="font-medium">Glitter</div>
+                <div className="text-xs text-gray-500">+40% cost</div>
               </div>
             </div>
             <div 
@@ -190,6 +194,7 @@ const CustomizerForm = ({
               </div>
               <div className="text-center">
                 <div className="font-medium">Mirror</div>
+                <div className="text-xs text-gray-500">+60% cost</div>
               </div>
             </div>
             <div 
@@ -201,6 +206,7 @@ const CustomizerForm = ({
               </div>
               <div className="text-center">
                 <div className="font-medium">Pixie Dust</div>
+                <div className="text-xs text-gray-500">+80% cost</div>
               </div>
             </div>
           </div>

@@ -60,8 +60,8 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   const calculatePrice = () => {
     if (!product) return 0;
     
-    // Base price (example: $4.99 = 499 cents)
-    let basePrice = 499;
+    // Base rate is $1.99 per inch of vinyl (199 cents)
+    const baseRatePerInch = 199;
     
     // Check for custom size
     if (selectedOptions.size && selectedOptions.size.includes('"') && selectedOptions.size.includes('×')) {
@@ -69,29 +69,83 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       const dimensions = selectedOptions.size.replace(/"/g, '').split('×').map(d => parseFloat(d.trim()));
       if (dimensions.length === 2 && !isNaN(dimensions[0]) && !isNaN(dimensions[1])) {
         const [width, height] = dimensions;
-        // $0.15 per square inch = 15 cents, with a minimum of $2.99 (299 cents)
-        const area = width * height;
-        const customPrice = Math.round(area * 15);
-        basePrice = Math.max(customPrice, 299);
+        // Calculate perimeter (sum of all sides)
+        const perimeter = 2 * (width + height);
+        // $1.99 per inch of vinyl (199 cents)
+        const basePrice = Math.round(perimeter * baseRatePerInch);
         
-        // Return directly as custom sizes override other price modifiers
-        return basePrice * quantity;
+        // Additional cost for material upgrades
+        let materialMultiplier = 1.0; // Default for vinyl
+        
+        if (selectedOptions.material) {
+          switch (selectedOptions.material) {
+            case "Holographic":
+              materialMultiplier = 1.5;
+              break;
+            case "Transparent":
+              materialMultiplier = 1.2;
+              break;
+            case "Glitter":
+              materialMultiplier = 1.4;
+              break;
+            case "Mirror":
+              materialMultiplier = 1.6;
+              break;
+            case "Pixie Dust":
+              materialMultiplier = 1.8;
+              break;
+          }
+        }
+        
+        let calculatedPrice = Math.round(basePrice * materialMultiplier);
+        
+        // Apply quantity discount for orders of 10 or more (10% off)
+        if (quantity >= 10) {
+          calculatedPrice = Math.round(calculatedPrice * 0.9);
+        }
+        
+        // Ensure a minimum price of $1.99 (199 cents)
+        return Math.max(calculatedPrice, 199) * quantity;
       }
     }
     
-    // Add price modifiers from selected options for non-custom sizes
-    if (product.options && product.options.length > 0) {
-      Object.entries(selectedOptions).forEach(([optionType, selectedValue]) => {
-        if (optionType !== 'size' || !selectedValue.includes('×')) {
-          const matchingOption = product.options?.find(
-            (opt: any) => opt.optionType === optionType && opt.optionValue === selectedValue
-          );
-          
-          if (matchingOption) {
-            basePrice += matchingOption.priceModifier;
-          }
-        }
-      });
+    // For standard sizes
+    let basePrice = 199; // Start with base $1.99
+    
+    // Standard sizes have fixed prices based on dimensions
+    if (selectedOptions.size) {
+      if (selectedOptions.size.includes("2\"")) {
+        basePrice = 399; // $3.99 for 2" size
+      } else if (selectedOptions.size.includes("3\"")) {
+        basePrice = 599; // $5.99 for 3" size
+      } else if (selectedOptions.size.includes("4\"")) {
+        basePrice = 799; // $7.99 for 4" size
+      } else if (selectedOptions.size.includes("5\"")) {
+        basePrice = 999; // $9.99 for 5" size
+      } else if (selectedOptions.size.includes("6\"")) {
+        basePrice = 1199; // $11.99 for 6" size
+      }
+    }
+    
+    // Additional cost for material upgrades
+    if (selectedOptions.material) {
+      switch (selectedOptions.material) {
+        case "Holographic":
+          basePrice = Math.round(basePrice * 1.5);
+          break;
+        case "Transparent":
+          basePrice = Math.round(basePrice * 1.2);
+          break;
+        case "Glitter":
+          basePrice = Math.round(basePrice * 1.4);
+          break;
+        case "Mirror":
+          basePrice = Math.round(basePrice * 1.6);
+          break;
+        case "Pixie Dust":
+          basePrice = Math.round(basePrice * 1.8);
+          break;
+      }
     }
     
     // Apply quantity discount for orders of 10 or more (10% off)
