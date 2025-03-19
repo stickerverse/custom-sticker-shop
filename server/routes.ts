@@ -3,16 +3,18 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertUserSchema, insertMessageSchema, insertCartItemSchema, insertOrderSchema } from "@shared/schema";
+import { insertUserSchema, insertMessageSchema, insertCartItemSchema, insertOrderSchema, InsertProduct } from "@shared/schema";
 import session from 'express-session';
 import Stripe from "stripe";
 import { removeBackground, detectBorders, requireReplicateToken } from "./services/replicate";
-import { importEbayProductsToApp, getSimulatedEbayProducts } from "./services/ebay";
+import { importEbayProductsToApp, getSimulatedEbayProducts, getEbayProductsFromBrowseAPI } from "./services/ebay";
 import { 
   syncEbayProducts, 
   getEbayProductsJsonDownload, 
   getEbayProductsCsvDownload,
-  getSyncLogs 
+  getSyncLogs,
+  getEbayProductsApi,
+  importSelectedEbayProducts
 } from './services/ebay-store-sync';
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -1008,6 +1010,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
   
+  // Get eBay products for selection
+  app.get('/api/ebay/products', requireEbayCredentials, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can view eBay products' });
+      }
+      
+      return getEbayProductsApi(req, res);
+    } catch (error: any) {
+      console.error('Error fetching eBay products:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch eBay products',
+        error: error.message
+      });
+    }
+  });
+  
+  // Import selected eBay products
+  app.post('/api/ebay/import-selected', requireEbayCredentials, async (req: Request, res: Response) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      // Check if user is admin
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can import products' });
+      }
+      
+      return importSelectedEbayProducts(req, res);
+    } catch (error: any) {
+      console.error('Error importing selected eBay products:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to import selected eBay products',
+        error: error.message
+      });
+    }
+  });
+  
   // Import products from eBay
   app.post('/api/ebay/import-products', requireEbayCredentials, async (req: Request, res: Response) => {
     const userId = req.session.userId;
@@ -1066,14 +1120,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only admins can sync eBay products' });
       }
       
-      const result = await syncEbayProducts();
-      res.status(200).json({ 
-        success: true, 
-        message: `Successfully synced ${result.products.length} products from eBay`,
-        productsImported: result.products.length,
-        jsonFile: result.jsonPath,
-        csvFile: result.csvPath
-      });
+      await syncEbayProducts(req, res);
+      return;
     } catch (error: any) {
       console.error('Error syncing eBay products:', error);
       res.status(500).json({ 
