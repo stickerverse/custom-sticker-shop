@@ -54,9 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/create-payment-intent', async (req: Request, res: Response) => {
     const userId = req.session.userId;
     
-    if (!userId) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
+    // Allow guests to create payment intents (no authentication required)
     
     try {
       const { amount } = req.body;
