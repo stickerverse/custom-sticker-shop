@@ -45,7 +45,7 @@ const Navbar = () => {
       setIsLoginModalOpen(false);
       toast({
         title: "Login Successful",
-        description: "Welcome back to StickerChat!",
+        description: "Welcome back to The StickerVerse!",
       });
     } catch (error) {
       toast({
@@ -94,8 +94,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-6">
             <Link href="/" className="flex items-center">
-              <span className="material-icons text-primary text-3xl">auto_awesome</span>
-              <span className="font-bold text-xl ml-2 text-gray-800">StickerApp</span>
+              <img src="/images/stickerverse-logo.svg" alt="The StickerVerse" className="h-10" />
             </Link>
             <div className="hidden md:flex space-x-8">
               <Link href="/shop" className="text-gray-600 hover:text-primary font-medium">Shop</Link>
@@ -151,7 +150,7 @@ const Navbar = () => {
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
-                  <SheetTitle>StickerChat</SheetTitle>
+                  <SheetTitle>The StickerVerse</SheetTitle>
                   <SheetDescription>
                     Custom stickers and direct communication
                   </SheetDescription>
@@ -319,7 +318,7 @@ const Navbar = () => {
           <SheetHeader>
             <SheetTitle>Create an Account</SheetTitle>
             <SheetDescription>
-              Join StickerChat to start shopping and communicating
+              Join The StickerVerse to start shopping and customizing
             </SheetDescription>
           </SheetHeader>
           <form onSubmit={handleSignup} className="space-y-4 pt-4">
