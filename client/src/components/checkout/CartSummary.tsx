@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import { motion } from "framer-motion";
 
 interface CartSummaryProps {
   cart: {
@@ -17,12 +19,90 @@ interface CartSummaryProps {
 }
 
 export default function CartSummary({ cart }: CartSummaryProps) {
-  // Calculate subtotal using actual product prices from the API
-  const subtotal = cart.reduce((total, item) => {
-    // Use the product price from the cart data (already loaded from API)
-    const itemPrice = item.product.price ? item.product.price * item.quantity : 0;
-    return total + itemPrice;
-  }, 0);
+  // Create a local copy of the cart for optimistic UI updates
+  const [liveCart, setLiveCart] = useState(cart);
+  const [optimisticSubtotal, setOptimisticSubtotal] = useState<number | null>(null);
+  
+  // Update local cart state when cart changes
+  useEffect(() => {
+    setLiveCart(cart);
+    setOptimisticSubtotal(null); // Reset optimistic subtotal when real cart updates
+  }, [cart]);
+  
+  // Setup event listeners for cart updates
+  useEffect(() => {
+    const handleQuantityUpdating = (e: CustomEvent) => {
+      const { itemId, newQuantity, oldQuantity } = e.detail;
+      
+      // Update local cart state optimistically
+      setLiveCart(prev => prev.map(item => 
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      ));
+      
+      // Calculate new subtotal optimistically
+      updateOptimisticSubtotal(itemId, newQuantity, oldQuantity);
+    };
+    
+    const handleItemRemoving = (e: CustomEvent) => {
+      const { itemId } = e.detail;
+      
+      // Update local cart state by removing the item
+      setLiveCart(prev => prev.filter(item => item.id !== itemId));
+      
+      // Calculate new subtotal without this item
+      updateOptimisticSubtotalAfterRemoval(itemId);
+    };
+    
+    // Add event listeners
+    window.addEventListener('cart:quantity:updating', handleQuantityUpdating as EventListener);
+    window.addEventListener('cart:item:removing', handleItemRemoving as EventListener);
+    
+    // Clean up event listeners
+    return () => {
+      window.removeEventListener('cart:quantity:updating', handleQuantityUpdating as EventListener);
+      window.removeEventListener('cart:item:removing', handleItemRemoving as EventListener);
+    };
+  }, [liveCart]);
+  
+  // Helper to get correct price for an item
+  const getItemPrice = (item: any) => {
+    const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
+    return customUnitPrice || item.product.price || 799; // Default to 7.99
+  };
+  
+  // Calculate subtotal using actual product prices
+  const calculateSubtotal = () => {
+    return liveCart.reduce((total, item) => {
+      const itemPrice = getItemPrice(item) * item.quantity;
+      return total + itemPrice;
+    }, 0);
+  };
+  
+  // Calculate an optimistic subtotal after quantity change
+  const updateOptimisticSubtotal = (itemId: number, newQuantity: number, oldQuantity: number) => {
+    const currentSubtotal = calculateSubtotal();
+    const item = liveCart.find(item => item.id === itemId);
+    
+    if (item) {
+      const itemUnitPrice = getItemPrice(item);
+      const priceDifference = itemUnitPrice * (newQuantity - oldQuantity);
+      setOptimisticSubtotal(currentSubtotal + priceDifference);
+    }
+  };
+  
+  // Calculate optimistic subtotal after removing an item
+  const updateOptimisticSubtotalAfterRemoval = (itemId: number) => {
+    const currentSubtotal = calculateSubtotal();
+    const item = liveCart.find(item => item.id === itemId);
+    
+    if (item) {
+      const itemTotalPrice = getItemPrice(item) * item.quantity;
+      setOptimisticSubtotal(currentSubtotal - itemTotalPrice);
+    }
+  };
+  
+  // Get the current subtotal value (actual or optimistic)
+  const subtotal = optimisticSubtotal !== null ? optimisticSubtotal : calculateSubtotal();
   
   // Set fixed values for shipping, tax, etc.
   const shipping = 499; // $4.99
@@ -39,8 +119,15 @@ export default function CartSummary({ cart }: CartSummaryProps) {
       <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
       
       <div className="space-y-4 mb-6">
-        {cart.map((item) => (
-          <div key={item.id} className="flex justify-between">
+        {liveCart.map((item) => (
+          <motion.div 
+            key={item.id} 
+            className="flex justify-between"
+            layout
+            initial={false}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, height: 0 }}
+          >
             <div className="flex">
               <div className="w-12 h-12 rounded bg-muted mr-3 overflow-hidden">
                 {item.product.imageUrl && (
@@ -53,20 +140,35 @@ export default function CartSummary({ cart }: CartSummaryProps) {
               </div>
               <div>
                 <p className="font-medium">{item.product.title}</p>
+                <motion.p 
+                  className="text-xs text-muted-foreground"
+                  key={`qty-${item.id}-${item.quantity}`}
+                  initial={{ opacity: 0.8 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  Qty: {item.quantity} × {formatCurrency(getItemPrice(item))} each
+                </motion.p>
                 <p className="text-xs text-muted-foreground">
-                  Qty: {item.quantity} × {formatCurrency(item.product.price || 0)} each
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  size: {item.options.size || "Standard"} {item.options.material ? `material: ${item.options.material}` : ""} {item.options.finish ? `finish: ${item.options.finish}` : ""}
+                  size: {item.options.size || "Standard"} 
+                  {item.options.material ? ` material: ${item.options.material}` : ""} 
+                  {item.options.finish ? ` finish: ${item.options.finish}` : ""}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="font-medium">
-                {formatCurrency((item.product.price || 0) * item.quantity)}
-              </p>
+              <motion.p 
+                className="font-medium"
+                key={`price-${item.id}-${item.quantity}`}
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  transition: { duration: 0.3 }
+                }}
+              >
+                {formatCurrency(getItemPrice(item) * item.quantity)}
+              </motion.p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
       
@@ -75,7 +177,13 @@ export default function CartSummary({ cart }: CartSummaryProps) {
       <div className="space-y-2">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Subtotal</span>
-          <span>{formatCurrency(subtotal)}</span>
+          <motion.span
+            key={`subtotal-${subtotal}`}
+            animate={{ opacity: [0.6, 1] }}
+            transition={{ duration: 0.3 }}
+          >
+            {formatCurrency(subtotal)}
+          </motion.span>
         </div>
         
         <div className="flex justify-between">
@@ -85,14 +193,27 @@ export default function CartSummary({ cart }: CartSummaryProps) {
         
         <div className="flex justify-between">
           <span className="text-muted-foreground">Tax</span>
-          <span>{formatCurrency(tax)}</span>
+          <motion.span
+            key={`tax-${tax}`}
+            animate={{ opacity: [0.6, 1] }}
+            transition={{ duration: 0.3 }}
+          >
+            {formatCurrency(tax)}
+          </motion.span>
         </div>
         
         <Separator className="my-2" />
         
         <div className="flex justify-between font-semibold text-lg">
           <span>Total</span>
-          <span>{formatCurrency(total)}</span>
+          <motion.span
+            key={`total-${total}`}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 0.4 }}
+            className="text-primary"
+          >
+            {formatCurrency(total)}
+          </motion.span>
         </div>
       </div>
     </div>
