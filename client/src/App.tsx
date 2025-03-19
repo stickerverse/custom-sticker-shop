@@ -44,7 +44,7 @@ function Router() {
     }
     
     setIsLoaded(true);
-  }, []);
+  }, [location, toast]);
 
   return (
     <>
