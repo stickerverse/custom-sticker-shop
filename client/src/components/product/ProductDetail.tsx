@@ -192,7 +192,29 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   
   // Calculate total price
   const calculatePrice = () => {
-    return calculateUnitPrice() * quantity;
+    // Get the calculated unit price from the InstantPriceCalculator
+    const basePrice = 799; // Base price for medium 4x4 sticker (matches price shown in the breakdown)
+    const materialMultiplier = selectedOptions.material === "Holographic" ? 1.5 : (selectedOptions.material === "Clear" ? 1.2 : 1.0);
+    const finishPriceModifier = selectedOptions.finish === "Matte" ? 200 : (selectedOptions.finish === "Holographic" ? 300 : 0);
+    
+    // Calculate price using the same logic as InstantPriceCalculator
+    const priceBeforeComplexity = basePrice * materialMultiplier;
+    const priceWithComplexity = Math.round(priceBeforeComplexity * complexityMultiplier);
+    const priceWithFinish = priceWithComplexity + finishPriceModifier;
+    
+    // Apply quantity discounts (same logic as in InstantPriceCalculator)
+    let finalUnitPrice = priceWithFinish;
+    
+    if (quantity >= 50) {
+      finalUnitPrice = Math.round(finalUnitPrice * 0.75); // 25% off
+    } else if (quantity >= 25) {
+      finalUnitPrice = Math.round(finalUnitPrice * 0.80); // 20% off
+    } else if (quantity >= 10) {
+      finalUnitPrice = Math.round(finalUnitPrice * 0.90); // 10% off
+    }
+    
+    // Calculate total (unit price × quantity)
+    return finalUnitPrice * quantity;
   };
   
   // Format price in dollars (US style)
@@ -217,16 +239,33 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         throw new Error(`Please select options for: ${missingOptions.join(", ")}`);
       }
       
-      // Calculate the unit price
-      const unitPrice = calculateUnitPrice();
+      // Calculate the unit price using the same logic as InstantPriceCalculator
+      const basePrice = 799; // Base price for medium 4x4 sticker
+      const materialMultiplier = selectedOptions.material === "Holographic" ? 1.5 : (selectedOptions.material === "Clear" ? 1.2 : 1.0);
+      const finishPriceModifier = selectedOptions.finish === "Matte" ? 200 : (selectedOptions.finish === "Holographic" ? 300 : 0);
       
-      // Add to cart with unit price in options
+      // Calculate price using the same logic as InstantPriceCalculator
+      const priceBeforeComplexity = basePrice * materialMultiplier;
+      const priceWithComplexity = Math.round(priceBeforeComplexity * complexityMultiplier);
+      const priceWithFinish = priceWithComplexity + finishPriceModifier;
+      
+      // Apply quantity discounts
+      let finalUnitPrice = priceWithFinish;
+      if (quantity >= 50) {
+        finalUnitPrice = Math.round(finalUnitPrice * 0.75); // 25% off
+      } else if (quantity >= 25) {
+        finalUnitPrice = Math.round(finalUnitPrice * 0.80); // 20% off
+      } else if (quantity >= 10) {
+        finalUnitPrice = Math.round(finalUnitPrice * 0.90); // 10% off
+      }
+      
+      // Add to cart with the consistent unit price in options
       await addToCart({
         productId: product.id,
         quantity,
         options: {
           ...selectedOptions,
-          unitPrice: unitPrice.toString() // Pass calculated unit price to cart
+          unitPrice: finalUnitPrice.toString() // Pass the correct unit price to cart
         }
       });
       
