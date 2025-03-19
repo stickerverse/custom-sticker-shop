@@ -356,10 +356,14 @@ const EbayStoreSync: React.FC = () => {
 
   return (
     <Tabs defaultValue="import" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="import">Import Products</TabsTrigger>
         <TabsTrigger value="export">Export Data</TabsTrigger>
         <TabsTrigger value="logs">Sync Logs</TabsTrigger>
+        <TabsTrigger value="settings">
+          <Settings className="h-4 w-4 mr-2" />
+          Settings
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="import" className="space-y-4">
@@ -647,6 +651,78 @@ const EbayStoreSync: React.FC = () => {
               <RefreshCw className="h-4 w-4 mr-1" /> Refresh
             </Button>
           </CardFooter>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="settings" className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Settings className="mr-2 h-5 w-5" />
+              eBay Store Settings
+            </CardTitle>
+            <CardDescription>
+              Configure your eBay store connection settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="rounded-lg border p-4">
+              <h3 className="text-lg font-medium mb-4">Store Identification</h3>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="seller-id" className="text-sm font-medium">
+                    eBay Seller ID
+                  </label>
+                  <div className="flex gap-2 mt-1">
+                    <input
+                      type="text"
+                      id="seller-id"
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      value={sellerID}
+                      onChange={(e) => setSellerID(e.target.value)}
+                      placeholder="Enter your eBay seller username"
+                    />
+                    <Button 
+                      onClick={saveSellerID}
+                      disabled={isSavingSellerID || !sellerID.trim()}
+                    >
+                      {isSavingSellerID ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Save className="mr-2 h-4 w-4" />
+                      )}
+                      Save
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    This will filter eBay product search results to only show listings from your specific store
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <Alert>
+              <User className="h-4 w-4" />
+              <AlertTitle>Store Connection</AlertTitle>
+              <AlertDescription>
+                Your eBay seller ID ensures that only products from your store are imported.
+                If you don't provide a seller ID, the application may show products from other sellers.
+              </AlertDescription>
+            </Alert>
+            
+            <Alert variant="destructive" className="bg-red-50">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>API Permissions Required</AlertTitle>
+              <AlertDescription>
+                To use all features, your eBay API token needs the following OAuth scopes:
+                <ul className="list-disc pl-5 mt-2">
+                  <li>sell.inventory</li>
+                  <li>sell.account</li>
+                  <li>sell.analytics.readonly</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+          </CardContent>
         </Card>
       </TabsContent>
     </Tabs>
