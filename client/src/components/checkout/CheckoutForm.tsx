@@ -35,46 +35,91 @@ export default function CheckoutForm({ shippingAddress }: CheckoutFormProps) {
 
     if (!stripe || !elements) {
       // Stripe.js has not yet loaded
+      console.log("Stripe or elements not loaded yet");
       return;
     }
 
     setIsProcessing(true);
     setErrorMessage(null);
+    console.log("Starting payment process", { isAuthenticated, cartItems: cart.length });
 
     try {
-      // Confirm payment with Stripe
+      // Step 1: First create the order (for both guests and authenticated users)
+      console.log("Creating order...");
+      // Calculate total from cart
+      const total = cart.reduce(
+        (sum, item) => sum + (item.product.price || 500) * item.quantity, 
+        0
+      );
+      
+      // For guest checkout, we need to send the cart items in the request body
+      const orderPayload: any = {
+        shippingAddress,
+        total,
+      };
+      
+      // If user is not authenticated, include cart items
+      if (!isAuthenticated) {
+        orderPayload.cart = cart;
+        console.log("Including cart items for guest checkout", cart.length);
+      }
+      
+      // Use direct fetch for better debugging
+      console.log("Sending order payload:", orderPayload);
+      const orderResponse = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderPayload),
+        credentials: "include",
+      });
+      
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        console.error("Order creation failed:", errorData);
+        throw new Error(errorData.message || "Failed to create order");
+      }
+      
+      const orderData = await orderResponse.json();
+      console.log("Order created successfully:", orderData);
+      
+      // Step 2: Confirm payment with Stripe
+      console.log("Confirming payment with Stripe...");
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: window.location.origin + "/checkout",
+          return_url: window.location.origin + "/order-confirmation",
         },
         redirect: 'if_required',
       });
 
       if (error) {
         // Show error to customer
+        console.error("Payment confirmation error:", error);
         setErrorMessage(error.message || "An error occurred with your payment");
         setIsProcessing(false);
         return;
       }
 
+      console.log("Payment intent status:", paymentIntent?.status);
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Payment successful, create the order
+        // Payment successful
+        console.log("Payment successful, updating order...");
+        
         try {
-          // For guest checkout, we need to send the cart items in the request body
-          const payload: any = {
-            shippingAddress,
-            paymentIntentId: paymentIntent.id,
-          };
-          
-          // If user is not authenticated, include cart items
-          if (!isAuthenticated) {
-            payload.cart = cart;
-          }
-          
-          const response = await apiRequest("POST", "/api/orders", payload);
-          
-          const orderData = await response.json();
+          // Update order with payment info
+          await fetch(`/api/orders/${orderData.id}/status`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+              status: "processing",
+              paymentIntentId: paymentIntent.id
+            }),
+            credentials: "include",
+          });
           
           // Clear cart after successful order
           await clearCart();
@@ -87,18 +132,20 @@ export default function CheckoutForm({ shippingAddress }: CheckoutFormProps) {
           });
           
           // Redirect to order confirmation page
+          console.log("Redirecting to order confirmation page");
           navigate(`/order-confirmation?orderId=${orderData.id}`);
         } catch (error) {
-          console.error("Error creating order:", error);
-          setErrorMessage("Payment successful, but we couldn't create your order. Please contact support.");
+          console.error("Error updating order:", error);
+          setErrorMessage("Payment successful, but we couldn't update your order. Please contact support.");
           setIsProcessing(false);
         }
       } else {
+        console.error("Payment not successful:", paymentIntent);
         setErrorMessage("Something went wrong with your payment. Please try again.");
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error("Payment error:", error);
+      console.error("Payment process error:", error);
       setErrorMessage("An unexpected error occurred. Please try again or contact support.");
       setIsProcessing(false);
     }

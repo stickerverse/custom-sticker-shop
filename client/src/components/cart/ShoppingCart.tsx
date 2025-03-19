@@ -48,15 +48,7 @@ const ShoppingCart = () => {
 
   // Handle checkout
   const handleCheckout = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Please Log In",
-        description: "You need to be logged in to checkout",
-        variant: "default",
-      });
-      return;
-    }
-
+    // Allow guest checkout - no longer requiring authentication
     if (cart.length === 0) {
       toast({
         title: "Empty Cart",
@@ -66,6 +58,7 @@ const ShoppingCart = () => {
       return;
     }
 
+    // Redirect to checkout for both guests and authenticated users
     setLocation("/checkout");
   };
 
