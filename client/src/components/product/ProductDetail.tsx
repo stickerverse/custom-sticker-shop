@@ -188,54 +188,155 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:space-x-8">
-        {/* Product Image with hover effects */}
+        {/* Product Image with advanced animated effects */}
         <div className="md:w-1/2">
           <div className="rounded-lg overflow-hidden border border-gray-200 relative group">
-            <div className="absolute inset-0 bg-gradient-radial from-transparent to-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            {/* Use ColorMorph for the container background effect */}
+            <ColorMorph 
+              className="absolute inset-0 rounded-lg z-0" 
+              isActive={true}
+              duration={7000}
+              borderWidth={0}
+              blendMode="soft-light"
+              colors={[
+                'rgba(0, 112, 243, 0.6)',   // Primary blue
+                'rgba(138, 75, 255, 0.6)',  // Purple
+                'rgba(20, 184, 166, 0.6)',  // Teal
+                'rgba(14, 165, 233, 0.6)',  // Light blue
+              ]}
+            />
             
-            {/* Main image with floating animation */}
+            {/* Main image with AnimatedSticker component */}
             <div className="relative overflow-hidden">
-              <img 
-                src={product.imageUrl} 
-                alt={product.title} 
-                className="w-full h-auto object-cover transition-all duration-500 group-hover:scale-110"
+              <AnimatedSticker
+                imageUrl={product.imageUrl}
+                alt={product.title}
+                className="w-full h-auto aspect-square"
+                effectIntensity="medium"
+                morphSpeed="medium"
+                colors={[
+                  'rgba(0, 112, 243, 0.7)',   // Primary blue
+                  'rgba(138, 75, 255, 0.7)',  // Purple
+                  'rgba(20, 184, 166, 0.7)',  // Teal
+                  'rgba(14, 165, 233, 0.7)',  // Light blue
+                ]}
               />
               
-              {/* Floating effect elements */}
+              {/* Floating effect elements with improved animations */}
               <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" />
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse delay-300" />
+                <div 
+                  className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700"
+                  style={{
+                    animation: 'pulse 3s infinite, float 6s infinite',
+                  }}
+                />
+                <div 
+                  className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700"
+                  style={{
+                    animation: 'pulse 4s infinite, float 8s infinite reverse',
+                    animationDelay: '1s',
+                  }}
+                />
+                
+                {/* Add new animated elements */}
+                <div 
+                  className="absolute bottom-10 right-10 w-16 h-16 rounded-full bg-purple-500/20 blur-xl opacity-0 group-hover:opacity-80 transition-all duration-1000"
+                  style={{
+                    animation: 'pulse 5s infinite, float 7s infinite',
+                    animationDelay: '0.5s',
+                  }}
+                />
               </div>
               
-              {/* Product badges that appear on hover */}
-              <div className="absolute bottom-4 left-4 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                <Badge className="bg-primary text-white border-0 shadow-md mr-2">
+              {/* Product badges that appear on hover with improved animations */}
+              <div className="absolute bottom-4 left-4 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+                <Badge 
+                  className="bg-primary text-white border-0 shadow-md mr-2 transition-all duration-500 hover:bg-primary-dark"
+                  style={{
+                    animation: 'badgePulse 2s infinite',
+                  }}
+                >
                   Premium Quality
                 </Badge>
-                <Badge className="bg-white text-primary border-primary shadow-md">
+                <Badge 
+                  className="bg-white text-primary border-primary shadow-md transition-all duration-500 hover:bg-blue-50"
+                  style={{
+                    animation: 'badgePulse 2s infinite',
+                    animationDelay: '1s',
+                  }}
+                >
                   Waterproof
                 </Badge>
+              </div>
+              
+              {/* Add floating call to action */}
+              <div 
+                className="absolute top-4 right-4 opacity-0 transform rotate-12 scale-90 group-hover:opacity-100 group-hover:rotate-0 group-hover:scale-100 transition-all duration-700"
+                style={{
+                  transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }}
+              >
+                <div className="bg-white text-primary px-3 py-1 rounded-full text-sm font-semibold shadow-lg border border-primary/20 flex items-center">
+                  <span className="material-icons text-sm mr-1">auto_awesome</span>
+                  Customizable Design
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Thumbnail gallery with hover effects */}
+          {/* Thumbnail gallery with advanced hover effects */}
           <div className="grid grid-cols-5 gap-2 mt-4">
-            <div className="border border-primary rounded-md p-1 overflow-hidden">
+            <ColorMorph 
+              className="border border-primary rounded-md p-1 overflow-hidden" 
+              isActive={true}
+              duration={3000}
+              borderWidth={1}
+              blendMode="normal"
+            >
               <img 
                 src={product.imageUrl} 
                 alt={product.title} 
-                className="w-full h-auto object-cover aspect-square hover:scale-110 transition-transform duration-300"
+                className="w-full h-auto object-cover aspect-square hover:scale-110 transition-transform duration-500"
               />
-            </div>
+            </ColorMorph>
             
             {/* Placeholder thumbnails with hover effects */}
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="border border-gray-200 rounded-md p-1 bg-gray-50 opacity-70 hover:opacity-100 hover:border-primary/30 transition-all duration-300 cursor-pointer overflow-hidden">
+              <div 
+                key={i} 
+                className="border border-gray-200 rounded-md p-1 bg-gray-50 opacity-70 hover:opacity-100 hover:border-primary/30 transition-all duration-500 cursor-pointer overflow-hidden transform hover:scale-105"
+                style={{ 
+                  transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  animation: `fadeIn 0.5s ${i * 0.1}s both` 
+                }}
+              >
                 <div className="w-full aspect-square bg-gray-200 hover:bg-gray-100 transition-colors duration-300" />
               </div>
             ))}
           </div>
+          
+          {/* Add custom animation keyframes to the head */}
+          <style jsx global>{`
+            @keyframes pulse {
+              0%, 100% { opacity: 0.8; transform: scale(1); }
+              50% { opacity: 1; transform: scale(1.05); }
+            }
+            
+            @keyframes float {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+            
+            @keyframes badgePulse {
+              0%, 100% { transform: scale(1); }
+              50% { transform: scale(1.05); }
+            }
+            
+            @keyframes fadeIn {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 0.7; transform: translateY(0); }
+            }
+          `}</style>
         </div>
         
         {/* Product Information */}
