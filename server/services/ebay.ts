@@ -34,7 +34,8 @@ export async function getEbayToken(): Promise<string> {
     return ebayToken;
   }
 
-  // Generate a token through OAuth as a fallback
+  // Generate a token through OAuth as a fallback - note that this generally
+  // won't have all the required permissions for features like listing management
   try {
     console.log("Generating new eBay access token through OAuth");
     const response = await axios({

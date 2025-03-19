@@ -34,6 +34,23 @@ const EbayProductSelector = () => {
       // This endpoint should return eBay products without importing them
       const response = await apiRequest('GET', '/api/ebay/products', undefined);
 
+      // Check for specific authentication errors
+      if (response.status === 400 || response.status === 401 || response.status === 403) {
+        const errorData = await response.json();
+        
+        if (errorData.missingCredentials) {
+          toast({
+            title: 'eBay API Configuration Required',
+            description: 'Please provide your eBay API token with correct permissions in your environment settings.',
+            variant: 'destructive',
+            duration: 8000,
+          });
+          setProducts([]);
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const data = await response.json();
       setProducts(data.products || []);
 
@@ -51,11 +68,22 @@ const EbayProductSelector = () => {
       });
     } catch (error) {
       console.error('Error fetching products:', error);
-      toast({
-        title: 'Failed to Load Products',
-        description: 'Could not fetch products from eBay. Please try again.',
-        variant: 'destructive',
-      });
+      
+      // Check if this is an authentication error
+      if (error.message && error.message.includes('403')) {
+        toast({
+          title: 'eBay API Permission Error',
+          description: 'Your eBay API token lacks the required permissions. Please update your token with appropriate scopes.',
+          variant: 'destructive',
+          duration: 8000,
+        });
+      } else {
+        toast({
+          title: 'Failed to Load Products',
+          description: 'Could not fetch products from eBay. Please try again or check your API configuration.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
