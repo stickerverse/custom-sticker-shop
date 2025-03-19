@@ -77,105 +77,58 @@ const CustomizerForm = ({
         <div>
           <div className="flex justify-between items-center mb-3">
             <Label className="font-medium">Size</Label>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="custom-size-toggle" className="text-sm text-gray-500 cursor-pointer">
-                Custom Size
-              </Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Switch 
-                      id="custom-size-toggle" 
-                      checked={useCustomSize}
-                      onCheckedChange={handleCustomSizeToggle}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Enter your own custom dimensions</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <Label className="text-right text-sm font-medium">Custom Size</Label>
           </div>
           
-          {!useCustomSize ? (
-            // Standard predefined sizes
-            <div className="grid grid-cols-2 gap-2">
-              {optionsByType.size.map((option) => (
-                <Button
-                  key={option.id}
-                  type="button"
-                  variant="outline"
-                  className={`justify-between h-auto py-3 px-4 font-normal ${
-                    selectedOptions.size === option.optionValue ? selectedClass : defaultClass
-                  }`}
-                  onClick={() => onOptionSelect("size", option.optionValue)}
-                  disabled={useCustomSize}
-                >
-                  <span>{option.optionValue}</span>
-                  <span className="text-xs text-gray-500">
-                    {formatPriceModifier(option.priceModifier)}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          ) : (
-            // Custom size inputs
-            <div className="border border-primary rounded-md p-4 bg-primary/5 animate-bubble-in">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="custom-width" className="text-sm mb-1 block">Width (inches)</Label>
-                  <div className="relative">
-                    <Input
-                      id="custom-width"
-                      type="number"
-                      value={customWidth}
-                      min="0.5"
-                      max="24"
-                      step="0.1"
-                      className="pr-8"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setCustomWidth(value);
-                        setTimeout(updateCustomSize, 0);
-                      }}
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">in</span>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="custom-height" className="text-sm mb-1 block">Height (inches)</Label>
-                  <div className="relative">
-                    <Input
-                      id="custom-height"
-                      type="number"
-                      value={customHeight}
-                      min="0.5"
-                      max="24"
-                      step="0.1"
-                      className="pr-8"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setCustomHeight(value);
-                        setTimeout(updateCustomSize, 0);
-                      }}
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">in</span>
-                  </div>
-                </div>
+          <div className="rounded-lg bg-white border border-gray-200 mb-4">
+            <div className="grid grid-cols-2 gap-1 p-1">
+              <div className="relative">
+                <Label htmlFor="custom-width" className="text-sm font-medium text-gray-600 px-2 pt-1 block">Width (inches)</Label>
+                <Input
+                  id="custom-width"
+                  type="number"
+                  value={customWidth}
+                  min="0.5"
+                  max="24"
+                  step="0.1"
+                  className="border-0 focus:ring-0 h-10 rounded-none shadow-none pr-6"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCustomWidth(value);
+                    setTimeout(updateCustomSize, 0);
+                  }}
+                />
+                <span className="absolute right-3 bottom-3 text-gray-400 text-sm">in</span>
               </div>
-              
-              <p className="text-xs text-gray-500 mt-3">
-                <span className="inline-block bg-primary/20 rounded-full w-4 h-4 text-center mr-1">i</span>
+              <div className="relative">
+                <Label htmlFor="custom-height" className="text-sm font-medium text-gray-600 px-2 pt-1 block">Height (inches)</Label>
+                <Input
+                  id="custom-height"
+                  type="number"
+                  value={customHeight}
+                  min="0.5"
+                  max="24"
+                  step="0.1"
+                  className="border-0 focus:ring-0 h-10 rounded-none shadow-none pr-6"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCustomHeight(value);
+                    setTimeout(updateCustomSize, 0);
+                  }}
+                />
+                <span className="absolute right-3 bottom-3 text-gray-400 text-sm">in</span>
+              </div>
+            </div>
+            <div className="text-xs px-3 py-2 bg-blue-50 text-center">
+              <span className="text-blue-600">
                 Custom sizes are priced at $0.15 per square inch with a $2.99 minimum
-              </p>
-              
-              <div className="mt-3 text-center">
-                <span className="text-sm font-medium">Your sticker will be: </span>
-                <span className="text-sm text-primary font-bold">{customWidth}" × {customHeight}"</span>
-              </div>
+              </span>
             </div>
-          )}
+            <div className="py-2 px-3 text-center border-t border-gray-200">
+              <span className="text-sm">Your sticker will be: </span>
+              <span className="text-sm text-primary font-bold">{customWidth}" × {customHeight}"</span>
+            </div>
+          </div>
         </div>
       )}
       
@@ -183,27 +136,92 @@ const CustomizerForm = ({
       {optionsByType.material && (
         <div>
           <Label className="block mb-2 font-medium">Material</Label>
-          <RadioGroup 
-            value={selectedOptions.material || ""} 
-            onValueChange={(value) => onOptionSelect("material", value)}
-          >
-            <div className="grid grid-cols-2 gap-3">
-              {optionsByType.material.map((option) => (
-                <div key={option.id} className="flex items-start space-x-2">
-                  <RadioGroupItem value={option.optionValue} id={`material-${option.id}`} />
-                  <Label 
-                    htmlFor={`material-${option.id}`} 
-                    className="cursor-pointer flex flex-col"
-                  >
-                    <span>{option.optionValue}</span>
-                    <span className="text-xs text-gray-500">
-                      {formatPriceModifier(option.priceModifier)}
-                    </span>
-                  </Label>
-                </div>
-              ))}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
+              <input 
+                type="radio" 
+                id="material-prismatic" 
+                name="material" 
+                className="w-4 h-4 text-blue-600"
+                checked={selectedOptions.material === "Prismatic"} 
+                onChange={() => onOptionSelect("material", "Prismatic")} 
+              />
+              <label htmlFor="material-prismatic" className="flex flex-col ml-2">
+                <span className="font-medium">Prismatic</span>
+                <span className="text-xs text-gray-500">+$2.00</span>
+              </label>
             </div>
-          </RadioGroup>
+            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
+              <input 
+                type="radio" 
+                id="material-brushed" 
+                name="material" 
+                className="w-4 h-4 text-blue-600"
+                checked={selectedOptions.material === "Brushed Aluminium"} 
+                onChange={() => onOptionSelect("material", "Brushed Aluminium")} 
+              />
+              <label htmlFor="material-brushed" className="flex flex-col ml-2">
+                <span className="font-medium">Brushed Aluminium</span>
+                <span className="text-xs text-gray-500">+$3.00</span>
+              </label>
+            </div>
+            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
+              <input 
+                type="radio" 
+                id="material-kraft" 
+                name="material" 
+                className="w-4 h-4 text-blue-600"
+                checked={selectedOptions.material === "Kraft Paper"} 
+                onChange={() => onOptionSelect("material", "Kraft Paper")} 
+              />
+              <label htmlFor="material-kraft" className="flex flex-col ml-2">
+                <span className="font-medium">Kraft Paper</span>
+                <span className="text-xs text-gray-500"></span>
+              </label>
+            </div>
+            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
+              <input 
+                type="radio" 
+                id="material-hi-tack" 
+                name="material" 
+                className="w-4 h-4 text-blue-600"
+                checked={selectedOptions.material === "Hi-Tack Vinyl"} 
+                onChange={() => onOptionSelect("material", "Hi-Tack Vinyl")} 
+              />
+              <label htmlFor="material-hi-tack" className="flex flex-col ml-2">
+                <span className="font-medium">Hi-Tack Vinyl</span>
+                <span className="text-xs text-gray-500">+$1.00</span>
+              </label>
+            </div>
+            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
+              <input 
+                type="radio" 
+                id="material-low-tack" 
+                name="material" 
+                className="w-4 h-4 text-blue-600"
+                checked={selectedOptions.material === "Low-Tack Vinyl"} 
+                onChange={() => onOptionSelect("material", "Low-Tack Vinyl")} 
+              />
+              <label htmlFor="material-low-tack" className="flex flex-col ml-2">
+                <span className="font-medium">Low-Tack Vinyl</span>
+                <span className="text-xs text-gray-500">+$1.00</span>
+              </label>
+            </div>
+            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
+              <input 
+                type="radio" 
+                id="material-reflective" 
+                name="material" 
+                className="w-4 h-4 text-blue-600"
+                checked={selectedOptions.material === "Reflective"} 
+                onChange={() => onOptionSelect("material", "Reflective")} 
+              />
+              <label htmlFor="material-reflective" className="flex flex-col ml-2">
+                <span className="font-medium">Reflective</span>
+                <span className="text-xs text-gray-500">+$4.00</span>
+              </label>
+            </div>
+          </div>
         </div>
       )}
       
@@ -212,22 +230,42 @@ const CustomizerForm = ({
         <div>
           <Label className="block mb-2 font-medium">Finish</Label>
           <div className="grid grid-cols-2 gap-2">
-            {optionsByType.finish.map((option) => (
-              <Button
-                key={option.id}
-                type="button"
-                variant="outline"
-                className={`justify-between h-auto py-3 px-4 font-normal ${
-                  selectedOptions.finish === option.optionValue ? selectedClass : defaultClass
-                }`}
-                onClick={() => onOptionSelect("finish", option.optionValue)}
-              >
-                <span>{option.optionValue}</span>
-                <span className="text-xs text-gray-500">
-                  {formatPriceModifier(option.priceModifier)}
-                </span>
-              </Button>
-            ))}
+            <div 
+              className={`p-3 border ${selectedOptions.finish === "Glossy" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer`}
+              onClick={() => onOptionSelect("finish", "Glossy")}
+            >
+              <div className="text-center">
+                <div className="font-medium">Glossy</div>
+                <div className="text-xs text-gray-500">+$1.00</div>
+              </div>
+            </div>
+            <div 
+              className={`p-3 border ${selectedOptions.finish === "Matte" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer`}
+              onClick={() => onOptionSelect("finish", "Matte")}
+            >
+              <div className="text-center">
+                <div className="font-medium">Matte</div>
+                <div className="text-xs text-gray-500">+$2.00</div>
+              </div>
+            </div>
+            <div 
+              className={`p-3 border ${selectedOptions.finish === "Holographic" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer`}
+              onClick={() => onOptionSelect("finish", "Holographic")}
+            >
+              <div className="text-center">
+                <div className="font-medium">Holographic</div>
+                <div className="text-xs text-gray-500">+$3.00</div>
+              </div>
+            </div>
+            <div 
+              className={`p-3 border ${selectedOptions.finish === "Transparent" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer`}
+              onClick={() => onOptionSelect("finish", "Transparent")}
+            >
+              <div className="text-center">
+                <div className="font-medium">Transparent</div>
+                <div className="text-xs text-gray-500">+$2.00</div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -244,11 +282,10 @@ const CustomizerForm = ({
               <SelectValue placeholder="Select shape" />
             </SelectTrigger>
             <SelectContent>
-              {optionsByType.shape.map((option) => (
-                <SelectItem key={option.id} value={option.optionValue}>
-                  {option.optionValue} {formatPriceModifier(option.priceModifier)}
-                </SelectItem>
-              ))}
+              <SelectItem value="Circle">Circle</SelectItem>
+              <SelectItem value="Square">Square</SelectItem>
+              <SelectItem value="Rounded">Rounded Corners</SelectItem>
+              <SelectItem value="Custom">Custom Cut</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -261,12 +298,12 @@ const CustomizerForm = ({
           <Button
             type="button"
             variant="outline"
-            size="icon"
-            className="h-10 w-10"
+            size="sm"
+            className="h-10 px-3"
             onClick={() => handleQuantityChange(quantity - 1)}
             disabled={quantity <= 1}
           >
-            <span className="material-icons">remove</span>
+            <span>−</span>
           </Button>
           <Input
             type="number"
@@ -274,26 +311,18 @@ const CustomizerForm = ({
             onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
             min="1"
             max="1000"
-            className="w-20 mx-2 text-center"
+            className="w-16 mx-2 text-center"
           />
           <Button
             type="button"
             variant="outline"
-            size="icon"
-            className="h-10 w-10"
+            size="sm"
+            className="h-10 px-3"
             onClick={() => handleQuantityChange(quantity + 1)}
             disabled={quantity >= 1000}
           >
-            <span className="material-icons">add</span>
+            <span>+</span>
           </Button>
-          
-          <div className="ml-4 text-sm text-gray-500">
-            {quantity >= 10 && (
-              <span className="text-green-600 font-medium">
-                Bulk discount applied!
-              </span>
-            )}
-          </div>
         </div>
         
         {/* Quantity discount information */}
@@ -302,11 +331,18 @@ const CustomizerForm = ({
         </div>
       </div>
       
-      {/* Upload Custom Design (placeholder for future implementation) */}
+      {/* Upload Custom Design */}
       <div>
         <Label className="block mb-2 font-medium">Upload Your Design (optional)</Label>
-        <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-primary transition-colors">
-          <span className="material-icons text-gray-400 text-3xl mb-2">upload_file</span>
+        <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-blue-300 transition-colors">
+          <div className="text-gray-400 mb-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
+              <path d="M12 16L12 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9 11L12 8 15 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 16H6C4.89543 16 4 15.1046 4 14V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V14C20 15.1046 19.1046 16 18 16H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M4 20H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
           <p className="text-sm text-gray-500">
             Drag and drop your image here, or click to browse
           </p>
