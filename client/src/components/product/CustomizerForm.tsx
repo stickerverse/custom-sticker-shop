@@ -318,27 +318,6 @@ const CustomizerForm = ({
           <p>Buy 10+ for bulk discount</p>
         </div>
       </div>
-      
-      {/* Upload Custom Design */}
-      <div>
-        <Label className="block mb-2 font-medium">Upload Your Design (optional)</Label>
-        <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-blue-300 transition-colors">
-          <div className="text-gray-400 mb-2">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
-              <path d="M12 16L12 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M9 11L12 8 15 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M8 16H6C4.89543 16 4 15.1046 4 14V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V14C20 15.1046 19.1046 16 18 16H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M4 20H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <p className="text-sm text-gray-500">
-            Drag and drop your image here, or click to browse
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Supported formats: PNG, JPG, SVG (max 10MB)
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
