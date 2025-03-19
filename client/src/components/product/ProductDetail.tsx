@@ -5,6 +5,8 @@ import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatedSticker } from "@/components/ui/animated-sticker";
+import { ColorMorph } from "@/components/ui/color-morph";
 import CustomizerForm from "./CustomizerForm";
 
 interface ProductDetailProps {
@@ -78,10 +80,10 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
     }
     
     // Add price modifiers from selected options for non-custom sizes
-    if (product.options) {
+    if (product.options && product.options.length > 0) {
       Object.entries(selectedOptions).forEach(([optionType, selectedValue]) => {
         if (optionType !== 'size' || !selectedValue.includes('×')) {
-          const matchingOption = product.options.find(
+          const matchingOption = product.options?.find(
             (opt: any) => opt.optionType === optionType && opt.optionValue === selectedValue
           );
           
@@ -316,7 +318,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
           </div>
           
           {/* Add custom animation keyframes to the head */}
-          <style jsx global>{`
+          <style dangerouslySetInnerHTML={{__html: `
             @keyframes pulse {
               0%, 100% { opacity: 0.8; transform: scale(1); }
               50% { opacity: 1; transform: scale(1.05); }
@@ -336,7 +338,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
               from { opacity: 0; transform: translateY(10px); }
               to { opacity: 0.7; transform: translateY(0); }
             }
-          `}</style>
+          `}} />
         </div>
         
         {/* Product Information */}
