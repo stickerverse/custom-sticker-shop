@@ -1120,8 +1120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only admins can sync eBay products' });
       }
       
-      await syncEbayProducts(req, res);
-      return;
+      return syncEbayProducts(req, res);
     } catch (error: any) {
       console.error('Error syncing eBay products:', error);
       res.status(500).json({ 
@@ -1147,8 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only admins can export eBay products' });
       }
       
-      await getEbayProductsJsonDownload(req, res);
-      return;
+      return getEbayProductsJsonDownload(req, res);
     } catch (error: any) {
       console.error('Error exporting eBay products as JSON:', error);
       res.status(500).json({ 
@@ -1174,8 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only admins can export eBay products' });
       }
       
-      await getEbayProductsCsvDownload(req, res);
-      return;
+      return getEbayProductsCsvDownload(req, res);
     } catch (error: any) {
       console.error('Error exporting eBay products as CSV:', error);
       res.status(500).json({ 
@@ -1201,11 +1198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only admins can view sync logs' });
       }
       
-      const logs = getSyncLogs();
-      res.status(200).json({ 
-        success: true, 
-        logs 
-      });
+      return getSyncLogs(req, res);
     } catch (error: any) {
       console.error('Error getting eBay sync logs:', error);
       res.status(500).json({ 
