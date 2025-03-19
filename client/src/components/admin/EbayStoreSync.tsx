@@ -100,11 +100,30 @@ const EbayStoreSync: React.FC = () => {
     }
   };
 
+  // Function to load the current seller ID from settings
+  const loadSellerID = async () => {
+    try {
+      // Fetch the current seller ID from the backend
+      const response = await apiRequest("GET", "/api/ebay/settings/seller-id", undefined);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.settings && data.settings.sellerID) {
+          setSellerID(data.settings.sellerID);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading seller ID:", error);
+      // We don't show toast errors here as it's not critical for the user
+    }
+  };
+
   // Check token and available products on component mount
   useEffect(() => {
-    // First check token status, then check for products
+    // First check token status, then check for products and load settings
     checkEbayToken().then(() => {
       checkAvailableProducts();
+      loadSellerID();
     });
   }, []);
 
@@ -320,7 +339,7 @@ const EbayStoreSync: React.FC = () => {
     setIsSavingSellerID(true);
     
     try {
-      const response = await apiRequest("POST", "/api/ebay/settings", {
+      const response = await apiRequest("POST", "/api/ebay/settings/seller-id", {
         sellerID: sellerID.trim()
       });
       

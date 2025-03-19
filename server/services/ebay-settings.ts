@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { Request, Response } from 'express';
 import { logSync } from './ebay-sync';
 
 // Settings storage file
@@ -93,7 +94,7 @@ export function getEbaySellerID(): string {
  */
 export async function saveEbaySellerIDHandler(req: Request, res: Response) {
   try {
-    const { sellerID } = req.body;
+    const { sellerID } = req.body as { sellerID?: string };
     
     if (typeof sellerID !== 'string') {
       return res.status(400).json({
@@ -116,6 +117,30 @@ export async function saveEbaySellerIDHandler(req: Request, res: Response) {
     return res.status(500).json({
       success: false,
       message: 'Failed to save eBay seller ID',
+      error: errorMessage
+    });
+  }
+}
+
+/**
+ * Express API endpoint handler to get the current eBay seller ID
+ */
+export async function getEbaySellerIDHandler(req: Request, res: Response) {
+  try {
+    const sellerID = getEbaySellerID();
+    const settings = loadEbaySettings();
+    
+    return res.status(200).json({
+      success: true,
+      settings
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logSync(`ERROR: Failed to get eBay seller ID - ${errorMessage}`);
+    
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get eBay seller ID',
       error: errorMessage
     });
   }

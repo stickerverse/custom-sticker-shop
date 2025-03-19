@@ -1023,6 +1023,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+
+  
   // Check if eBay credentials are present
   const requireEbayCredentials = (req: Request, res: Response, next: NextFunction) => {
     if (!process.env.EBAY_TOKEN) {
@@ -1229,6 +1231,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         message: 'Failed to get eBay sync logs',
         error: error.message
+      });
+    }
+  });
+  
+  // Save eBay seller ID
+  app.post('/api/ebay/settings/seller-id', requireEbayCredentials, async (req: Request, res: Response) => {
+    try {
+      // Check if user is admin
+      const userId = req.session.userId;
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (!user?.isAdmin) {
+          return res.status(403).json({ message: 'Only admins can update eBay settings' });
+        }
+      }
+      
+      // Import the function to save seller ID
+      const { saveEbaySellerIDHandler } = await import('./services/ebay-settings');
+      return saveEbaySellerIDHandler(req, res);
+    } catch (error) {
+      console.error('Error saving eBay seller ID:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to save eBay seller ID',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  // Get eBay seller ID
+  app.get('/api/ebay/settings/seller-id', requireEbayCredentials, async (req: Request, res: Response) => {
+    try {
+      // Check if user is admin
+      const userId = req.session.userId;
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (!user?.isAdmin) {
+          return res.status(403).json({ message: 'Only admins can view eBay settings' });
+        }
+      }
+      
+      // Import the function to get seller ID
+      const { getEbaySellerIDHandler } = await import('./services/ebay-settings');
+      return getEbaySellerIDHandler(req, res);
+    } catch (error) {
+      console.error('Error getting eBay seller ID:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get eBay seller ID',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

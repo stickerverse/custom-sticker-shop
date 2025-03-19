@@ -67,20 +67,14 @@ export async function getEbayToken(): Promise<string> {
 /**
  * Get the eBay seller ID from environment variable or configuration
  * This should be the username of the eBay seller account you want to import products from
+ * 
+ * Note: This function is now imported from ebay-settings.ts
+ * It's kept here for backwards compatibility but delegates to the settings module
  */
 export function getEbaySellerID(): string {
-  // Primary: use dedicated env var for seller ID if available
-  const sellerID = process.env.EBAY_SELLER_ID || '';
-  
-  if (sellerID) {
-    console.log(`Using eBay seller ID from environment: ${sellerID}`);
-    return sellerID;
-  }
-  
-  // Fallback: if no dedicated seller ID is provided, return empty string
-  // The Browse API will then return general results
-  console.log("No eBay seller ID provided, will return general results");
-  return '';
+  // Import the function from the settings module to avoid circular dependencies
+  const { getEbaySellerID: getEbaySellerIDFromSettings } = require('./ebay-settings');
+  return getEbaySellerIDFromSettings();
 }
 
 /**
