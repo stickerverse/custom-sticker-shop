@@ -314,6 +314,25 @@ export class MemStorage implements IStorage {
     return product;
   }
   
+  async createProductOption(option: { productId: number, optionType: string, optionValue: string, priceModifier: number }): Promise<any> {
+    const productId = option.productId;
+    const productOptions = this.productOptions.get(productId) || [];
+    
+    const newOption = {
+      id: this.currentOptionId++,
+      productId,
+      optionType: option.optionType,
+      optionValue: option.optionValue,
+      priceModifier: option.priceModifier,
+      inStock: true
+    };
+    
+    productOptions.push(newOption);
+    this.productOptions.set(productId, productOptions);
+    
+    return newOption;
+  }
+  
   // Order methods
   async getOrders(userId?: number): Promise<Order[]> {
     let orders = Array.from(this.orders.values());
