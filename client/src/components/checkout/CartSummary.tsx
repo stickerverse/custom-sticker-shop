@@ -19,12 +19,12 @@ interface CartSummaryProps {
 export default function CartSummary({ cart }: CartSummaryProps) {
   // Calculate subtotal
   const subtotal = cart.reduce((total, item) => {
-    // Use product price or default to 0 if not provided
-    const itemPrice = (item.product.price || 0) * item.quantity;
+    // Use product price or default to 500 cents ($5.00) if not provided
+    const itemPrice = (item.product.price || 500) * item.quantity;
     return total + itemPrice;
   }, 0);
   
-  // Mock values for shipping, tax, etc.
+  // Set fixed values for shipping, tax, etc.
   const shipping = 499; // $4.99
   const tax = Math.round(subtotal * 0.08); // 8% tax
   const total = subtotal + shipping + tax;
@@ -63,7 +63,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
             </div>
             <div className="text-right">
               <p className="font-medium">
-                {formatCurrency((item.product.price || 0) * item.quantity)}
+                {formatCurrency((item.product.price || 500) * item.quantity)}
               </p>
             </div>
           </div>
