@@ -95,6 +95,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-6">
             <Link href="/" className="flex items-center">
               <img src="/images/stickerverse-logo.svg" alt="The StickerVerse" className="h-10" />
+              <span className="font-bold text-xl ml-2 bg-gradient-to-r from-blue-600 via-purple-500 to-teal-500 text-transparent bg-clip-text">The StickerVerse</span>
             </Link>
             <div className="hidden md:flex space-x-8">
               <Link href="/shop" className="text-gray-600 hover:text-primary font-medium">Shop</Link>
