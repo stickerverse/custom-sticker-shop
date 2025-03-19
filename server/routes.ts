@@ -1001,9 +1001,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Check if eBay credentials are present
   const requireEbayCredentials = (req: Request, res: Response, next: NextFunction) => {
-    if (!process.env.EBAY_APP_ID || !process.env.EBAY_SECRET) {
+    if (!process.env.EBAY_TOKEN) {
       return res.status(400).json({ 
-        message: 'eBay API credentials are required',
+        message: 'eBay API token is required',
         missingCredentials: true
       });
     }
