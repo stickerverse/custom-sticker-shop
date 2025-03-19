@@ -9,7 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
-const EbayProductSelector = () => {
+/**
+ * EbayProductSelector component allows users to select and import products from eBay
+ * 
+ * @param {Object} props - Component props
+ * @param {Function} props.onImportComplete - Optional callback when import is complete
+ */
+const EbayProductSelector = ({ onImportComplete }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
@@ -112,6 +118,11 @@ const EbayProductSelector = () => {
         description: `${data.importedCount} products have been imported to your store`,
         variant: 'default',
       });
+      
+      // Call the onImportComplete callback if provided
+      if (onImportComplete && typeof onImportComplete === 'function') {
+        onImportComplete(data);
+      }
     } catch (error) {
       console.error('Error importing products:', error);
       toast({
