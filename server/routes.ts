@@ -1147,8 +1147,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only admins can export eBay products' });
       }
       
-      const filePath = await getEbayProductsJsonDownload();
-      res.download(filePath, 'ebay_products.json');
+      await getEbayProductsJsonDownload(req, res);
+      return;
     } catch (error: any) {
       console.error('Error exporting eBay products as JSON:', error);
       res.status(500).json({ 
@@ -1174,8 +1174,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Only admins can export eBay products' });
       }
       
-      const filePath = await getEbayProductsCsvDownload();
-      res.download(filePath, 'ebay_products.csv');
+      await getEbayProductsCsvDownload(req, res);
+      return;
     } catch (error: any) {
       console.error('Error exporting eBay products as CSV:', error);
       res.status(500).json({ 
