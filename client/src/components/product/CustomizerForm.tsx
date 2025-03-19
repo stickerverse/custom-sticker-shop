@@ -136,90 +136,72 @@ const CustomizerForm = ({
       {optionsByType.material && (
         <div>
           <Label className="block mb-2 font-medium">Material</Label>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
-              <input 
-                type="radio" 
-                id="material-prismatic" 
-                name="material" 
-                className="w-4 h-4 text-blue-600"
-                checked={selectedOptions.material === "Prismatic"} 
-                onChange={() => onOptionSelect("material", "Prismatic")} 
-              />
-              <label htmlFor="material-prismatic" className="flex flex-col ml-2">
-                <span className="font-medium">Prismatic</span>
-                <span className="text-xs text-gray-500">+$2.00</span>
-              </label>
+          <div className="grid grid-cols-3 gap-2">
+            <div 
+              className={`p-3 border ${selectedOptions.material === "Vinyl" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer h-28 flex flex-col items-center justify-center`}
+              onClick={() => onOptionSelect("material", "Vinyl")}
+            >
+              <div className="w-12 h-12 bg-gray-100 rounded-full mb-2 flex items-center justify-center">
+                <div className="w-8 h-8 bg-white rounded-full"></div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium">Vinyl</div>
+              </div>
             </div>
-            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
-              <input 
-                type="radio" 
-                id="material-brushed" 
-                name="material" 
-                className="w-4 h-4 text-blue-600"
-                checked={selectedOptions.material === "Brushed Aluminium"} 
-                onChange={() => onOptionSelect("material", "Brushed Aluminium")} 
-              />
-              <label htmlFor="material-brushed" className="flex flex-col ml-2">
-                <span className="font-medium">Brushed Aluminium</span>
-                <span className="text-xs text-gray-500">+$3.00</span>
-              </label>
+            <div 
+              className={`p-3 border ${selectedOptions.material === "Holographic" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer h-28 flex flex-col items-center justify-center`}
+              onClick={() => onOptionSelect("material", "Holographic")}
+            >
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-300 via-pink-200 to-blue-300 rounded-full mb-2 flex items-center justify-center">
+                <div className="w-8 h-8 bg-white rounded-full opacity-50"></div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium">Holographic</div>
+              </div>
             </div>
-            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
-              <input 
-                type="radio" 
-                id="material-kraft" 
-                name="material" 
-                className="w-4 h-4 text-blue-600"
-                checked={selectedOptions.material === "Kraft Paper"} 
-                onChange={() => onOptionSelect("material", "Kraft Paper")} 
-              />
-              <label htmlFor="material-kraft" className="flex flex-col ml-2">
-                <span className="font-medium">Kraft Paper</span>
-                <span className="text-xs text-gray-500"></span>
-              </label>
+            <div 
+              className={`p-3 border ${selectedOptions.material === "Transparent" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer h-28 flex flex-col items-center justify-center`}
+              onClick={() => onOptionSelect("material", "Transparent")}
+            >
+              <div className="w-12 h-12 border border-gray-200 rounded-full mb-2 flex items-center justify-center">
+                <div className="w-8 h-8 border border-dashed border-gray-300 rounded-full"></div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium">Transparent</div>
+              </div>
             </div>
-            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
-              <input 
-                type="radio" 
-                id="material-hi-tack" 
-                name="material" 
-                className="w-4 h-4 text-blue-600"
-                checked={selectedOptions.material === "Hi-Tack Vinyl"} 
-                onChange={() => onOptionSelect("material", "Hi-Tack Vinyl")} 
-              />
-              <label htmlFor="material-hi-tack" className="flex flex-col ml-2">
-                <span className="font-medium">Hi-Tack Vinyl</span>
-                <span className="text-xs text-gray-500">+$1.00</span>
-              </label>
+            <div 
+              className={`p-3 border ${selectedOptions.material === "Glitter" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer h-28 flex flex-col items-center justify-center`}
+              onClick={() => onOptionSelect("material", "Glitter")}
+            >
+              <div className="w-12 h-12 bg-gradient-to-r from-pink-200 to-blue-200 rounded-full mb-2 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-white opacity-20" style={{backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '4px 4px'}}></div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium">Glitter</div>
+              </div>
             </div>
-            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
-              <input 
-                type="radio" 
-                id="material-low-tack" 
-                name="material" 
-                className="w-4 h-4 text-blue-600"
-                checked={selectedOptions.material === "Low-Tack Vinyl"} 
-                onChange={() => onOptionSelect("material", "Low-Tack Vinyl")} 
-              />
-              <label htmlFor="material-low-tack" className="flex flex-col ml-2">
-                <span className="font-medium">Low-Tack Vinyl</span>
-                <span className="text-xs text-gray-500">+$1.00</span>
-              </label>
+            <div 
+              className={`p-3 border ${selectedOptions.material === "Mirror" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer h-28 flex flex-col items-center justify-center`}
+              onClick={() => onOptionSelect("material", "Mirror")}
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full mb-2 flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-white to-gray-200 rounded-full"></div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium">Mirror</div>
+              </div>
             </div>
-            <div className="flex items-center p-3 border border-gray-200 rounded-md bg-white">
-              <input 
-                type="radio" 
-                id="material-reflective" 
-                name="material" 
-                className="w-4 h-4 text-blue-600"
-                checked={selectedOptions.material === "Reflective"} 
-                onChange={() => onOptionSelect("material", "Reflective")} 
-              />
-              <label htmlFor="material-reflective" className="flex flex-col ml-2">
-                <span className="font-medium">Reflective</span>
-                <span className="text-xs text-gray-500">+$4.00</span>
-              </label>
+            <div 
+              className={`p-3 border ${selectedOptions.material === "Pixie Dust" ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} rounded-md cursor-pointer h-28 flex flex-col items-center justify-center`}
+              onClick={() => onOptionSelect("material", "Pixie Dust")}
+            >
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-200 via-yellow-200 to-pink-200 rounded-full mb-2 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-white opacity-30" style={{backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '3px 3px'}}></div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium">Pixie Dust</div>
+              </div>
             </div>
           </div>
         </div>
