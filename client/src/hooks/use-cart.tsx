@@ -14,6 +14,7 @@ type CartItem = {
     title: string;
     description: string;
     imageUrl: string;
+    price?: number;
   };
 };
 
@@ -144,6 +145,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
               title: product.title,
               description: product.description,
               imageUrl: product.imageUrl,
+              price: product.price, // Include the price from product
             },
           };
           
