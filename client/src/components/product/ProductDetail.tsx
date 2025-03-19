@@ -44,7 +44,11 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   });
   
   // State for selected options
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({
+    size: '4" × 4"',
+    material: "Vinyl",
+    finish: "Glossy"
+  });
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   
@@ -99,9 +103,13 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         
         let calculatedPrice = Math.round(basePrice * materialMultiplier);
         
-        // Apply quantity discount for orders of 10 or more (10% off)
-        if (quantity >= 10) {
-          calculatedPrice = Math.round(calculatedPrice * 0.9);
+        // Apply quantity discounts
+        if (quantity >= 50) {
+          calculatedPrice = Math.round(calculatedPrice * 0.75); // 25% off for 50+ items
+        } else if (quantity >= 25) {
+          calculatedPrice = Math.round(calculatedPrice * 0.80); // 20% off for 25+ items
+        } else if (quantity >= 10) {
+          calculatedPrice = Math.round(calculatedPrice * 0.90); // 10% off for 10+ items
         }
         
         // Ensure a minimum price of $1.99 (199 cents)
@@ -148,17 +156,21 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       }
     }
     
-    // Apply quantity discount for orders of 10 or more (10% off)
-    if (quantity >= 10) {
-      basePrice = Math.round(basePrice * 0.9);
+    // Apply quantity discounts
+    if (quantity >= 50) {
+      basePrice = Math.round(basePrice * 0.75); // 25% off for 50+ items
+    } else if (quantity >= 25) {
+      basePrice = Math.round(basePrice * 0.80); // 20% off for 25+ items
+    } else if (quantity >= 10) {
+      basePrice = Math.round(basePrice * 0.90); // 10% off for 10+ items
     }
     
     return basePrice * quantity;
   };
   
-  // Format price in dollars
+  // Format price in dollars (US style)
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
+    return `US$${(cents / 100).toFixed(2)}`;
   };
   
   // Handle add to cart
@@ -245,7 +257,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:space-x-8">
         {/* Product Image with simple display that matches the design */}
-        <div className="md:w-1/2 flex flex-row">
+        <div className="md:w-3/5 flex flex-row">
           {/* Thumbnail gallery - now on the left */}
           <div className="hidden md:flex flex-col gap-2 mr-4">
             <div className="border border-blue-500 rounded-md p-1 overflow-hidden w-16">
@@ -268,7 +280,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
           </div>
           
           {/* Main image */}
-          <div className="flex-1 rounded-lg overflow-hidden border border-gray-200 relative group bg-white">
+          <div className="flex-1 rounded-lg overflow-hidden relative group bg-white">
             <div className="relative overflow-hidden">
               <img
                 src={product.imageUrl}
@@ -300,20 +312,53 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         </div>
         
         {/* Product Information */}
-        <div className="md:w-1/2 mt-8 md:mt-0">
-          <h1 className="text-2xl font-bold text-gray-900">{product.title}</h1>
-          <div className="flex items-center mt-2 mb-4">
-            <p className="text-xl font-semibold text-gray-900">${(product.price ? product.price / 100 : 3.15).toFixed(2)}</p>
+        <div className="md:w-2/5 mt-8 md:mt-0">
+          <h1 className="text-xl font-bold text-gray-900">{product.title}</h1>
+          
+          {/* Star rating */}
+          <div className="flex items-center mt-2">
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span key={star} className="material-icons text-yellow-400 text-sm">
+                  star
+                </span>
+              ))}
+              <span className="text-sm text-gray-600 ml-1">(459 reviews)</span>
+            </div>
           </div>
           
-          <div className="prose prose-sm max-w-none mb-6">
-            <p>{product.description || "Beautiful pink leopard sticker, perfect for laptops, water bottles, and more."}</p>
+          {/* Price display */}
+          <div className="flex items-center mt-4 mb-4">
+            <p className="text-2xl font-semibold text-pink-600">{formatPrice(calculatePrice())}</p>
+          </div>
+          
+          {/* Size Options */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium mb-2">Size</h3>
+            <div className="flex flex-wrap gap-2">
+              <button 
+                className={`px-3 py-1 border ${selectedOptions.size === '3" × 3"' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-full text-sm font-medium hover:border-gray-500`}
+                onClick={() => handleOptionSelect('size', '3" × 3"')}
+              >
+                Small (3" x 3")
+              </button>
+              <button 
+                className={`px-3 py-1 border ${selectedOptions.size === '4" × 4"' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-full text-sm font-medium hover:border-gray-500`}
+                onClick={() => handleOptionSelect('size', '4" × 4"')}
+              >
+                Medium (4" x 4")
+              </button>
+              <button 
+                className={`px-3 py-1 border ${selectedOptions.size === '5" × 5"' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-full text-sm font-medium hover:border-gray-500`}
+                onClick={() => handleOptionSelect('size', '5" × 5"')}
+              >
+                Large (5" x 5")
+              </button>
+            </div>
           </div>
           
           {/* Customizer Form */}
-          <div className="pt-4">
-            <h2 className="text-lg font-semibold mb-4">Customize Your Sticker</h2>
-            
+          <div className="pt-4 border-t border-gray-200">
             <CustomizerForm 
               optionsByType={optionsByType}
               selectedOptions={selectedOptions}
@@ -323,64 +368,78 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             />
           </div>
           
+          {/* Add to Cart Button */}
+          <div className="mt-6">
+            <Button 
+              className="w-full bg-pink-500 text-white hover:bg-pink-600 h-12 rounded-full text-base font-medium"
+              onClick={handleAddToCart}
+              disabled={isAddingToCart}
+            >
+              {isAddingToCart ? (
+                <>
+                  <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin mr-2"></div>
+                  Adding to Cart...
+                </>
+              ) : (
+                <>
+                  Add to Cart • {formatPrice(calculatePrice())}
+                </>
+              )}
+            </Button>
+          </div>
+          
+          {/* Shipping and Returns */}
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <div className="mb-3">
+              <h3 className="text-sm font-medium mb-1">Shipping</h3>
+              <p className="text-xs text-gray-500">Free delivery: March 24</p>
+              <p className="text-xs text-gray-500">Get shipping options at checkout</p>
+            </div>
+            
+            <div className="mb-4">
+              <h3 className="text-sm font-medium mb-1">Easy returns</h3>
+              <p className="text-xs text-gray-500">Free 30-day returns, with no hassle</p>
+            </div>
+          </div>
+          
           {/* Product Features */}
-          <div className="pt-6 mt-6">
-            <h2 className="text-lg font-semibold mb-4">Product Features</h2>
-            <ul className="space-y-2">
+          <div className="border-t border-gray-200 pt-4">
+            <h2 className="text-sm font-medium mb-2">Product Features</h2>
+            <ul className="space-y-1 text-xs text-gray-600">
               <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
+                <span className="text-black mr-2">•</span>
                 <span>Decorate and personalize laptops, water bottles, and more</span>
               </li>
               <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
+                <span className="text-black mr-2">•</span>
                 <span>Half-cut (kiss-cut) peel-off sticker</span>
               </li>
               <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
+                <span className="text-black mr-2">•</span>
                 <span>Very durable and water resistant</span>
               </li>
               <li className="flex items-start">
-                <span className="text-blue-500 mr-2">•</span>
+                <span className="text-black mr-2">•</span>
                 <span>3.2mm white border around each design</span>
               </li>
             </ul>
           </div>
-          
-          {/* Add to Cart Button with Animation */}
-          <div className="mt-8">
-            <Button 
-              className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-base relative overflow-hidden group transition-all duration-300"
-              onClick={handleAddToCart}
-              disabled={isAddingToCart}
-            >
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-primary/0 via-white/30 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></span>
-              <span className="relative flex items-center justify-center gap-2">
-                {isAddingToCart ? (
-                  <>
-                    <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin"></div>
-                    <span>Adding to Cart...</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="material-icons text-base">shopping_cart</span>
-                    <span>Add to Cart</span>
-                  </>
-                )}
-              </span>
-            </Button>
-            
-            {/* Price guarantee and shipping info */}
-            <div className="flex items-center justify-center gap-4 mt-3">
-              <div className="flex items-center text-xs text-gray-500">
-                <span className="material-icons text-green-500 text-sm mr-1">verified</span>
-                <span>Price Match Guarantee</span>
+        </div>
+      </div>
+      
+      {/* Similar Products Section */}
+      <div className="mt-12 border-t border-gray-200 pt-8">
+        <h2 className="text-xl font-bold mb-4">Also available in</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <div key={item} className="border border-gray-200 rounded-md p-2 hover:shadow-md transition-shadow">
+              <div className="aspect-square bg-gray-100 mb-2 rounded-md overflow-hidden">
+                <div className="w-full h-full bg-gray-200" />
               </div>
-              <div className="flex items-center text-xs text-gray-500">
-                <span className="material-icons text-primary text-sm mr-1">local_shipping</span>
-                <span>Free shipping over $35</span>
-              </div>
+              <p className="text-xs font-medium truncate">Classic T-Shirt</p>
+              <p className="text-xs text-gray-600">US$19.99</p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

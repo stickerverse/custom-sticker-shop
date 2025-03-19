@@ -206,7 +206,7 @@ const CustomizerForm = ({
             type="button"
             variant="outline"
             size="sm"
-            className="h-10 px-3"
+            className="h-10 px-3 rounded-l-full border-r-0"
             onClick={() => handleQuantityChange(quantity - 1)}
             disabled={quantity <= 1}
           >
@@ -218,13 +218,13 @@ const CustomizerForm = ({
             onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
             min="1"
             max="1000"
-            className="w-16 mx-2 text-center"
+            className="w-16 border-x-0 text-center rounded-none focus:ring-0"
           />
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-10 px-3"
+            className="h-10 px-3 rounded-r-full border-l-0"
             onClick={() => handleQuantityChange(quantity + 1)}
             disabled={quantity >= 1000}
           >
@@ -234,7 +234,9 @@ const CustomizerForm = ({
         
         {/* Quantity discount information */}
         <div className="mt-2 text-xs text-gray-500">
-          <p>Buy 10+ for bulk discount</p>
+          <p>Buy 10+ for bulk discount (10% off)</p>
+          <p>Buy 25+ for larger discount (20% off)</p>
+          <p>Buy 50+ for biggest discount (25% off)</p>
         </div>
       </div>
     </div>
