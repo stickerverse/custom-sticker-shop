@@ -17,10 +17,10 @@ interface CartSummaryProps {
 }
 
 export default function CartSummary({ cart }: CartSummaryProps) {
-  // Calculate subtotal
+  // Calculate subtotal using actual product prices from the API
   const subtotal = cart.reduce((total, item) => {
-    // Use product price or default to 500 cents ($5.00) if not provided
-    const itemPrice = (item.product.price || 500) * item.quantity;
+    // Use the product price from the cart data (already loaded from API)
+    const itemPrice = item.product.price ? item.product.price * item.quantity : 0;
     return total + itemPrice;
   }, 0);
   
@@ -54,7 +54,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
               <div>
                 <p className="font-medium">{item.product.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  Qty: {item.quantity} × {formatCurrency(item.product.price || 500)} each
+                  Qty: {item.quantity} × {formatCurrency(item.product.price || 0)} each
                 </p>
                 <p className="text-xs text-muted-foreground">
                   size: {item.options.size || "Standard"} {item.options.material ? `material: ${item.options.material}` : ""} {item.options.finish ? `finish: ${item.options.finish}` : ""}
@@ -63,7 +63,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
             </div>
             <div className="text-right">
               <p className="font-medium">
-                {formatCurrency((item.product.price || 500) * item.quantity)}
+                {formatCurrency((item.product.price || 0) * item.quantity)}
               </p>
             </div>
           </div>

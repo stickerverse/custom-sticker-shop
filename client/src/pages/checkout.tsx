@@ -82,8 +82,8 @@ export default function Checkout() {
   
   // Calculate total price from cart items
   const total = cart.reduce((sum, item) => {
-    // Get product price safely (default to 500 cents if not available)
-    const productPrice = (item.product?.price !== undefined) ? item.product.price : 500;
+    // Get actual product price from API data
+    const productPrice = (item.product?.price !== undefined) ? item.product.price : 0;
     
     // Get option price (if available)
     const optionPrice = item.options?.price 
@@ -104,7 +104,7 @@ export default function Checkout() {
             id: item.id,
             productId: item.productId,
             productTitle: item.product?.title,
-            price: item.product?.price || 500,
+            price: item.product?.price || 0,
             quantity: item.quantity
           }))
         });

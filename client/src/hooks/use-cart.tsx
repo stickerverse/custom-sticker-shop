@@ -134,7 +134,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           setCart(updatedCart);
           newItemId = updatedCart[existingItemIndex].id;
         } else {
-          // Create new cart item
+          // Create new cart item with exact product details including actual price
           const newItem: CartItem = {
             id: Date.now(), // Use timestamp as temporary ID
             productId: item.productId,
@@ -145,7 +145,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
               title: product.title,
               description: product.description,
               imageUrl: product.imageUrl,
-              price: product.price, // Include the price from product
+              price: product.price, // Include the exact price from product API
             },
           };
           
