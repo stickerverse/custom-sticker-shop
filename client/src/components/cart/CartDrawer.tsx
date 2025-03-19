@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { XIcon, ShoppingCartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,49 @@ interface CartDrawerProps {
 
 export function CartDrawer({ isOpen, onClose, newItemId }: CartDrawerProps) {
   const { cart } = useCart();
+  const [liveCart, setLiveCart] = useState(cart);
+  const [optimisticTotal, setOptimisticTotal] = useState<number | null>(null);
+
+  // Update local cart state when cart changes
+  useEffect(() => {
+    setLiveCart(cart);
+    setOptimisticTotal(null); // Reset optimistic total when real cart updates
+  }, [cart]);
+
+  // Set up event listeners for live updates
+  useEffect(() => {
+    const handleQuantityUpdating = (e: any) => {
+      const { itemId, newQuantity, oldQuantity } = e.detail;
+      
+      // Update local cart state optimistically
+      setLiveCart(prev => prev.map(item => 
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      ));
+      
+      // Calculate new total optimistically
+      calculateOptimisticTotal(itemId, newQuantity, oldQuantity);
+    };
+    
+    const handleItemRemoving = (e: any) => {
+      const { itemId } = e.detail;
+      
+      // Update local cart state optimistically by removing the item
+      setLiveCart(prev => prev.filter(item => item.id !== itemId));
+      
+      // Calculate new total without this item
+      calculateOptimisticTotalAfterRemoval(itemId);
+    };
+    
+    // Add event listeners
+    window.addEventListener('cart:quantity:updating', handleQuantityUpdating);
+    window.addEventListener('cart:item:removing', handleItemRemoving);
+    
+    // Clean up event listeners
+    return () => {
+      window.removeEventListener('cart:quantity:updating', handleQuantityUpdating);
+      window.removeEventListener('cart:item:removing', handleItemRemoving);
+    };
+  }, [liveCart]);
 
   // Handle key press to close drawer with Escape key
   useEffect(() => {
@@ -33,14 +76,43 @@ export function CartDrawer({ isOpen, onClose, newItemId }: CartDrawerProps) {
     };
   }, [isOpen, onClose]);
 
-  // Calculate total price
-  const calculateTotal = (): number => {
-    return cart.reduce((total, item) => {
-      // Use the actual price from the product data stored in cart
-      const itemPrice = item.product.price || 0;
+  // Calculate an optimistic total after quantity change
+  const calculateOptimisticTotal = (itemId: number, newQuantity: number, oldQuantity: number) => {
+    const currentTotal = calculateTotal();
+    const item = liveCart.find(item => item.id === itemId);
+    
+    if (item) {
+      const itemUnitPrice = getItemPrice(item);
+      const priceDifference = itemUnitPrice * (newQuantity - oldQuantity);
+      setOptimisticTotal(currentTotal + priceDifference);
+    }
+  };
+  
+  // Calculate optimistic total after removing an item
+  const calculateOptimisticTotalAfterRemoval = (itemId: number) => {
+    const currentTotal = calculateTotal();
+    const item = liveCart.find(item => item.id === itemId);
+    
+    if (item) {
+      const itemTotalPrice = getItemPrice(item) * item.quantity;
+      setOptimisticTotal(currentTotal - itemTotalPrice);
+    }
+  };
+  
+  // Helper to get the correct price for an item
+  const getItemPrice = (item: any) => {
+    const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
+    return customUnitPrice || item.product.price || 799; // Fall back to default price
+  };
+
+  // Calculate total price using either live cart or original cart
+  const calculateTotal = useCallback((): number => {
+    return liveCart.reduce((total, item) => {
+      // Get the correct price for this item (custom price or product price)
+      const itemPrice = getItemPrice(item);
       return total + (itemPrice * item.quantity);
     }, 0);
-  };
+  }, [liveCart]);
 
   // Format price in cents to dollars
   const formatPrice = (cents: number) => {
@@ -88,7 +160,7 @@ export function CartDrawer({ isOpen, onClose, newItemId }: CartDrawerProps) {
 
             {/* Cart Items */}
             <div className="flex-grow overflow-y-auto p-4">
-              {cart.length === 0 ? (
+              {liveCart.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">
                   <ShoppingCartIcon className="w-12 h-12 mb-4 text-gray-300" />
                   <p>Your cart is empty</p>
@@ -98,13 +170,15 @@ export function CartDrawer({ isOpen, onClose, newItemId }: CartDrawerProps) {
                 </div>
               ) : (
                 <ul className="space-y-4">
-                  {cart.map((item) => (
+                  {liveCart.map((item) => (
                     <motion.li
                       key={item.id}
                       className={`${item.id === newItemId ? 'bg-blue-50 border-blue-200' : 'bg-white'} 
                         rounded-lg p-2 border transition-colors duration-300`}
                       initial={item.id === newItemId ? { scale: 0.95, opacity: 0 } : undefined}
                       animate={item.id === newItemId ? { scale: 1, opacity: 1 } : undefined}
+                      exit={{ opacity: 0, height: 0 }}
+                      layout // Enable automatic layout adjustments
                     >
                       <CartItem item={item} />
                     </motion.li>
@@ -114,12 +188,19 @@ export function CartDrawer({ isOpen, onClose, newItemId }: CartDrawerProps) {
             </div>
 
             {/* Cart Footer */}
-            {cart.length > 0 && (
+            {liveCart.length > 0 && (
               <div className="p-4 border-t bg-gray-50">
                 <div className="mb-4 space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">{formatPrice(calculateTotal())}</span>
+                    <motion.span 
+                      className="font-medium"
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      key={optimisticTotal || calculateTotal()} // Force animation when total changes
+                    >
+                      {formatPrice(optimisticTotal !== null ? optimisticTotal : calculateTotal())}
+                    </motion.span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -128,7 +209,14 @@ export function CartDrawer({ isOpen, onClose, newItemId }: CartDrawerProps) {
                   <Separator className="my-2" />
                   <div className="flex justify-between font-semibold">
                     <span>Total</span>
-                    <span className="text-pink-600">{formatPrice(calculateTotal())}</span>
+                    <motion.span 
+                      className="text-pink-600"
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      key={`total-${optimisticTotal || calculateTotal()}`} // Force animation when total changes
+                    >
+                      {formatPrice(optimisticTotal !== null ? optimisticTotal : calculateTotal())}
+                    </motion.span>
                   </div>
                 </div>
                 

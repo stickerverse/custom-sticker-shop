@@ -59,12 +59,29 @@ const CartItem = ({ item }: CartItemProps) => {
 
     try {
       setIsUpdating(true);
+      // Emit a global cart update event before API call
+      // This enables other components to update instantly
+      window.dispatchEvent(new CustomEvent('cart:quantity:updating', { 
+        detail: { itemId: item.id, newQuantity: quantity, oldQuantity: item.quantity }
+      }));
+      
       await updateCartItem(item.id, quantity);
+      
+      // Dispatch another event when update is successful
+      window.dispatchEvent(new CustomEvent('cart:quantity:updated', { 
+        detail: { itemId: item.id, quantity: quantity }
+      }));
+      
       toast({
         title: "Cart Updated",
         description: `Quantity updated to ${quantity}`,
       });
     } catch (error) {
+      // Revert the change in case of error
+      window.dispatchEvent(new CustomEvent('cart:quantity:failed', { 
+        detail: { itemId: item.id, quantity: item.quantity }
+      }));
+      
       toast({
         title: "Update Failed",
         description: error instanceof Error ? error.message : "Could not update cart",
@@ -80,12 +97,29 @@ const CartItem = ({ item }: CartItemProps) => {
   const handleRemoveItem = async () => {
     try {
       setIsRemoving(true);
+      
+      // Emit removal event before API call
+      window.dispatchEvent(new CustomEvent('cart:item:removing', { 
+        detail: { itemId: item.id, product: item.product }
+      }));
+      
       await removeFromCart(item.id);
+      
+      // Dispatch event when removal is successful
+      window.dispatchEvent(new CustomEvent('cart:item:removed', { 
+        detail: { itemId: item.id }
+      }));
+      
       toast({
         title: "Item Removed",
         description: `${item.product.title} has been removed from your cart`,
       });
     } catch (error) {
+      // Emit failure event
+      window.dispatchEvent(new CustomEvent('cart:item:removal:failed', { 
+        detail: { itemId: item.id }
+      }));
+      
       toast({
         title: "Removal Failed",
         description: error instanceof Error ? error.message : "Could not remove item",
