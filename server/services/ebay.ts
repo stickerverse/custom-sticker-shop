@@ -65,27 +65,92 @@ export async function getEbayToken(): Promise<string> {
 }
 
 /**
+ * Get the eBay seller ID from environment variable or configuration
+ * This should be the username of the eBay seller account you want to import products from
+ */
+export function getEbaySellerID(): string {
+  // Primary: use dedicated env var for seller ID if available
+  const sellerID = process.env.EBAY_SELLER_ID || '';
+  
+  if (sellerID) {
+    console.log(`Using eBay seller ID from environment: ${sellerID}`);
+    return sellerID;
+  }
+  
+  // Fallback: if no dedicated seller ID is provided, return empty string
+  // The Browse API will then return general results
+  console.log("No eBay seller ID provided, will return general results");
+  return '';
+}
+
+/**
  * Get products from eBay Browse API
  * This is an alternative method that often works well with the provided token
+ * @param sellerID Optional eBay seller username to filter results by specific seller
  */
-export async function getEbayProductsFromBrowseAPI(): Promise<any[]> {
+export async function getEbayProductsFromBrowseAPI(sellerID?: string): Promise<any[]> {
   try {
     const token = await getEbayToken();
     console.log("Fetching products from eBay Browse API...");
+    
+    // Get seller ID if not provided
+    const seller = sellerID || getEbaySellerID();
     
     // For better results, try multiple search queries
     const searchTerms = ['stickers', 'decal', 'custom sticker', 'vinyl sticker'];
     let allItems: any[] = [];
     
+    // If we have a seller ID, try to get their specific listings first
+    if (seller) {
+      try {
+        console.log(`Searching eBay Browse API for seller: ${seller}...`);
+        
+        // Using the Browse API with seller filter
+        const response = await axios({
+          method: 'get',
+          url: `${EBAY_PRODUCTION_API_URL}${EBAY_BROWSE_API}?q=${encodeURIComponent(seller)}&filter=sellers:{${encodeURIComponent(seller)}}&limit=200`,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+          }
+        });
+
+        const items = response.data.itemSummaries || [];
+        console.log(`Found ${items.length} items for seller "${seller}" from eBay Browse API`);
+        
+        // Add all seller items to our collection
+        for (const item of items) {
+          allItems.push(item);
+        }
+        
+        // If we found items from the seller, return them directly
+        if (allItems.length > 0) {
+          return allItems;
+        }
+      } catch (sellerError) {
+        console.error(`Error searching for seller "${seller}":`, sellerError);
+        // Continue with keyword search as fallback
+      }
+    }
+    
     // Try multiple search terms to maximize our chances of finding relevant products
     for (const searchTerm of searchTerms) {
       try {
-        console.log(`Searching eBay Browse API for "${searchTerm}"...`);
+        // Create the search URL with seller filter if available
+        let searchUrl = `${EBAY_PRODUCTION_API_URL}${EBAY_BROWSE_API}?q=${encodeURIComponent(searchTerm)}&limit=20`;
+        
+        if (seller) {
+          searchUrl += `&filter=sellers:{${encodeURIComponent(seller)}}`;
+          console.log(`Searching eBay Browse API for "${searchTerm}" from seller "${seller}"...`);
+        } else {
+          console.log(`Searching eBay Browse API for "${searchTerm}"...`);
+        }
         
         // Using the direct Browse API with search
         const response = await axios({
           method: 'get',
-          url: `${EBAY_PRODUCTION_API_URL}${EBAY_BROWSE_API}?q=${encodeURIComponent(searchTerm)}&limit=20`,
+          url: searchUrl,
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
