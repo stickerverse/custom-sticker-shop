@@ -20,20 +20,28 @@ type CartItem = {
 interface CartContextType {
   cart: CartItem[];
   isLoading: boolean;
+  isCartOpen: boolean;
+  newItemId: number | undefined;
   addToCart: (item: { productId: number; quantity: number; options: Record<string, string> }) => Promise<void>;
   updateCartItem: (id: number, quantity: number) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
   clearCart: () => Promise<void>;
+  openCart: (itemId?: number) => void;
+  closeCart: () => void;
 }
 
 // Create context
 const CartContext = createContext<CartContextType>({
   cart: [],
   isLoading: false,
+  isCartOpen: false,
+  newItemId: undefined,
   addToCart: async () => {},
   updateCartItem: async () => {},
   removeFromCart: async () => {},
   clearCart: async () => {},
+  openCart: () => {},
+  closeCart: () => {},
 });
 
 // Provider component
@@ -42,6 +50,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [newItemId, setNewItemId] = useState<number | undefined>(undefined);
 
   // Load cart from local storage or API
   useEffect(() => {
@@ -92,11 +102,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   // Add item to cart
   const addToCart = async (item: { productId: number; quantity: number; options: Record<string, string> }) => {
     try {
+      let newItemId: number | undefined;
+      
       if (isAuthenticated) {
         // If authenticated, use API
         const response = await apiRequest("POST", "/api/cart", item);
         const newItem = await response.json();
         setCart(prev => [...prev, newItem]);
+        newItemId = newItem.id;
       } else {
         // If not authenticated, use local storage
         // Fetch product details
@@ -105,20 +118,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           throw new Error("Could not fetch product details");
         }
         const product = await productResponse.json();
-
-        // Create new cart item
-        const newItem: CartItem = {
-          id: Date.now(), // Use timestamp as temporary ID
-          productId: item.productId,
-          quantity: item.quantity,
-          options: item.options,
-          product: {
-            id: product.id,
-            title: product.title,
-            description: product.description,
-            imageUrl: product.imageUrl,
-          },
-        };
 
         // Check if item already exists (same product and options)
         const existingItemIndex = cart.findIndex(
@@ -132,11 +131,30 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           const updatedCart = [...cart];
           updatedCart[existingItemIndex].quantity += item.quantity;
           setCart(updatedCart);
+          newItemId = updatedCart[existingItemIndex].id;
         } else {
+          // Create new cart item
+          const newItem: CartItem = {
+            id: Date.now(), // Use timestamp as temporary ID
+            productId: item.productId,
+            quantity: item.quantity,
+            options: item.options,
+            product: {
+              id: product.id,
+              title: product.title,
+              description: product.description,
+              imageUrl: product.imageUrl,
+            },
+          };
+          
           // Add new item if it doesn't exist
           setCart(prev => [...prev, newItem]);
+          newItemId = newItem.id;
         }
       }
+      
+      // Open cart drawer with newly added item highlighted
+      openCart(newItemId);
     } catch (error) {
       console.error("Error adding to cart:", error);
       throw error;
@@ -197,9 +215,37 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       throw error;
     }
   };
+  
+  // Open cart drawer and highlight newly added item
+  const openCart = (itemId?: number) => {
+    if (itemId) {
+      setNewItemId(itemId);
+    }
+    setIsCartOpen(true);
+  };
+  
+  // Close cart drawer
+  const closeCart = () => {
+    setIsCartOpen(false);
+    // Clear the highlighted item after a delay
+    setTimeout(() => {
+      setNewItemId(undefined);
+    }, 300); // Same duration as the drawer animation
+  };
 
   return (
-    <CartContext.Provider value={{ cart, isLoading, addToCart, updateCartItem, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ 
+      cart, 
+      isLoading, 
+      isCartOpen, 
+      newItemId,
+      addToCart, 
+      updateCartItem, 
+      removeFromCart, 
+      clearCart,
+      openCart,
+      closeCart
+    }}>
       {children}
     </CartContext.Provider>
   );

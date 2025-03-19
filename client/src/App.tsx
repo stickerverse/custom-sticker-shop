@@ -5,10 +5,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { AuthProvider } from "@/hooks/use-auth";
-import { CartProvider } from "@/hooks/use-cart";
+import { CartProvider, useCart } from "@/hooks/use-cart";
 import { ChatProvider } from "@/hooks/use-chat";
 import { WebSocketProvider } from "@/lib/socket";
 import AnimatedBackground from "@/components/ui/animated-background";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 import Navbar from "@/components/layout/Navbar";
 import Home from "@/pages/home";
@@ -23,6 +24,19 @@ import Account from "@/pages/account";
 import OrderConfirmation from "@/pages/order-confirmation";
 import EbaySelection from "@/pages/ebay-selection";
 import NotFound from "@/pages/not-found";
+
+// Cart drawer wrapper needs access to cart context
+function CartDrawerWrapper() {
+  const { isCartOpen, closeCart, newItemId } = useCart();
+  
+  return (
+    <CartDrawer 
+      isOpen={isCartOpen} 
+      onClose={closeCart} 
+      newItemId={newItemId} 
+    />
+  );
+}
 
 function Router() {
   const [location] = useLocation();
@@ -70,6 +84,9 @@ function Router() {
           <Route component={NotFound} />
         </Switch>
       </div>
+      
+      {/* Cart drawer that slides from the right */}
+      <CartDrawerWrapper />
       
       <Toaster />
     </>
