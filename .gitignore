@@ -27,6 +27,7 @@ yarn-error.log*
 .cache/
 .config/
 .upm/
+replit.nix
 
 # Editor directories and files
 .idea/
@@ -40,3 +41,15 @@ yarn-error.log*
 # Logs
 logs
 *.log
+
+# Application data
+data/
+*.json.bak
+ebay-settings.json
+ebay-sync-log.txt
+cookies.txt
+
+# Local storage files
+*.db
+*.sqlite
+*.sqlite3
