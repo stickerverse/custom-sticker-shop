@@ -11,22 +11,22 @@ const EBAY_PRODUCTION_API_URL = 'https://api.ebay.com';
 const EBAY_INVENTORY_API = '/sell/inventory/v1/inventory_item';
 const EBAY_BROWSE_API = '/buy/browse/v1/item_summary/search';
 
-// Direct eBay token (provided by user)
-const DIRECT_EBAY_TOKEN = "v^1.1#i^1#p^1#r^0#f^0#I^3#t^H4sIAAAAAAAA/+VYXWwUVRTebbeLTS1EJJYfo8tUU8HM7PztsjOyS5aW0oVCl25ZtBFwfu60Q2dnpnPv0m6JybYENMaqwcQEIaWGB0MwwYgpJsQGBR5E/HkhQiKGCBIfeCCEiiApzmx/2FYCSDexifuymXPPPff7vnPOvXeGzHpLF++s23mj3D2jqD9LZovcbqqMLPWWvDizuGh+iYvMc3D3Z5/LenqKf18KhZRm8o0AmoYOga8zpemQzxnDWNrSeUOAKuR1IQUgjyQ+EV1Tz9MEyZuWgQzJ0DBfrCaMBQMiJyq0SDOsQNJsyLbqYzGbjDDGhESRkQKADQBB4jjKHocwDWI6RIKOwhhN0gGcZHAq1ESRPBvkGY6ggmwz5ksCC6qGbrsQJBbJweVzc608rPeHKkAILGQHwSKxaG2iIRqrWbG2aak/L1ZkVIcEElAaTnyqNmTgSwpaGtx/GZjz5hNpSQIQYv7IyAoTg/LRMTCPAD8nNcvITChAc0DgWJZjmIJIWWtYKQHdH4djUWVcybnyQEcqyjxIUVsNcQuQ0OjTWjtErMbn/K1LC5qqqMAKYyuWR1+JxuNYJIGA2Qr01TiQjBREhoXHG2twMSSxQjCoSLgssoBil1CjC41EG5V50krVhi6rjmjQt9ZAy4GNGkzWhsnTxnZq0BusqIIcRPl+9JiGLNXsJHUki2nUqjt5BSlbCF/u8cEZGJ+NkKWKaQTGI0weyEkUxgTTVGVs8mCuFkfLpxOGsVaETN7v7+joIDoYwrBa/DRJUv6X19QnpFaQEjDb1+n1EX/1wRNwNUdFAvZMqPIoY9pYOu1atQHoLVgkQFPB0FgWJsKKTLb+w5DH2T+xIwrVIQpJskBhRY6lAQkAKESHREaL1O/gAKKQwVOC1QaQqQkSwCW7ztIpYKkyzwQUmgkpAJeDnIKznKLgYkAO4pQCHDCiKHGh/1OjPGypJ4BkAVSQWi9YnXctT6yA6cbU6tW0lGzOULXx6mSH3tbYbloN8a416rqtQbm9rktdJ6wPP2w33JN8tabayjTZ6xdCAKfXCydCnQERkKdELyEZJogbmiplpleCGUuOCxbKJICm2YYpkYyaZqwwe3XB6P3LbeLReBfujPqPzqd7soJOyU4vVs58aAcQTJVwTiDCTqrf6XVDsK8fjnlzDvWUeKv2zXVasbZJjrBV5ZErJ5GjS8CtEmEBaKQt+7ZNNDg3sCajDej2eYYsQ9OAlZxaBTj9nEqlkSBqYLo1dgEKXBWm2WFLLWFpmmOXcNyUeEm5o3TzdNuSCrEVe1Y+4rXaP/ElP+LK/age99dkj3uwyO0ml5LPU5XkQm/xek/x4/OhigChCgoB1Rbdfne1ANEGMqagWkVPun6YWS9319UPZcX0kQ3Xl4Vc5XnfGPo3knPHvzKUFlNleZ8cyKfvjpRQsyrK6QDJUCGKZIMM10xW3h31UE955nRtsS5c7u2wumrnlb43UHXjGtt2miwfd3K7S1yeHrdLjJedSs6qzF5wHbt8hjm4iJy76QWDmif2fbfql8PylUjf5y0/pfY1DfbIw6f0qkSbFjj/affxPcelrM88cKLmUtXB6vXfnuwp71tUOf/MG8dvEDtqBo8tu3LUmzw7Y8vwYO/s2J25A5u1imc//Ar1G+3Zge73z+1LZ9sPF23/bde5I907+6k9By79eg1eHVpZ4dv+TeZj188r6y7OsYZf+qyTu3XoaOneysPJQ/repHdb9q2N2Xf183/dwnft/3P49uXZVbuvfrH4jx93eK5vfL1swWvKidKbxPdmfNvNhR8N9UZLPjntfWzVsYtvV6hDJxcM7O6rNZ/44KybePOZd15tvP3lJrr75KoNI7n8G8De7HD9EQAA";
+// Get token from environment variable
+const EBAY_TOKEN = process.env.EBAY_TOKEN;
 
 // Token storage
-let ebayToken: string | null = DIRECT_EBAY_TOKEN || null;
+let ebayToken: string | null = EBAY_TOKEN || null;
 let tokenExpiration: Date | null = new Date(Date.now() + 7200 * 1000); // Token expires in 2 hours (7200 seconds)
 
 /**
  * Get OAuth token for eBay API
- * Uses the direct token provided by the user if available
+ * Uses the token provided by the user through environment variable if available
  */
 export async function getEbayToken(): Promise<string> {
-  // If we have the direct token, always use it
-  if (DIRECT_EBAY_TOKEN) {
-    console.log("Using direct eBay token provided by user");
-    return DIRECT_EBAY_TOKEN;
+  // If we have the environment token, always use it
+  if (EBAY_TOKEN) {
+    console.log("Using eBay token from environment variable");
+    return EBAY_TOKEN;
   }
   
   // Check if we have a valid token already
