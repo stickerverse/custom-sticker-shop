@@ -54,21 +54,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/create-payment-intent', async (req: Request, res: Response) => {
     const userId = req.session.userId;
     
-    // Allow guests to create payment intents (no authentication required)
+    console.log('Payment intent requested:', {
+      userId: userId || 'guest',
+      body: req.body
+    });
     
+    // Allow guests to create payment intents (no authentication required)
     try {
       const { amount } = req.body;
       
+      console.log('Processing payment intent with amount:', amount);
+      
       if (!amount || typeof amount !== 'number' || amount <= 0) {
+        console.error('Invalid amount for payment intent:', amount);
         return res.status(400).json({ message: 'Invalid amount' });
       }
 
+      const amountInCents = Math.round(amount * 100);
+      console.log('Amount in cents:', amountInCents);
+
       // Create a PaymentIntent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
+        amount: amountInCents, // Convert to cents
         currency: "usd",
         // Verify your integration in this guide by including this parameter
-        metadata: { integration_check: 'accept_a_payment' },
+        metadata: { 
+          integration_check: 'accept_a_payment',
+          userId: userId || 'guest'
+        },
+      });
+
+      console.log('Payment intent created successfully:', {
+        id: paymentIntent.id,
+        hasClientSecret: !!paymentIntent.client_secret
       });
 
       res.json({
@@ -76,9 +94,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error('Error creating payment intent:', error);
+      // Send detailed error for debugging
       res.status(500).json({ 
         message: 'Error creating payment intent',
-        error: error.message 
+        error: error.message,
+        stack: process.env.NODE_ENV === 'production' ? undefined : error.stack
       });
     }
   });

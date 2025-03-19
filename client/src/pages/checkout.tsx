@@ -97,16 +97,28 @@ export default function Checkout() {
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        const response = await apiRequest("POST", "/api/create-payment-intent", { 
-          amount: total
+        console.log("Creating payment intent for amount:", total);
+        
+        // Use direct fetch instead of apiRequest for better error handling
+        const response = await fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amount: total }),
+          credentials: "include"
         });
+        
+        console.log("Payment intent response status:", response.status);
         
         if (!response.ok) {
           const errorData = await response.json();
+          console.error("Payment intent error data:", errorData);
           throw new Error(errorData.message || "Failed to create payment intent");
         }
         
         const data = await response.json();
+        console.log("Payment intent created successfully");
         setClientSecret(data.clientSecret);
       } catch (err: any) {
         console.error("Error creating payment intent:", err);
