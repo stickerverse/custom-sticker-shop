@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/use-cart";
+import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { CreditCard, ArrowRight, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -22,7 +23,8 @@ export default function CheckoutForm({ shippingAddress }: CheckoutFormProps) {
   const elements = useElements();
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { clearCart } = useCart();
+  const { cart, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -59,10 +61,18 @@ export default function CheckoutForm({ shippingAddress }: CheckoutFormProps) {
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Payment successful, create the order
         try {
-          const response = await apiRequest("POST", "/api/orders", {
+          // For guest checkout, we need to send the cart items in the request body
+          const payload: any = {
             shippingAddress,
             paymentIntentId: paymentIntent.id,
-          });
+          };
+          
+          // If user is not authenticated, include cart items
+          if (!isAuthenticated) {
+            payload.cart = cart;
+          }
+          
+          const response = await apiRequest("POST", "/api/orders", payload);
           
           const orderData = await response.json();
           

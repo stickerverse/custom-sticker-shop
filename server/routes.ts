@@ -590,20 +590,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post('/api/orders', async (req: Request, res: Response) => {
     const userId = req.session.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
+    let cartItems;
     
     try {
-      // Validate order data
+      // For guest checkout, userId will be null but we'll still accept the order
+      // Validate order data - for guest orders, userId will be null
       const orderData = insertOrderSchema.parse({
         ...req.body,
-        userId
+        userId: userId || null
       });
       
       // Get cart items to create order items
-      const cartItems = await storage.getCartItems(userId);
+      let cartItems;
+      if (userId) {
+        // For logged-in users, get cart from database
+        cartItems = await storage.getCartItems(userId);
+      } else {
+        // For guest users, cart is sent with the request
+        const { cart } = req.body;
+        
+        if (!cart || !Array.isArray(cart) || cart.length === 0) {
+          return res.status(400).json({ message: 'Cart items must be provided for guest checkout' });
+        }
+        
+        cartItems = cart;
+      }
       
       if (cartItems.length === 0) {
         return res.status(400).json({ message: 'Cart is empty' });
@@ -650,8 +661,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderItems
       );
       
-      // Clear the cart
-      await storage.clearCart(userId);
+      // Clear the cart (only for authenticated users)
+      if (userId) {
+        await storage.clearCart(userId);
+      }
       
       res.status(201).json(order);
     } catch (error) {
