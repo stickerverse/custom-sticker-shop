@@ -134,7 +134,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           setCart(updatedCart);
           newItemId = updatedCart[existingItemIndex].id;
         } else {
-          // Create new cart item with exact product details including actual price
+          // Create new cart item with exact product details including unit price
+          // We need to pass custom unit price based on the selected options
+          // This will be calculated by the product page and passed in the options
+          const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : product.price;
+          
           const newItem: CartItem = {
             id: Date.now(), // Use timestamp as temporary ID
             productId: item.productId,
@@ -145,7 +149,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
               title: product.title,
               description: product.description,
               imageUrl: product.imageUrl,
-              price: product.price, // Include the exact price from product API
+              price: customUnitPrice, // Use the calculated unit price based on options
             },
           };
           

@@ -55,6 +55,7 @@ export function InstantPriceCalculator({
     finalUnitPrice = Math.round(finalUnitPrice * 0.90); // 10% off
   }
   
+  // Only multiply by quantity for the total, not for the unit price
   const total = finalUnitPrice * quantity;
   
   return (

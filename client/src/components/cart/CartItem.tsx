@@ -27,8 +27,8 @@ const CartItem = ({ item }: CartItemProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  // Calculate item price (this is a simplified version)
-  const itemPrice = 499; // Base price: $4.99
+  // Get the actual product price from the product data
+  const itemPrice = item.product.price || 0; // Use the price from product data
   const totalPrice = itemPrice * quantity;
 
   // Format price in dollars

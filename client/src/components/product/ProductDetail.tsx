@@ -67,8 +67,8 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
     setComplexityMultiplier(multiplier);
   };
   
-  // Calculate price based on selected options
-  const calculatePrice = () => {
+  // Calculate unit price based on selected options
+  const calculateUnitPrice = () => {
     if (!product) return 0;
     
     // Base rate is $1.99 per inch of vinyl (199 cents)
@@ -126,7 +126,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         }
         
         // Ensure a minimum price of $1.99 (199 cents)
-        return Math.max(calculatedPrice, 199) * quantity;
+        return Math.max(calculatedPrice, 199);
       }
     }
     
@@ -187,7 +187,12 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       basePrice = Math.round(basePrice * 0.90); // 10% off for 10+ items
     }
     
-    return basePrice * quantity;
+    return basePrice;
+  };
+  
+  // Calculate total price
+  const calculatePrice = () => {
+    return calculateUnitPrice() * quantity;
   };
   
   // Format price in dollars (US style)
@@ -212,11 +217,17 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         throw new Error(`Please select options for: ${missingOptions.join(", ")}`);
       }
       
-      // Add to cart
+      // Calculate the unit price
+      const unitPrice = calculateUnitPrice();
+      
+      // Add to cart with unit price in options
       await addToCart({
         productId: product.id,
         quantity,
-        options: selectedOptions
+        options: {
+          ...selectedOptions,
+          unitPrice: unitPrice.toString() // Pass calculated unit price to cart
+        }
       });
       
       toast({
