@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/use-cart";
@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatedSticker } from "@/components/ui/animated-sticker";
 import { ColorMorph } from "@/components/ui/color-morph";
 import CustomizerForm from "./CustomizerForm";
+import InstantPriceCalculator from "./InstantPriceCalculator";
 
 interface ProductDetailProps {
   productId: number;
@@ -51,6 +52,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   });
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [complexityMultiplier, setComplexityMultiplier] = useState(1);
   
   // Handle option selection
   const handleOptionSelect = (optionType: string, value: string) => {
@@ -58,6 +60,11 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       ...prev,
       [optionType]: value
     }));
+  };
+  
+  // Handle complexity change
+  const handleComplexityChange = (multiplier: number) => {
+    setComplexityMultiplier(multiplier);
   };
   
   // Calculate price based on selected options
@@ -92,7 +99,8 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
           }
         }
         
-        let calculatedPrice = Math.round(basePrice * materialMultiplier);
+        // Calculate base price with material and complexity multipliers
+        let calculatedPrice = Math.round(basePrice * materialMultiplier * complexityMultiplier);
         
         // Apply quantity discounts
         if (quantity >= 50) {
@@ -126,17 +134,21 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       }
     }
     
-    // Additional cost for material upgrades
+    // Apply material multiplier
+    let materialMultiplier = 1.0;
     if (selectedOptions.material) {
       switch (selectedOptions.material) {
         case "Holographic":
-          basePrice = Math.round(basePrice * 1.5);
+          materialMultiplier = 1.5;
           break;
         case "Clear":
-          basePrice = Math.round(basePrice * 1.2);
+          materialMultiplier = 1.2;
           break;
       }
     }
+    
+    // Apply complexity and material multipliers
+    basePrice = Math.round(basePrice * materialMultiplier * complexityMultiplier);
     
     // Apply quantity discounts
     if (quantity >= 50) {
@@ -347,6 +359,16 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
               onOptionSelect={handleOptionSelect}
               quantity={quantity}
               onQuantityChange={setQuantity}
+            />
+          </div>
+          
+          {/* Design Complexity & Price Calculator */}
+          <div className="mt-6">
+            <InstantPriceCalculator
+              basePrice={799} // Base price for medium 4x4 sticker
+              materialMultiplier={selectedOptions.material === "Holographic" ? 1.5 : (selectedOptions.material === "Clear" ? 1.2 : 1.0)}
+              quantity={quantity}
+              onComplexityChange={handleComplexityChange}
             />
           </div>
           
