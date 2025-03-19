@@ -80,17 +80,16 @@ export default function Checkout() {
   const [formCompleted, setFormCompleted] = useState(false);
   const [formattedAddress, setFormattedAddress] = useState("");
   
-  // Calculate total price from cart items
+  // Calculate total price from cart items with the consistent pricing logic
   const total = cart.reduce((sum, item) => {
-    // Get actual product price from API data
-    const productPrice = (item.product?.price !== undefined) ? item.product.price : 0;
+    // Check for custom unit price first (from customization)
+    const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
     
-    // Get option price (if available)
-    const optionPrice = item.options?.price 
-      ? parseFloat(String(item.options.price)) 
-      : 0;
+    // Fall back to product price if no custom price
+    const itemPrice = customUnitPrice || (item.product?.price || 0);
     
-    return sum + (productPrice || optionPrice) * item.quantity;
+    // Total for this item = unit price × quantity
+    return sum + (itemPrice * item.quantity);
   }, 0);
 
   // Create payment intent when total changes
@@ -114,8 +113,9 @@ export default function Checkout() {
           throw new Error("Invalid cart total");
         }
 
-        // Use direct fetch with minimum 1 as amount to avoid Stripe errors
-        const safeAmount = Math.max(1, total);
+        // Make sure the amount is converted to cents for Stripe (if not already)
+        // The total is already in cents based on our previous pricing calculations
+        const safeAmount = Math.max(50, total); // Minimum 50 cents for Stripe
         console.log("Using safe amount for payment intent:", safeAmount);
         
         const response = await fetch("/api/create-payment-intent", {
