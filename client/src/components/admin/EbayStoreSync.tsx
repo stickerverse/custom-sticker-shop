@@ -6,42 +6,20 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, FileDown, Download, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 
 const EbayStoreSync: React.FC = () => {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isImporting, setIsImporting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncResult, setLastSyncResult] = useState<any>(null);
   const [logs, setLogs] = useState<string>('');
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
 
-  // Import products from eBay
-  const handleImportProducts = async () => {
-    setIsImporting(true);
-    
-    try {
-      const response = await apiRequest('POST', '/api/ebay/import-products', {});
-      
-      const data = await response.json();
-      
-      toast({
-        title: 'Import Successful',
-        description: `Imported ${data.products.length} products from eBay`,
-        variant: 'default',
-      });
-      
-      // Load logs after successful import
-      fetchLogs();
-    } catch (error) {
-      console.error('Error importing products:', error);
-      toast({
-        title: 'Import Failed',
-        description: 'Could not import products from eBay. Please check your credentials and try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsImporting(false);
-    }
+  // Import products from eBay - redirects to selection page
+  const handleImportProducts = () => {
+    setLocation('/ebay-selection');
   };
 
   // Sync products from eBay and save to files
