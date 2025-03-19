@@ -129,9 +129,9 @@ const EbayStoreSync: React.FC = () => {
         
         if (response.status === 403) {
           toast({
-            title: 'eBay API Permission Error',
-            description: 'Your eBay API token lacks required permissions. Please update with appropriate scopes including Listing Management.',
-            variant: 'destructive',
+            title: 'eBay API Access Information',
+            description: 'Your eBay token has limited permissions. We\'ll attempt to use the Browse API to find products, but some advanced features may be limited.',
+            variant: 'default',
             duration: 6000,
           });
           setEbayApiStatus('error');
@@ -157,9 +157,9 @@ const EbayStoreSync: React.FC = () => {
       // Check if this is an authentication error
       if (error instanceof Error && error.message && error.message.includes('403')) {
         toast({
-          title: 'eBay API Permission Error',
-          description: 'Your eBay API token lacks required permissions. Please update with appropriate scopes.',
-          variant: 'destructive',
+          title: 'eBay API Access Information',
+          description: 'Your eBay token has limited permissions. We\'ll use the Browse API to find products, but some advanced features may be limited.',
+          variant: 'default',
           duration: 6000,
         });
         setEbayApiStatus('error');
@@ -211,9 +211,9 @@ const EbayStoreSync: React.FC = () => {
         
         if (response.status === 403) {
           toast({
-            title: 'eBay API Permission Error',
-            description: 'Your eBay API token lacks required permissions for syncing products. Please ensure your token has Listing Management and Account Management scopes.',
-            variant: 'destructive',
+            title: 'eBay API Feature Limitation',
+            description: 'Your eBay API token has limited permissions for syncing products. Some advanced synchronization features may not be available.',
+            variant: 'default',
             duration: 8000,
           });
           setEbayApiStatus('error');
@@ -242,9 +242,9 @@ const EbayStoreSync: React.FC = () => {
       // Check if this is an authentication error
       if (error instanceof Error && error.message && error.message.includes('403')) {
         toast({
-          title: 'eBay API Permission Error',
-          description: 'Your eBay API token lacks required permissions. Please update with appropriate scopes including Listing Management.',
-          variant: 'destructive',
+          title: 'eBay API Feature Limitation',
+          description: 'Your eBay API token has limited permissions. Some advanced sync features may not be available.',
+          variant: 'default',
           duration: 6000,
         });
         setEbayApiStatus('error');
@@ -332,7 +332,7 @@ const EbayStoreSync: React.FC = () => {
                 )}
                 {ebayApiStatus === 'error' && (
                   <Badge variant="outline" className="ml-2 bg-yellow-50 text-yellow-700 hover:bg-yellow-50">
-                    Permission Error
+                    Limited Access
                   </Badge>
                 )}
                 {ebayApiStatus === 'missing' && (

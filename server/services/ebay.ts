@@ -73,10 +73,57 @@ export async function getEbayProductsFromBrowseAPI(): Promise<any[]> {
     const token = await getEbayToken();
     console.log("Fetching products from eBay Browse API...");
     
-    // Using the direct Browse API with search for stickers
-    const response = await axios({
+    // For better results, try multiple search queries
+    const searchTerms = ['stickers', 'decal', 'custom sticker', 'vinyl sticker'];
+    let allItems: any[] = [];
+    
+    // Try multiple search terms to maximize our chances of finding relevant products
+    for (const searchTerm of searchTerms) {
+      try {
+        console.log(`Searching eBay Browse API for "${searchTerm}"...`);
+        
+        // Using the direct Browse API with search
+        const response = await axios({
+          method: 'get',
+          url: `${EBAY_PRODUCTION_API_URL}${EBAY_BROWSE_API}?q=${encodeURIComponent(searchTerm)}&limit=20`,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+          }
+        });
+
+        const items = response.data.itemSummaries || [];
+        console.log(`Found ${items.length} items for "${searchTerm}" from eBay Browse API`);
+        
+        // Add unique items to our collection
+        for (const item of items) {
+          // Only add if not already in the collection (avoid duplicates)
+          if (!allItems.some(existingItem => existingItem.itemId === item.itemId)) {
+            allItems.push(item);
+          }
+        }
+        
+        // If we found enough items, stop searching
+        if (allItems.length >= 30) {
+          break;
+        }
+      } catch (searchError) {
+        console.error(`Error searching for "${searchTerm}":`, searchError);
+        // Continue with next search term
+      }
+    }
+    
+    // If we got any items, return them
+    if (allItems.length > 0) {
+      console.log(`Total unique items found from eBay Browse API: ${allItems.length}`);
+      return allItems;
+    }
+    
+    // Fall back to a more generic search as a last resort
+    const fallbackResponse = await axios({
       method: 'get',
-      url: `${EBAY_PRODUCTION_API_URL}${EBAY_BROWSE_API}?q=stickers&limit=10`,
+      url: `${EBAY_PRODUCTION_API_URL}${EBAY_BROWSE_API}?limit=50`,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -84,9 +131,9 @@ export async function getEbayProductsFromBrowseAPI(): Promise<any[]> {
       }
     });
 
-    const items = response.data.itemSummaries || [];
-    console.log(`Found ${items.length} items from eBay Browse API`);
-    return items;
+    const fallbackItems = fallbackResponse.data.itemSummaries || [];
+    console.log(`Found ${fallbackItems.length} items from fallback search`);
+    return fallbackItems;
   } catch (error) {
     console.error('Error fetching from Browse API:', error);
     throw new Error('Failed to fetch products from eBay Browse API');
