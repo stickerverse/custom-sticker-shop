@@ -47,7 +47,7 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({
     size: '4" × 4"',
     material: "Vinyl",
-    finish: "Glossy"
+    finish: "Gloss"
   });
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -86,17 +86,8 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             case "Holographic":
               materialMultiplier = 1.5;
               break;
-            case "Transparent":
+            case "Clear":
               materialMultiplier = 1.2;
-              break;
-            case "Glitter":
-              materialMultiplier = 1.4;
-              break;
-            case "Mirror":
-              materialMultiplier = 1.6;
-              break;
-            case "Pixie Dust":
-              materialMultiplier = 1.8;
               break;
           }
         }
@@ -141,17 +132,8 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
         case "Holographic":
           basePrice = Math.round(basePrice * 1.5);
           break;
-        case "Transparent":
+        case "Clear":
           basePrice = Math.round(basePrice * 1.2);
-          break;
-        case "Glitter":
-          basePrice = Math.round(basePrice * 1.4);
-          break;
-        case "Mirror":
-          basePrice = Math.round(basePrice * 1.6);
-          break;
-        case "Pixie Dust":
-          basePrice = Math.round(basePrice * 1.8);
           break;
       }
     }
