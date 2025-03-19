@@ -203,10 +203,13 @@ export default function Checkout() {
                     <Button 
                       variant="secondary" 
                       className="flex-1"
-                      onClick={() => toast({
-                        title: "Continuing as Guest",
-                        description: "You can create an account after checkout if you wish."
-                      })}
+                      onClick={() => {
+                        toast({
+                          title: "Continuing as Guest",
+                          description: "You can create an account after checkout if you wish."
+                        });
+                        // Simply continue with checkout process as guest
+                      }}
                     >
                       Continue as Guest
                     </Button>
