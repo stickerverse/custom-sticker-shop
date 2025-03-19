@@ -48,6 +48,7 @@ const EbayStoreSync: React.FC = () => {
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [productCount, setProductCount] = useState<number | null>(null);
   const [isCheckingProducts, setIsCheckingProducts] = useState(false);
+  const [ebayApiStatus, setEbayApiStatus] = useState<'connected' | 'error' | 'missing'>('connected');
 
   // Workflow steps
   const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([
@@ -74,9 +75,32 @@ const EbayStoreSync: React.FC = () => {
     }
   ]);
 
-  // Check available products on component mount
+  // Function to check if eBay token is properly configured
+  const checkEbayToken = async () => {
+    try {
+      const response = await apiRequest("GET", "/api/ebay/token-status", undefined);
+      const data = await response.json();
+      
+      if (data.valid) {
+        setEbayApiStatus('connected');
+      } else if (data.missing) {
+        setEbayApiStatus('missing');
+      } else {
+        setEbayApiStatus('error');
+      }
+    } catch (error) {
+      console.error("Error checking eBay token status:", error);
+      // Default to error state if we can't check the token status
+      setEbayApiStatus('error');
+    }
+  };
+
+  // Check token and available products on component mount
   useEffect(() => {
-    checkAvailableProducts();
+    // First check token status, then check for products
+    checkEbayToken().then(() => {
+      checkAvailableProducts();
+    });
   }, []);
 
   // Check how many products are available
@@ -85,7 +109,42 @@ const EbayStoreSync: React.FC = () => {
     
     try {
       const response = await apiRequest("GET", "/api/ebay/products", undefined);
+      
+      // Check for authentication errors
+      if (response.status === 400 || response.status === 401 || response.status === 403) {
+        const errorData = await response.json();
+        
+        if (errorData.missingCredentials) {
+          toast({
+            title: 'eBay API Configuration Required',
+            description: 'Please provide your eBay API token with correct permissions in the environment settings.',
+            variant: 'destructive',
+            duration: 6000,
+          });
+          setEbayApiStatus('missing');
+          setProductCount(0);
+          setIsCheckingProducts(false);
+          return;
+        }
+        
+        if (response.status === 403) {
+          toast({
+            title: 'eBay API Permission Error',
+            description: 'Your eBay API token lacks required permissions. Please update with appropriate scopes including Listing Management.',
+            variant: 'destructive',
+            duration: 6000,
+          });
+          setEbayApiStatus('error');
+          setProductCount(0);
+          setIsCheckingProducts(false);
+          return;
+        }
+      }
+      
       const data = await response.json();
+      
+      // If we got here with a successful response, the API is connected
+      setEbayApiStatus('connected');
       
       if (data.products && Array.isArray(data.products)) {
         setProductCount(data.products.length);
@@ -94,6 +153,23 @@ const EbayStoreSync: React.FC = () => {
       }
     } catch (error) {
       console.error("Error checking products:", error);
+      
+      // Check if this is an authentication error
+      if (error instanceof Error && error.message && error.message.includes('403')) {
+        toast({
+          title: 'eBay API Permission Error',
+          description: 'Your eBay API token lacks required permissions. Please update with appropriate scopes.',
+          variant: 'destructive',
+          duration: 6000,
+        });
+        setEbayApiStatus('error');
+      } else if (error instanceof Error && error.message && error.message.includes('401')) {
+        setEbayApiStatus('missing');
+      } else {
+        // For other errors, the API might still be connected but something else went wrong
+        setEbayApiStatus('error');
+      }
+      
       setProductCount(0);
     } finally {
       setIsCheckingProducts(false);
@@ -116,6 +192,35 @@ const EbayStoreSync: React.FC = () => {
 
     try {
       const response = await apiRequest("POST", "/api/ebay/sync", {});
+      
+      // Check for authentication errors
+      if (response.status === 400 || response.status === 401 || response.status === 403) {
+        const errorData = await response.json();
+        
+        if (errorData.missingCredentials) {
+          toast({
+            title: 'eBay API Configuration Required',
+            description: 'Please provide your eBay API token with appropriate permissions in the environment settings.',
+            variant: 'destructive',
+            duration: 6000,
+          });
+          setEbayApiStatus('missing');
+          setIsSyncing(false);
+          return;
+        }
+        
+        if (response.status === 403) {
+          toast({
+            title: 'eBay API Permission Error',
+            description: 'Your eBay API token lacks required permissions for syncing products. Please ensure your token has Listing Management and Account Management scopes.',
+            variant: 'destructive',
+            duration: 8000,
+          });
+          setEbayApiStatus('error');
+          setIsSyncing(false);
+          return;
+        }
+      }
 
       const data = await response.json();
       setLastSyncResult(data);
@@ -133,12 +238,33 @@ const EbayStoreSync: React.FC = () => {
       checkAvailableProducts();
     } catch (error) {
       console.error("Error syncing products:", error);
-      toast({
-        title: "Sync Failed",
-        description:
-          "Could not sync products from eBay. Please check your credentials and try again.",
-        variant: "destructive",
-      });
+      
+      // Check if this is an authentication error
+      if (error instanceof Error && error.message && error.message.includes('403')) {
+        toast({
+          title: 'eBay API Permission Error',
+          description: 'Your eBay API token lacks required permissions. Please update with appropriate scopes including Listing Management.',
+          variant: 'destructive',
+          duration: 6000,
+        });
+        setEbayApiStatus('error');
+      } else if (error instanceof Error && error.message && error.message.includes('401')) {
+        toast({
+          title: 'eBay API Authentication Failed',
+          description: 'Your eBay API token is invalid or expired. Please provide a valid token.',
+          variant: 'destructive',
+          duration: 6000,
+        });
+        setEbayApiStatus('missing');
+      } else {
+        toast({
+          title: "Sync Failed",
+          description:
+            "Could not sync products from eBay. Please check your credentials and API permissions, then try again.",
+          variant: "destructive",
+        });
+        // For other errors, we don't change the API status as the issue might be temporary
+      }
     } finally {
       setIsSyncing(false);
     }
@@ -199,9 +325,21 @@ const EbayStoreSync: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium">eBay Connection Status: </span>
-                <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 hover:bg-green-50">
-                  Connected
-                </Badge>
+                {ebayApiStatus === 'connected' && (
+                  <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 hover:bg-green-50">
+                    Connected
+                  </Badge>
+                )}
+                {ebayApiStatus === 'error' && (
+                  <Badge variant="outline" className="ml-2 bg-yellow-50 text-yellow-700 hover:bg-yellow-50">
+                    Permission Error
+                  </Badge>
+                )}
+                {ebayApiStatus === 'missing' && (
+                  <Badge variant="outline" className="ml-2 bg-red-50 text-red-700 hover:bg-red-50">
+                    Configuration Required
+                  </Badge>
+                )}
               </div>
               <div>
                 <Badge variant="secondary" className="flex items-center">
