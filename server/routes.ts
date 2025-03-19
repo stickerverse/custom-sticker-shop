@@ -16,6 +16,7 @@ import {
   getEbayProductsApi,
   importSelectedEbayProducts
 } from './services/ebay-store-sync';
+import { getEbayTokenStatus, requireEbayToken } from './services/ebay-token';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -998,6 +999,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // eBay Integration routes
+  
+  // Check eBay token status
+  app.get('/api/ebay/token-status', async (req: Request, res: Response) => {
+    try {
+      // Check if user is admin
+      const userId = req.session.userId;
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (!user?.isAdmin) {
+          return res.status(403).json({ message: 'Only admins can check eBay API status' });
+        }
+      }
+      
+      // Check token status
+      return getEbayTokenStatus(req, res);
+    } catch (error) {
+      console.error('Error checking eBay token status:', error);
+      res.status(500).json({
+        valid: false,
+        error: 'Failed to check eBay token status'
+      });
+    }
+  });
   
   // Check if eBay credentials are present
   const requireEbayCredentials = (req: Request, res: Response, next: NextFunction) => {
