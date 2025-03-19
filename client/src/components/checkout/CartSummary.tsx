@@ -53,18 +53,12 @@ export default function CartSummary({ cart }: CartSummaryProps) {
               </div>
               <div>
                 <p className="font-medium">{item.product.title}</p>
-                <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
-                {Object.keys(item.options).length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {Object.entries(item.options).map(([key, value]) => (
-                      key !== 'price' && (
-                        <span key={key} className="mr-2">
-                          {key}: {String(value)}
-                        </span>
-                      )
-                    ))}
-                  </p>
-                )}
+                <p className="text-xs text-muted-foreground">
+                  Qty: {item.quantity} × {formatCurrency(item.product.price || 500)} each
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  size: {item.options.size || "Standard"} {item.options.material ? `material: ${item.options.material}` : ""} {item.options.finish ? `finish: ${item.options.finish}` : ""}
+                </p>
               </div>
             </div>
             <div className="text-right">
