@@ -22,6 +22,7 @@ export interface IStorage {
   getProduct(id: number): Promise<Product | undefined>;
   getProductOptions(productId: number): Promise<any[]>;
   createProduct(product: InsertProduct): Promise<Product>;
+  createProductOption(option: { productId: number, optionType: string, optionValue: string, priceModifier: number }): Promise<any>;
   
   // Order methods
   getOrders(userId?: number): Promise<Order[]>;
