@@ -16,6 +16,7 @@ interface CartItemProps {
       title: string;
       description: string;
       imageUrl: string;
+      price?: number;
     };
   };
 }
@@ -36,11 +37,13 @@ const CartItem = ({ item }: CartItemProps) => {
     return `$${(cents / 100).toFixed(2)}`;
   };
 
-  // Format options to display
+  // Format options to display (exclude technical fields like unitPrice)
   const formatOptions = () => {
-    return Object.entries(item.options)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join(", ");
+    const displayableOptions = Object.entries(item.options)
+      .filter(([key]) => !['unitPrice'].includes(key))
+      .map(([key, value]) => `${key}: ${value}`);
+    
+    return displayableOptions.join(", ");
   };
 
   // Handle quantity update

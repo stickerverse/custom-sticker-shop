@@ -36,8 +36,8 @@ export function CartDrawer({ isOpen, onClose, newItemId }: CartDrawerProps) {
   // Calculate total price
   const calculateTotal = (): number => {
     return cart.reduce((total, item) => {
-      // Basic calculation - in a real app this would use the same logic as the product page
-      const itemPrice = 799; // Default to $7.99 for all products
+      // Use the actual price from the product data stored in cart
+      const itemPrice = item.product.price || 0;
       return total + (itemPrice * item.quantity);
     }, 0);
   };
