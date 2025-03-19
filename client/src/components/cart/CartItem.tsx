@@ -28,8 +28,11 @@ const CartItem = ({ item }: CartItemProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  // Get the actual product price from the product data
-  const itemPrice = item.product.price || 0; // Use the price from product data
+  // Get the actual product price from the product data or custom unitPrice
+  // First check if unitPrice was passed in options (from customization)
+  const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
+  // Fall back to product price if no custom price, or default to 799 (7.99) if neither available
+  const itemPrice = customUnitPrice || item.product.price || 799;
   const totalPrice = itemPrice * quantity;
 
   // Format price in dollars
@@ -115,7 +118,12 @@ const CartItem = ({ item }: CartItemProps) => {
             </h3>
           </Link>
           <p className="text-gray-600 text-sm mb-2">{formatOptions()}</p>
-          <p className="text-primary font-semibold">{formatPrice(totalPrice)}</p>
+          <div className="text-primary">
+            <span className="font-semibold">{formatPrice(itemPrice)}</span>
+            {quantity > 1 && (
+              <span className="text-gray-600 text-sm ml-1">× {quantity} = {formatPrice(totalPrice)}</span>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4">
