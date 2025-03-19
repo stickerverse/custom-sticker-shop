@@ -6,6 +6,7 @@ interface InstantPriceCalculatorProps {
   basePrice: number;
   materialMultiplier: number;
   quantity: number;
+  finishPriceModifier?: number;
   onComplexityChange: (complexityMultiplier: number) => void;
 }
 
@@ -13,6 +14,7 @@ export function InstantPriceCalculator({
   basePrice,
   materialMultiplier,
   quantity,
+  finishPriceModifier = 0,
   onComplexityChange
 }: InstantPriceCalculatorProps) {
   const [designComplexity, setDesignComplexity] = useState(1);
@@ -36,9 +38,10 @@ export function InstantPriceCalculator({
   // Calculate price breakdown
   const priceBeforeComplexity = basePrice * materialMultiplier;
   const priceWithComplexity = Math.round(priceBeforeComplexity * complexityMultiplier);
+  const priceWithFinish = priceWithComplexity + finishPriceModifier;
   
   // Apply quantity discounts
-  let finalUnitPrice = priceWithComplexity;
+  let finalUnitPrice = priceWithFinish;
   let discountPercentage = 0;
   
   if (quantity >= 50) {
@@ -79,6 +82,13 @@ export function InstantPriceCalculator({
           <span>Design Complexity</span>
           <span>×{complexityMultiplier.toFixed(2)}</span>
         </div>
+        
+        {finishPriceModifier > 0 && (
+          <div className="flex justify-between text-gray-600">
+            <span>Finish Upgrade</span>
+            <span>+{formatPrice(finishPriceModifier)}</span>
+          </div>
+        )}
         
         {discountPercentage > 0 && (
           <div className="flex justify-between text-green-600">

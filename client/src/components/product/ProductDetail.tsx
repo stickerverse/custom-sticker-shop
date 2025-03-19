@@ -99,8 +99,22 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
           }
         }
         
-        // Calculate base price with material and complexity multipliers
-        let calculatedPrice = Math.round(basePrice * materialMultiplier * complexityMultiplier);
+        // Apply finish price modifiers
+        let finishPriceModifier = 0;
+        if (selectedOptions.finish) {
+          switch (selectedOptions.finish) {
+            case "Matte":
+              finishPriceModifier = 200; // $2.00 extra
+              break;
+            case "Holographic":
+              finishPriceModifier = 300; // $3.00 extra
+              break;
+            // Gloss is the standard finish with no extra cost
+          }
+        }
+        
+        // Calculate base price with material and complexity multipliers, then add finish modifier
+        let calculatedPrice = Math.round(basePrice * materialMultiplier * complexityMultiplier) + finishPriceModifier;
         
         // Apply quantity discounts
         if (quantity >= 50) {
@@ -147,8 +161,22 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
       }
     }
     
-    // Apply complexity and material multipliers
-    basePrice = Math.round(basePrice * materialMultiplier * complexityMultiplier);
+    // Apply finish price modifiers
+    let finishPriceModifier = 0;
+    if (selectedOptions.finish) {
+      switch (selectedOptions.finish) {
+        case "Matte":
+          finishPriceModifier = 200; // $2.00 extra
+          break;
+        case "Holographic":
+          finishPriceModifier = 300; // $3.00 extra
+          break;
+        // Gloss is the standard finish with no extra cost
+      }
+    }
+    
+    // Apply complexity and material multipliers, then add finish modifier
+    basePrice = Math.round(basePrice * materialMultiplier * complexityMultiplier) + finishPriceModifier;
     
     // Apply quantity discounts
     if (quantity >= 50) {
@@ -367,6 +395,10 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             <InstantPriceCalculator
               basePrice={799} // Base price for medium 4x4 sticker
               materialMultiplier={selectedOptions.material === "Holographic" ? 1.5 : (selectedOptions.material === "Clear" ? 1.2 : 1.0)}
+              finishPriceModifier={
+                selectedOptions.finish === "Matte" ? 200 :
+                selectedOptions.finish === "Holographic" ? 300 : 0
+              }
               quantity={quantity}
               onComplexityChange={handleComplexityChange}
             />
