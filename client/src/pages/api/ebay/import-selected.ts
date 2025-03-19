@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { importSelectedEbayProducts } from '../../../server/ebay/ebay-selection';
+import { importSelectedEbayProducts } from '../../../../server/ebay/ebay-selection';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {

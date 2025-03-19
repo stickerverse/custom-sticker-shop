@@ -8,15 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 
-/**
- * EbayProductSelector component allows users to select and import products from eBay
- * 
- * @param {Object} props - Component props
- * @param {Function} props.onImportComplete - Optional callback when import is complete
- */
-const EbayProductSelector = ({ onImportComplete }) => {
+const EbayProductSelector = () => {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [products, setProducts] = useState([]);
@@ -118,11 +114,11 @@ const EbayProductSelector = ({ onImportComplete }) => {
         description: `${data.importedCount} products have been imported to your store`,
         variant: 'default',
       });
-      
-      // Call the onImportComplete callback if provided
-      if (onImportComplete && typeof onImportComplete === 'function') {
-        onImportComplete(data);
-      }
+
+      // Redirect back to admin after 3 seconds
+      setTimeout(() => {
+        setLocation('/admin');
+      }, 3000);
     } catch (error) {
       console.error('Error importing products:', error);
       toast({
@@ -167,7 +163,7 @@ const EbayProductSelector = ({ onImportComplete }) => {
       <CardHeader>
         <CardTitle>Select Products to Import</CardTitle>
         <CardDescription>
-          Choose which eBay products you want to import into your store
+          Choose which eBay products you want to import into your sticker shop
         </CardDescription>
       </CardHeader>
 
@@ -304,6 +300,9 @@ const EbayProductSelector = ({ onImportComplete }) => {
                   {importResults.errors.length} products failed to import.
                 </div>
               )}
+              <div className="mt-2">
+                Redirecting to Admin Dashboard...
+              </div>
             </AlertDescription>
           </Alert>
         )}
