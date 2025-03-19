@@ -93,17 +93,6 @@ export default function Checkout() {
     return sum + (productPrice || optionPrice) * item.quantity;
   }, 0);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to continue with checkout.",
-      });
-      navigate('/auth/login?redirect=/checkout');
-    }
-  }, [isAuthenticated, navigate, toast]);
-
   // Create payment intent when total changes
   useEffect(() => {
     const createPaymentIntent = async () => {
@@ -129,10 +118,11 @@ export default function Checkout() {
       }
     };
 
-    if (total > 0 && isAuthenticated) {
+    // Create payment intent for both guests and registered users
+    if (total > 0) {
       createPaymentIntent();
     }
-  }, [total, isAuthenticated, toast]);
+  }, [total, toast]);
 
   // Handle shipping form submission
   const onSubmitShippingForm = (values: ShippingFormValues) => {
@@ -141,9 +131,7 @@ export default function Checkout() {
     setFormCompleted(true);
   };
 
-  if (!isAuthenticated) {
-    return null; // Will redirect to login
-  }
+  // No longer redirecting to login for guest checkout
 
   if (cart.length === 0) {
     return (
@@ -181,6 +169,50 @@ export default function Checkout() {
           {!formCompleted ? (
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
+              
+              {/* Guest checkout or login/register option */}
+              {!isAuthenticated && (
+                <div className="mb-6 p-4 bg-muted rounded-md">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium">Checkout Options</h3>
+                    {isAuthenticated ? (
+                      <span className="text-sm text-green-600 flex items-center">
+                        <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Signed in
+                      </span>
+                    ) : null}
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => navigate('/auth/login?redirect=/checkout')}
+                    >
+                      Sign In
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => navigate('/auth/register?redirect=/checkout')}
+                    >
+                      Create Account
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      className="flex-1"
+                      onClick={() => toast({
+                        title: "Continuing as Guest",
+                        description: "You can create an account after checkout if you wish."
+                      })}
+                    >
+                      Continue as Guest
+                    </Button>
+                  </div>
+                </div>
+              )}
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmitShippingForm)} className="space-y-4">
