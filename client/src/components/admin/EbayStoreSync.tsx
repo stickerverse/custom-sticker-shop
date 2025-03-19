@@ -23,7 +23,10 @@ import {
   Store,
   ExternalLink,
   FileCheck,
-  ListFilter
+  ListFilter,
+  Save,
+  User,
+  Settings
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -49,6 +52,8 @@ const EbayStoreSync: React.FC = () => {
   const [productCount, setProductCount] = useState<number | null>(null);
   const [isCheckingProducts, setIsCheckingProducts] = useState(false);
   const [ebayApiStatus, setEbayApiStatus] = useState<'connected' | 'error' | 'missing'>('connected');
+  const [sellerID, setSellerID] = useState<string>("");
+  const [isSavingSellerID, setIsSavingSellerID] = useState(false);
 
   // Workflow steps
   const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([
@@ -298,6 +303,54 @@ const EbayStoreSync: React.FC = () => {
       setLogs("Error loading logs");
     } finally {
       setIsLoadingLogs(false);
+    }
+  };
+  
+  // Save eBay seller ID
+  const saveSellerID = async () => {
+    if (!sellerID.trim()) {
+      toast({
+        title: "Seller ID Required",
+        description: "Please enter your eBay seller ID",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSavingSellerID(true);
+    
+    try {
+      const response = await apiRequest("POST", "/api/ebay/settings", {
+        sellerID: sellerID.trim()
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: "Settings Saved",
+          description: "Your eBay seller ID has been saved. Products will be filtered by this seller.",
+          variant: "default",
+        });
+        
+        // Refresh product list with new seller ID
+        checkAvailableProducts();
+      } else {
+        toast({
+          title: "Error Saving Settings",
+          description: data.message || "Could not save eBay seller ID",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving seller ID:", error);
+      toast({
+        title: "Error Saving Settings",
+        description: "Could not save eBay seller ID. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingSellerID(false);
     }
   };
 
