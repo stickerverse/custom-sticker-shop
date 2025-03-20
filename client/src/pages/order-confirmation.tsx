@@ -21,17 +21,14 @@ export default function OrderConfirmation() {
   // Redirect to home if no orderId is present
   useEffect(() => {
     if (!orderId) {
+      toast({
+        title: "Missing Order Information",
+        description: "No order ID was provided.",
+        variant: "destructive"
+      });
       navigate("/");
     }
-    
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to view your order details.",
-      });
-      navigate("/auth/login?redirect=/order-confirmation?orderId=" + orderId);
-    }
-  }, [orderId, navigate, isAuthenticated, toast]);
+  }, [orderId, navigate, toast]);
 
   // Fetch order details
   const { data: order, isLoading, error } = useQuery({
@@ -41,7 +38,7 @@ export default function OrderConfirmation() {
       const response = await apiRequest("GET", `/api/orders/${orderId}`);
       return response.json();
     },
-    enabled: !!orderId && isAuthenticated,
+    enabled: !!orderId, // Allow both guest and authenticated users to view their orders
   });
 
   if (isLoading) {
