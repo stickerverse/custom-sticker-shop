@@ -24,7 +24,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16", // This is the latest stable API version
+  apiVersion: "2025-02-24.acacia", // Using the latest API version
 });
 
 // Extend Express Request to include session
@@ -99,7 +99,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const amountInCents = validAmount >= 100 && Math.floor(validAmount) === validAmount 
         ? Math.max(minAmount, validAmount) 
         : Math.max(minAmount, Math.round(validAmount * 100));
-      console.log('Final amount in cents:', amountInCents);
+      
+      // Format for logging using our utility
+      const formattedAmount = formatCurrency(amountInCents);
+      console.log(`Final amount: ${formattedAmount} (${amountInCents} cents)`);
 
       try {
         // Create a PaymentIntent with the order amount and currency
@@ -118,7 +121,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Payment intent created successfully:', {
           id: paymentIntent.id,
           hasClientSecret: !!paymentIntent.client_secret,
-          amount: paymentIntent.amount
+          amount: paymentIntent.amount,
+          formattedAmount: formatCurrency(paymentIntent.amount)
         });
 
         return res.status(200).json({
