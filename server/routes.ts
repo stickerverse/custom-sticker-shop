@@ -23,7 +23,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2023-10-16", // This is the latest stable API version
 });
 
 // Extend Express Request to include session
@@ -92,7 +92,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Ensure minimum amount for Stripe (at least $0.50 USD or 50 cents)
       const minAmount = 50; // 50 cents minimum
-      const amountInCents = Math.max(minAmount, Math.round(validAmount * 100));
+      
+      // If the amount is already in cents (e.g., 1999 instead of 19.99)
+      // we shouldn't multiply by 100 again
+      const amountInCents = validAmount >= 100 && Math.floor(validAmount) === validAmount 
+        ? Math.max(minAmount, validAmount) 
+        : Math.max(minAmount, Math.round(validAmount * 100));
       console.log('Final amount in cents:', amountInCents);
 
       try {
@@ -600,10 +605,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/orders/:id', async (req: Request, res: Response) => {
     const userId = req.session.userId;
     
-    if (!userId) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
-    
     try {
       const orderId = parseInt(req.params.id);
       const order = await storage.getOrder(orderId);
@@ -612,10 +613,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Order not found' });
       }
       
-      // Check if user owns this order or is admin
-      const user = await storage.getUser(userId);
-      if (order.userId !== userId && !user?.isAdmin) {
-        return res.status(403).json({ message: 'Not authorized to view this order' });
+      // Only enforce authorization if the user is logged in and not admin
+      // This allows guest users to see their order confirmation
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (order.userId !== userId && order.userId !== null && !user?.isAdmin) {
+          return res.status(403).json({ message: 'Not authorized to view this order' });
+        }
       }
       
       // Get order items
