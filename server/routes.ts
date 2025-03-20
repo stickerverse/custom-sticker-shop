@@ -17,6 +17,7 @@ import {
   importSelectedEbayProducts
 } from './services/ebay-store-sync';
 import { getEbayTokenStatus, requireEbayToken } from './services/ebay-token';
+import { calculateItemPrice, formatCurrency } from './utils/pricing';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -679,29 +680,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderItems = await Promise.all(cartItems.map(async (item) => {
         const product = await storage.getProduct(item.productId);
         
-        // Calculate price based on product and options
-        let price = 0;
-        if (product) {
-          // Base price (example: $5 = 500 cents)
-          price = 500;
-          
-          // Add option modifiers
-          const options = await storage.getProductOptions(product.id);
-          const itemOptions = item.options as Record<string, string>;
-          for (const selectedOption of Object.values(itemOptions)) {
-            const option = options.find(
-              opt => opt.optionValue === selectedOption
-            );
-            if (option) {
-              price += option.priceModifier;
-            }
-          }
-        }
+        // Prepare item with product for price calculation
+        const itemWithProduct = {
+          ...item,
+          product
+        };
+        
+        // Use the utility function to calculate the unit price
+        const unitPrice = calculateItemPrice(itemWithProduct, 1);
         
         return {
           productId: item.productId,
           quantity: item.quantity,
-          price,
+          price: unitPrice,
           options: item.options,
           customDesign: null
         };
