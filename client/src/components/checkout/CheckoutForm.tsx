@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
+import { calculateItemPrice } from "@/lib/utils";
 import { CreditCard, ArrowRight, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -46,16 +47,9 @@ export default function CheckoutForm({ shippingAddress }: CheckoutFormProps) {
     try {
       // Step 1: First create the order (for both guests and authenticated users)
       console.log("Creating order...");
-      // Calculate total from cart with consistent pricing logic
+      // Calculate total from cart with utility function for consistent pricing
       const total = cart.reduce((sum, item) => {
-        // Check for custom unit price first (from customization)
-        const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
-        
-        // Fall back to product price if no custom price, default to 500 cents ($5.00) if neither available
-        const itemPrice = customUnitPrice || (item.product?.price || 500);
-        
-        // Use Math.round to ensure we're working with whole cents (no fractional cents)
-        return sum + Math.round(itemPrice * item.quantity);
+        return sum + calculateItemPrice(item, item.quantity);
       }, 0);
       
       // For guest checkout, we need to send the cart items in the request body

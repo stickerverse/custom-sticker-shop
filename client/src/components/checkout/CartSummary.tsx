@@ -72,18 +72,13 @@ export default function CartSummary({ cart }: CartSummaryProps) {
     }, 0);
   };
   
-  // Helper to get correct price for an item using our utility
-  const getItemPrice = (item: any) => {
-    return calculateItemPrice(item, 1); // Get unit price (quantity = 1)
-  };
-
   // Calculate an optimistic subtotal after quantity change
   const updateOptimisticSubtotal = (itemId: number, newQuantity: number, oldQuantity: number) => {
     const currentSubtotal = calculateSubtotal();
     const item = liveCart.find(item => item.id === itemId);
     
     if (item) {
-      const itemUnitPrice = getItemPrice(item);
+      const itemUnitPrice = calculateItemPrice(item, 1); // Get unit price with quantity = 1
       const priceDifference = Math.round(itemUnitPrice * (newQuantity - oldQuantity));
       setOptimisticSubtotal(currentSubtotal + priceDifference);
     }
@@ -108,10 +103,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
   const tax = Math.round(subtotal * 0.08); // 8% tax
   const total = subtotal + shipping + tax;
 
-  // Format as currency
-  const formatCurrency = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
-  };
+  // We now use the imported formatCurrency utility function
 
   return (
     <div>
@@ -146,7 +138,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  Qty: {item.quantity} × {formatCurrency(getItemPrice(item))} each
+                  Qty: {item.quantity} × {formatCurrency(calculateItemPrice(item, 1))} each
                 </motion.p>
                 <p className="text-xs text-muted-foreground">
                   size: {item.options.size || "Standard"} 
@@ -164,7 +156,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
                   transition: { duration: 0.3 }
                 }}
               >
-                {formatCurrency(Math.round(getItemPrice(item) * item.quantity))}
+                {formatCurrency(calculateItemPrice(item, item.quantity))}
               </motion.p>
             </div>
           </motion.div>
