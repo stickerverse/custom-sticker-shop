@@ -12,11 +12,17 @@ const ShoppingCart = () => {
   const { cart, isLoading, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  // Calculate totals
+  // Calculate totals with correct pricing
   const calculateSubtotal = () => {
     return cart.reduce((sum, item) => {
-      const itemPrice = 499; // Base price: $4.99
-      return sum + itemPrice * item.quantity;
+      // Get the actual product price from the product data or custom unitPrice
+      // First check if unitPrice was passed in options (from customization)
+      const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
+      // Fall back to product price if no custom price, or default to 500 (5.00) if neither available
+      const itemPrice = customUnitPrice || (item.product?.price || 500);
+      
+      // Use Math.round to ensure we're working with whole cents (no fractional cents)
+      return sum + Math.round(itemPrice * item.quantity);
     }, 0);
   };
 

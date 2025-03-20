@@ -67,13 +67,14 @@ export default function CartSummary({ cart }: CartSummaryProps) {
   // Helper to get correct price for an item
   const getItemPrice = (item: any) => {
     const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
-    return customUnitPrice || item.product.price || 799; // Default to 7.99
+    return customUnitPrice || item.product.price || 500; // Default to $5.00
   };
   
   // Calculate subtotal using actual product prices
   const calculateSubtotal = () => {
     return liveCart.reduce((total, item) => {
-      const itemPrice = getItemPrice(item) * item.quantity;
+      // Use Math.round to ensure we're working with whole cents (no fractional cents)
+      const itemPrice = Math.round(getItemPrice(item) * item.quantity);
       return total + itemPrice;
     }, 0);
   };
@@ -85,7 +86,8 @@ export default function CartSummary({ cart }: CartSummaryProps) {
     
     if (item) {
       const itemUnitPrice = getItemPrice(item);
-      const priceDifference = itemUnitPrice * (newQuantity - oldQuantity);
+      // Use Math.round to ensure we're working with whole cents (no fractional cents)
+      const priceDifference = Math.round(itemUnitPrice * (newQuantity - oldQuantity));
       setOptimisticSubtotal(currentSubtotal + priceDifference);
     }
   };
@@ -96,7 +98,8 @@ export default function CartSummary({ cart }: CartSummaryProps) {
     const item = liveCart.find(item => item.id === itemId);
     
     if (item) {
-      const itemTotalPrice = getItemPrice(item) * item.quantity;
+      // Use Math.round to ensure we're working with whole cents (no fractional cents)
+      const itemTotalPrice = Math.round(getItemPrice(item) * item.quantity);
       setOptimisticSubtotal(currentSubtotal - itemTotalPrice);
     }
   };
@@ -165,7 +168,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
                   transition: { duration: 0.3 }
                 }}
               >
-                {formatCurrency(getItemPrice(item) * item.quantity)}
+                {formatCurrency(Math.round(getItemPrice(item) * item.quantity))}
               </motion.p>
             </div>
           </motion.div>
