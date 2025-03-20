@@ -1,0 +1,560 @@
+# **Focused Implementation Prompt for Replit AI Coder: Complete Application Transformation**
+
+## **Core Implementation Objective**
+Transform the **entire application** into a **cohesive, modern system** with exceptional UX across all modules. **CRITICAL: Maintain all existing business logic functionality** while creating a unified interface for administrators and end users.
+
+## **Implementation Requirements - Read Carefully**
+1. **Focus on code quality** - Write clean, well-documented, maintainable code
+2. **Implement in clear stages** - Do not attempt to rebuild everything at once
+3. **Test extensively** - Each component must work before moving to the next
+4. **Maintain full compatibility** - New UI must work with existing data structures
+5. **Never sacrifice functionality** - Visual improvements must not break features
+
+---
+
+## **1. Global Design System Implementation**
+
+### **1.1 Core Component Library - IMPLEMENT FIRST**
+```javascript
+// BEGIN WITH THESE FOUNDATIONAL ELEMENTS
+// Build and test each thoroughly before proceeding
+
+// 1. Color Token System
+const colors = {
+  // Define exact hex values - no placeholders
+  primary: {
+    main: '#3B82F6',
+    light: '#93C5FD',
+    dark: '#1D4ED8',
+  },
+  // Include complete error, warning, success, and info states
+  // Include full grayscale palette (50-900)
+};
+
+// 2. Typography Components
+// Create exact implementations, not conceptual descriptions
+const Typography = {
+  h1: ({ children }) => <h1 className="text-3xl font-bold tracking-tight">{children}</h1>,
+  h2: ({ children }) => <h2 className="text-2xl font-semibold leading-7">{children}</h2>,
+  // Include all typography variants with actual CSS
+};
+
+// 3. Button Components
+// Implement all states (hover, active, disabled)
+const Button = ({ variant = 'primary', size = 'md', children, ...props }) => {
+  // Include actual implementation with proper styles
+  const baseClasses = "font-medium rounded focus:outline-none focus-visible:ring-2";
+  const variantClasses = {
+    primary: "bg-primary-600 text-white hover:bg-primary-700",
+    secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50",
+    // Include actual implementation - no pseudocode
+  };
+  
+  // Return fully functional component
+};
+
+// 4. Form Controls
+// Implement with all necessary states and accessibility features
+const Input = ({ label, error, ...props }) => {
+  // Include actual code implementation with proper validation states
+};
+```
+
+### **1.2 Layout Structure Implementation**
+```javascript
+// Create actual code for layout containers
+const PageContainer = ({ children }) => (
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    {children}
+  </div>
+);
+
+const SectionContainer = ({ title, children }) => (
+  <div className="py-6">
+    {title && <Typography.h2>{title}</Typography.h2>}
+    <div className="mt-4">{children}</div>
+  </div>
+);
+
+// Implement grid system with actual breakpoints
+const Grid = ({ columns = { sm: 1, md: 2, lg: 3 }, gap = 4, children }) => {
+  // Include actual grid implementation with proper CSS
+};
+```
+
+---
+
+## **2. Navigation System Implementation**
+
+### **2.1 Main Navigation Component**
+```javascript
+// Implement complete, functional component - no pseudocode
+const MainNavigation = ({ routes, currentPath }) => {
+  // Include actual state management for mobile menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  return (
+    <nav className="bg-white shadow">
+      {/* Include actual full implementation */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <img className="h-8 w-auto" src="/logo.svg" alt="Logo" />
+          </div>
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
+            {routes.map(route => (
+              <Link
+                key={route.path}
+                href={route.path}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  currentPath === route.path
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                {route.name}
+              </Link>
+            ))}
+          </div>
+          
+          {/* Mobile menu button */}
+          {/* Implement actual mobile menu toggle */}
+        </div>
+      </div>
+      
+      {/* Mobile Navigation Menu */}
+      {/* Implement actual responsive menu */}
+    </nav>
+  );
+};
+```
+
+### **2.2 Dashboard Component Implementation**
+```javascript
+// Implement actual working code, not conceptual descriptions
+const Dashboard = ({ userData, stats, recentActivity }) => {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Welcome section */}
+      <div className="lg:col-span-3 bg-white rounded-lg shadow p-6">
+        <Typography.h1>Welcome back, {userData.name}</Typography.h1>
+        <p className="mt-1 text-gray-500">Here's what's happening today.</p>
+      </div>
+      
+      {/* Stats section */}
+      <div className="lg:col-span-2 bg-white rounded-lg shadow">
+        <div className="p-6">
+          <Typography.h2>Analytics</Typography.h2>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {stats.map(stat => (
+              <div key={stat.id} className="bg-gray-50 p-4 rounded-md">
+                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                <p className="mt-1 text-3xl font-semibold text-gray-900">{stat.value}</p>
+                <div className="mt-1 flex items-center">
+                  {/* Implement actual trend indicators */}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      {/* Recent activity feed - include actual implementation */}
+    </div>
+  );
+};
+```
+
+---
+
+## **3. Product Management Implementation**
+
+### **3.1 Product Listing Component**
+```javascript
+// Implement full working code for product listing
+const ProductList = ({ products, onEdit, onDelete }) => {
+  // Include actual state management for view type
+  const [viewType, setViewType] = useState('grid');
+  // Include actual filter implementation
+  const [filters, setFilters] = useState({
+    category: '',
+    status: '',
+    search: '',
+  });
+  
+  // Implement actual filtering logic
+  const filteredProducts = products.filter(product => {
+    // Return actual filtered results based on current filters
+  });
+  
+  return (
+    <div>
+      {/* Toolbar with view toggles and filters */}
+      <div className="bg-white p-4 shadow rounded-lg mb-4 flex flex-wrap items-center justify-between gap-4">
+        {/* View toggles - implement actual toggle functionality */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setViewType('grid')}
+            className={`p-2 rounded ${viewType === 'grid' ? 'bg-gray-100' : ''}`}
+          >
+            <GridIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => setViewType('list')}
+            className={`p-2 rounded ${viewType === 'list' ? 'bg-gray-100' : ''}`}
+          >
+            <ListIcon className="h-5 w-5" />
+          </button>
+        </div>
+        
+        {/* Filter controls - implement actual filter functionality */}
+        <div className="flex flex-wrap items-center space-x-2">
+          {/* Include actual filter implementation */}
+        </div>
+      </div>
+      
+      {/* Products display - implement both view types */}
+      {viewType === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredProducts.map(product => (
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              onEdit={() => onEdit(product.id)} 
+              onDelete={() => onDelete(product.id)} 
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white shadow rounded-lg overflow-hidden">
+          {/* Implement actual list view */}
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              {/* Include actual table headers */}
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {/* Include actual table rows */}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### **3.2 Product Form Implementation**
+```javascript
+// Create actual implementation, not just concepts
+const ProductForm = ({ initialData, onSubmit, categories }) => {
+  // Implement actual form state management
+  const [formData, setFormData] = useState(initialData || {
+    name: '',
+    price: '',
+    description: '',
+    images: [],
+    category: '',
+    variations: [],
+    // Include all required fields with proper types
+  });
+  
+  // Implement actual form validation
+  const [errors, setErrors] = useState({});
+  
+  // Implement actual image upload handling
+  const handleImageUpload = (files) => {
+    // Process files and update state
+  };
+  
+  // Implement actual variation management
+  const handleVariationChange = (index, field, value) => {
+    const updatedVariations = [...formData.variations];
+    updatedVariations[index] = { ...updatedVariations[index], [field]: value };
+    setFormData({ ...formData, variations: updatedVariations });
+  };
+  
+  // Implement actual form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Include actual validation logic
+    const newErrors = validate(formData);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    onSubmit(formData);
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Product basic info section */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <Typography.h2>Basic Information</Typography.h2>
+        <div className="mt-4 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          {/* Name field - implement with actual error handling */}
+          <div className="sm:col-span-4">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              Product Name
+            </label>
+            <div className="mt-1">
+              <input
+                type="text"
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className={`shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md ${
+                  errors.name ? 'border-red-300' : ''
+                }`}
+              />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+              )}
+            </div>
+          </div>
+          
+          {/* Implement actual fields for price, category, status */}
+        </div>
+      </div>
+      
+      {/* Product images section - implement actual upload functionality */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <Typography.h2>Product Images</Typography.h2>
+        <div className="mt-4">
+          {/* Implement actual image upload and preview */}
+        </div>
+      </div>
+      
+      {/* Product description section - implement rich text editor */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <Typography.h2>Description</Typography.h2>
+        <div className="mt-4">
+          {/* Implement actual rich text editor */}
+        </div>
+      </div>
+      
+      {/* Product variations section - implement actual variation UI */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <Typography.h2>Variations</Typography.h2>
+        <div className="mt-4">
+          {/* Implement actual variation management UI */}
+        </div>
+      </div>
+      
+      {/* Form actions */}
+      <div className="flex justify-end space-x-3">
+        <Button variant="secondary" type="button">
+          Cancel
+        </Button>
+        <Button type="submit">
+          Save Product
+        </Button>
+      </div>
+    </form>
+  );
+};
+```
+
+### **3.3 Bulk Import Implementation**
+```javascript
+// Implement actual bulk import functionality, not concepts
+const BulkImport = () => {
+  // Implement actual state management
+  const [step, setStep] = useState('upload'); // 'upload', 'validate', 'preview', 'import'
+  const [file, setFile] = useState(null);
+  const [templateType, setTemplateType] = useState('standard');
+  const [data, setData] = useState([]);
+  const [errors, setErrors] = useState([]);
+  
+  // Implement actual file handling
+  const handleFileUpload = (files) => {
+    const uploadedFile = files[0];
+    setFile(uploadedFile);
+    
+    // Parse CSV/Excel file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        // Implement actual file parsing (CSV/Excel)
+        // Process data and validate
+      } catch (error) {
+        setErrors([{ row: 0, message: 'Failed to parse file: ' + error.message }]);
+      }
+    };
+    reader.readAsArrayBuffer(uploadedFile);
+  };
+  
+  // Implement actual data validation
+  const validateData = (parsedData) => {
+    // Detailed validation logic for required fields, data types, etc.
+  };
+  
+  // Implement actual import functionality
+  const handleImport = () => {
+    // Process validated data and import to system
+  };
+  
+  return (
+    <div className="space-y-6">
+      {/* Step indicator */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex items-center justify-between">
+          {/* Implement actual step indicator */}
+        </div>
+      </div>
+      
+      {/* Current step content */}
+      <div className="bg-white shadow rounded-lg p-6">
+        {step === 'upload' && (
+          <div>
+            <Typography.h2>Upload Products</Typography.h2>
+            <div className="mt-4">
+              {/* Template selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Template Type
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Implement actual template options */}
+                </div>
+              </div>
+              
+              {/* File upload */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload File
+                </label>
+                {/* Implement actual file upload UI */}
+              </div>
+              
+              {/* Template download */}
+              <div className="mt-4">
+                <Button variant="secondary" size="sm">
+                  Download Template
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {step === 'validate' && (
+          <div>
+            <Typography.h2>Validate Data</Typography.h2>
+            <div className="mt-4">
+              {/* Implement actual validation results UI */}
+            </div>
+          </div>
+        )}
+        
+        {step === 'preview' && (
+          <div>
+            <Typography.h2>Preview Products</Typography.h2>
+            <div className="mt-4">
+              {/* Implement actual data preview UI */}
+            </div>
+          </div>
+        )}
+        
+        {step === 'import' && (
+          <div>
+            <Typography.h2>Import Results</Typography.h2>
+            <div className="mt-4">
+              {/* Implement actual import results UI */}
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Navigation buttons */}
+      <div className="flex justify-between">
+        <Button 
+          variant="secondary" 
+          onClick={() => setStep(prevStep => {
+            // Implement actual navigation logic
+          })}
+          disabled={step === 'upload'}
+        >
+          Back
+        </Button>
+        <Button
+          onClick={() => {
+            if (step === 'preview') {
+              handleImport();
+            } else {
+              setStep(prevStep => {
+                // Implement actual navigation logic
+              });
+            }
+          }}
+          disabled={
+            (step === 'upload' && !file) ||
+            (step === 'validate' && errors.length > 0)
+          }
+        >
+          {step === 'preview' ? 'Import' : step === 'import' ? 'Finish' : 'Continue'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+## **CRITICAL: Implementation Guidelines**
+
+### **1. Focused Development Approach**
+- ✅ **Build incrementally** - Start with design system, then single pages, then complex features
+- ✅ **Prioritize testability** - Each component must be independently functional
+- ✅ **Document as you build** - Include JSDoc comments for all functions and components
+- ✅ **Maintain type safety** - Use PropTypes or TypeScript to ensure correct data handling
+- ✅ **Follow separation of concerns** - Keep UI components separate from business logic
+
+### **2. Performance Optimizations**
+- ✅ **Implement code splitting** for each major section
+- ✅ **Use React.memo()** for components that render frequently with the same props
+- ✅ **Optimize image loading** with proper sizing and lazy loading
+- ✅ **Minimize re-renders** by structuring component trees efficiently
+- ✅ **Implement virtualization** for long lists (products, orders, customers)
+
+### **3. Test-First Development**
+- ✅ **Write unit tests** for all reusable components
+- ✅ **Test edge cases** (empty states, error states, loading states)
+- ✅ **Validate accessibility** with automated tools
+- ✅ **Check responsive behavior** on multiple breakpoints
+- ✅ **Verify performance** with React DevTools profiler
+
+### **4. Code Quality Standards**
+- ✅ **Maintain consistent naming** conventions
+- ✅ **Keep functions small** and focused on single responsibility
+- ✅ **Use clear, descriptive variable names**
+- ✅ **Avoid deep nesting** of components or logic
+- ✅ **Include error boundaries** to prevent cascade failures
+
+## **Implementation Sequence**
+1. **Core Design System** (colors, typography, buttons, inputs)
+2. **Layout Components** (navigation, page containers, grid system)
+3. **Dashboard & Overview Pages** (visual interface with mock data)
+4. **Product Management Module** (listings, edit forms, bulk import)
+5. **Order Management Module** (overview, details, processing workflows)
+6. **Customer Management Module** (directory, profiles, communication)
+7. **Inventory & Supplier Module** (stock tracking, vendor management)
+8. **Analytics & Reporting** (data visualization, export functions)
+9. **System Administration** (user management, settings, integrations)
+10. **Cross-Cutting Concerns** (final integration, error handling, testing)
+
+## **Final Deliverables**
+1. **Complete Component Library** with documentation
+2. **Fully Functional UI** for all application modules
+3. **Responsive Layouts** for desktop, tablet, and mobile
+4. **Accessibility Implementation** WCAG AA compliant
+5. **Performance Optimizations** for all critical user paths
+6. **Comprehensive Test Suite** covering all components
+7. **Integration Documentation** for backend developers
+
+---
+
+**IMPORTANT:** Write actual, executable code - not pseudocode or placeholders. Each component must be functional and testable on its own. Focus on clean implementation rather than conceptual descriptions.
