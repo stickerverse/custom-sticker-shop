@@ -23,6 +23,7 @@ import Admin from "@/pages/admin";
 import Account from "@/pages/account";
 import OrderConfirmation from "@/pages/order-confirmation";
 import EbaySelection from "@/pages/ebay-selection";
+import StyleGuide from "@/pages/style-guide";
 import NotFound from "@/pages/not-found";
 
 // Cart drawer wrapper needs access to cart context
@@ -81,6 +82,7 @@ function Router() {
           <Route path="/admin" component={Admin} />
           <Route path="/account" component={Account} />
           <Route path="/ebay-selection" component={EbaySelection} />
+          <Route path="/style-guide" component={StyleGuide} />
           <Route component={NotFound} />
         </Switch>
       </div>

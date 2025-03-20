@@ -3,6 +3,7 @@ import {
   Blockquote, List, InlineCode 
 } from "@/components/ui/typography";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -220,6 +221,76 @@ export default function StyleGuide() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+      
+      <section className="mb-12">
+        <H2>Glass Cards</H2>
+        <P>Glass effect cards provide a modern and visually appealing way to present content.</P>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
+          <GlassCard 
+            title="Standard Card" 
+            description="Medium glass effect"
+            glassEffect="medium"
+          >
+            <P>This card uses the default medium glass effect, providing a semi-transparent backdrop that works well in most contexts.</P>
+          </GlassCard>
+          
+          <GlassCard 
+            title="Light Glass" 
+            description="Subtle transparency"
+            glassEffect="light"
+            footer={<Button size="sm">Action</Button>}
+          >
+            <P>The light glass effect is more subtle, allowing more of the background to show through.</P>
+          </GlassCard>
+          
+          <GlassCard 
+            title="Heavy Glass" 
+            description="More opaque background"
+            glassEffect="heavy"
+            footer={<>
+              <Button variant="outline" size="sm">Cancel</Button>
+              <Button size="sm">Submit</Button>
+            </>}
+          >
+            <P>The heavy glass effect provides more opacity, improving text readability while still maintaining the glass aesthetic.</P>
+          </GlassCard>
+          
+          <GlassCard 
+            title="Color Morphing Card" 
+            description="Interactive color transitions"
+            glassEffect="light"
+            colorMorph={true}
+            colors={["rgba(59, 130, 246, 0.15)", "rgba(124, 58, 237, 0.15)", "rgba(236, 72, 153, 0.15)"]}
+          >
+            <P>This card features a color morphing effect that subtly transitions between different color states.</P>
+          </GlassCard>
+          
+          <GlassCard 
+            title={<div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary">💡</div>
+              <span>Custom Header</span>
+            </div>}
+            description="With custom components"
+            glassEffect="medium"
+          >
+            <div className="space-y-4">
+              <P>Cards can contain custom header components for more visual interest.</P>
+              <div className="bg-primary/10 p-3 rounded-md">
+                <Small>Nested content example</Small>
+              </div>
+            </div>
+          </GlassCard>
+          
+          <GlassCard glassEffect="medium">
+            <div className="text-center py-6">
+              <div className="h-16 w-16 rounded-full bg-primary/20 mx-auto mb-4 flex items-center justify-center text-primary text-2xl">✨</div>
+              <H3>No Header/Footer</H3>
+              <P className="mt-2">Cards can also be used without headers or footers for simpler content presentation.</P>
+            </div>
+          </GlassCard>
         </div>
       </section>
     </div>
