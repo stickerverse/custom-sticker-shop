@@ -85,11 +85,11 @@ export default function Checkout() {
     // Check for custom unit price first (from customization)
     const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
     
-    // Fall back to product price if no custom price
-    const itemPrice = customUnitPrice || (item.product?.price || 0);
+    // Fall back to product price if no custom price, default to 500 cents ($5.00) if neither available
+    const itemPrice = customUnitPrice || (item.product?.price || 500);
     
-    // Total for this item = unit price × quantity
-    return sum + (itemPrice * item.quantity);
+    // Total for this item = unit price × quantity (rounded to whole cents)
+    return sum + Math.round(itemPrice * item.quantity);
   }, 0);
 
   // Create payment intent when total changes

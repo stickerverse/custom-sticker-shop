@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/use-cart";
+import { calculateItemPrice, formatCurrency } from "@/lib/utils";
 
 interface CartItemProps {
   item: {

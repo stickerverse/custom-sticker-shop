@@ -46,11 +46,17 @@ export default function CheckoutForm({ shippingAddress }: CheckoutFormProps) {
     try {
       // Step 1: First create the order (for both guests and authenticated users)
       console.log("Creating order...");
-      // Calculate total from cart
-      const total = cart.reduce(
-        (sum, item) => sum + (item.product.price || 500) * item.quantity, 
-        0
-      );
+      // Calculate total from cart with consistent pricing logic
+      const total = cart.reduce((sum, item) => {
+        // Check for custom unit price first (from customization)
+        const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
+        
+        // Fall back to product price if no custom price, default to 500 cents ($5.00) if neither available
+        const itemPrice = customUnitPrice || (item.product?.price || 500);
+        
+        // Use Math.round to ensure we're working with whole cents (no fractional cents)
+        return sum + Math.round(itemPrice * item.quantity);
+      }, 0);
       
       // For guest checkout, we need to send the cart items in the request body
       const orderPayload: any = {
