@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CartItem from "./CartItem";
 import { Link, useLocation } from "wouter";
+import { calculateItemPrice, formatCurrency } from "@/lib/utils";
 
 const ShoppingCart = () => {
   const [, setLocation] = useLocation();
@@ -12,28 +13,16 @@ const ShoppingCart = () => {
   const { cart, isLoading, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  // Calculate totals with correct pricing
+  // Calculate totals with utility function for consistent pricing
   const calculateSubtotal = () => {
     return cart.reduce((sum, item) => {
-      // Get the actual product price from the product data or custom unitPrice
-      // First check if unitPrice was passed in options (from customization)
-      const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
-      // Fall back to product price if no custom price, or default to 500 (5.00) if neither available
-      const itemPrice = customUnitPrice || (item.product?.price || 500);
-      
-      // Use Math.round to ensure we're working with whole cents (no fractional cents)
-      return sum + Math.round(itemPrice * item.quantity);
+      return sum + calculateItemPrice(item, item.quantity);
     }, 0);
   };
 
   const subtotal = calculateSubtotal();
   const shippingCost = subtotal > 3500 ? 0 : 500; // Free shipping over $35
   const total = subtotal + shippingCost;
-
-  // Format price in dollars
-  const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
-  };
 
   // Handle clear cart
   const handleClearCart = async () => {
@@ -118,15 +107,15 @@ const ShoppingCart = () => {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Subtotal</span>
-            <span>{formatPrice(subtotal)}</span>
+            <span>{formatCurrency(subtotal)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span>Shipping</span>
-            <span>{shippingCost === 0 ? "Free" : formatPrice(shippingCost)}</span>
+            <span>{shippingCost === 0 ? "Free" : formatCurrency(shippingCost)}</span>
           </div>
           <div className="flex justify-between font-semibold text-base pt-2 border-t border-dashed border-gray-200">
             <span>Total</span>
-            <span>{formatPrice(total)}</span>
+            <span>{formatCurrency(total)}</span>
           </div>
         </div>
 

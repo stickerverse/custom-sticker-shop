@@ -1,0 +1,190 @@
+# Prompt for Replit AI Coder: Streamlined Product Listing System
+
+## Project Overview
+Enhance the admin panel by creating an intuitive, efficient product listing system that maintains the existing application's design language while significantly improving usability for both individual and bulk product creation.
+
+## Current Pain Points to Address
+- Complex, multi-step product creation process
+- Limited bulk upload capabilities
+- Inefficient image management
+- Inconsistent validation feedback
+- Time-consuming variation setup
+- Difficult SEO optimization
+
+## Design Requirements
+
+### General Interface Guidelines
+- Maintain current application color scheme, typography, and UI components
+- Use existing button styles, form elements, and navigation patterns
+- Ensure responsive design works on desktop and tablet admin views
+- Add helpful tooltips that explain fields without cluttering the interface
+- Implement real-time validation with clear error messages
+
+### Individual Product Creation Flow
+
+#### Main Product Information Panel
+```
+Create a clean form with organized sections:
+
+1. Basic Details Section
+   - Product Title (required): Text field with character counter
+   - SKU (required): Text field with auto-generation option
+   - Price (required): Numerical input with currency symbol
+   - Sale Price: Optional numerical input
+   - Tax Class: Dropdown selection
+   - Product Status: Toggle between Active/Draft/Scheduled
+
+2. Visual Assets Section
+   - Main Product Image: Drag-and-drop upload area
+   - Gallery Images: Multi-image uploader with preview grid
+   - Allow image reordering via drag-and-drop
+   - Image optimization options (auto-generate thumbnails)
+   - Alt text fields for accessibility
+
+3. Product Description Section
+   - Rich text editor for detailed description
+   - Short description field (for listings/search results)
+   - Text formatting tools matching front-end display capabilities
+   - Character/word counters with SEO recommendations
+
+4. Inventory & Shipping Tab
+   - Stock quantity management
+   - Backorder settings
+   - Product dimensions and weight
+   - Shipping class assignment
+   - Location in warehouse (optional)
+```
+
+#### Variations System
+```
+Create an intuitive variations manager:
+
+1. Variation Types Panel
+   - Quick-add buttons for common variations (Size, Color, Material, etc.)
+   - Custom variation type creation
+   - Bulk generate all possible combinations with single click
+
+2. Variation Details
+   - Grid view of all variations with inline editing
+   - Individual SKU, price, and stock fields per variation
+   - Bulk edit capabilities for shared attributes
+   - Image assignment to specific variations
+   - Quick duplicate function for similar variations
+```
+
+#### SEO Optimization Section
+```
+Create dedicated SEO tools:
+
+1. SEO Preview Panel
+   - Real-time preview of search result appearance
+   - Character counters with optimal ranges highlighted
+
+2. SEO Fields
+   - Meta title with template option
+   - Meta description with keyword highlighting
+   - Focus keyword field with content analysis
+   - URL slug with auto-generation from title
+   - Open Graph/social media preview settings
+```
+
+### Bulk Product Upload System
+
+#### File Upload Interface
+```
+Create a robust CSV/Excel import system:
+
+1. Template Management
+   - Downloadable template files with sample data
+   - Template selection based on product category
+   - Field mapping interface for custom spreadsheets
+
+2. Upload Process
+   - Drag-and-drop file upload area
+   - Progress indicator for large files
+   - Initial validation scan with error preview
+```
+
+#### Bulk Image Management
+```
+Create efficient image handling system:
+
+1. Image Association Methods
+   - Zip file upload containing all product images
+   - Folder structure mapping (SKU-named files auto-match)
+   - URL import option for images already hosted elsewhere
+
+2. Bulk Image Processing
+   - Automated image optimization
+   - Batch renaming tools
+   - Duplicate detection
+```
+
+#### Data Validation & Preview
+```
+Create comprehensive validation system:
+
+1. Pre-Import Validation
+   - Data type checking with error highlighting
+   - Required field verification
+   - Duplicate SKU detection
+   - Pricing consistency checks
+
+2. Interactive Preview Grid
+   - Spreadsheet-like view of all products
+   - Inline editing capabilities
+   - Filtering options to focus on problems
+   - Column visibility toggles
+```
+
+#### Post-Import Tools
+```
+Create post-processing options:
+
+1. Batch Actions
+   - Publish status setting (Draft/Active)
+   - Category assignment
+   - Tag application
+   - Featured product marking
+
+2. Confirmation System
+   - Success/error summary report
+   - Downloadable import log
+   - Undo import option (time-limited)
+```
+
+## Technical Implementation Notes
+
+1. Frontend Requirements
+   - Use React components consistent with existing application
+   - Implement form state management with proper validation
+   - Ensure all UI elements follow accessibility guidelines
+   - Add keyboard shortcuts for power users
+
+2. Backend Considerations
+   - Create RESTful API endpoints for all product operations
+   - Implement proper error handling and feedback
+   - Ensure database transactions for data integrity
+   - Add caching where appropriate for performance
+
+3. Image Processing
+   - Implement server-side image optimization
+   - Create secure temporary storage for bulk uploads
+   - Handle various image formats (JPG, PNG, WebP)
+
+4. Performance Optimization
+   - Lazy loading for image-heavy sections
+   - Pagination for bulk product lists
+   - Asynchronous validation to prevent UI blocking
+
+## Testing Requirements
+1. Verify the solution works with various product types and categories
+2. Test bulk import with both valid and invalid data
+3. Ensure mobile/tablet compatibility for all interfaces
+4. Validate with actual admin users if possible
+
+## Deliverables
+1. Frontend components matching application's design system
+2. API endpoints documentation
+3. Database schema updates if needed
+4. User guide explaining the new workflow

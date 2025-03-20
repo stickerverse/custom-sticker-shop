@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
+import { calculateItemPrice, formatCurrency } from "@/lib/utils";
 
 interface CartSummaryProps {
   cart: {
@@ -64,21 +65,18 @@ export default function CartSummary({ cart }: CartSummaryProps) {
     };
   }, [liveCart]);
   
-  // Helper to get correct price for an item
-  const getItemPrice = (item: any) => {
-    const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
-    return customUnitPrice || item.product.price || 500; // Default to $5.00
-  };
-  
-  // Calculate subtotal using actual product prices
+  // Calculate subtotal using utility function for consistent pricing
   const calculateSubtotal = () => {
     return liveCart.reduce((total, item) => {
-      // Use Math.round to ensure we're working with whole cents (no fractional cents)
-      const itemPrice = Math.round(getItemPrice(item) * item.quantity);
-      return total + itemPrice;
+      return total + calculateItemPrice(item, item.quantity);
     }, 0);
   };
   
+  // Helper to get correct price for an item using our utility
+  const getItemPrice = (item: any) => {
+    return calculateItemPrice(item, 1); // Get unit price (quantity = 1)
+  };
+
   // Calculate an optimistic subtotal after quantity change
   const updateOptimisticSubtotal = (itemId: number, newQuantity: number, oldQuantity: number) => {
     const currentSubtotal = calculateSubtotal();
@@ -86,7 +84,6 @@ export default function CartSummary({ cart }: CartSummaryProps) {
     
     if (item) {
       const itemUnitPrice = getItemPrice(item);
-      // Use Math.round to ensure we're working with whole cents (no fractional cents)
       const priceDifference = Math.round(itemUnitPrice * (newQuantity - oldQuantity));
       setOptimisticSubtotal(currentSubtotal + priceDifference);
     }
@@ -98,8 +95,7 @@ export default function CartSummary({ cart }: CartSummaryProps) {
     const item = liveCart.find(item => item.id === itemId);
     
     if (item) {
-      // Use Math.round to ensure we're working with whole cents (no fractional cents)
-      const itemTotalPrice = Math.round(getItemPrice(item) * item.quantity);
+      const itemTotalPrice = calculateItemPrice(item, item.quantity);
       setOptimisticSubtotal(currentSubtotal - itemTotalPrice);
     }
   };

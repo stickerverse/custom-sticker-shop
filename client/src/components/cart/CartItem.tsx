@@ -29,18 +29,9 @@ const CartItem = ({ item }: CartItemProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  // Get the actual product price from the product data or custom unitPrice
-  // First check if unitPrice was passed in options (from customization)
-  const customUnitPrice = item.options?.unitPrice ? parseInt(item.options.unitPrice) : null;
-  // Fall back to product price if no custom price, or default to 500 (5.00) if neither available
-  const itemPrice = customUnitPrice || item.product.price || 500;
-  // Round to ensure we're working with whole cents (no fractional cents)
-  const totalPrice = Math.round(itemPrice * quantity);
-
-  // Format price in dollars
-  const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
-  };
+  // Use utility functions for consistent price calculations
+  const itemPrice = calculateItemPrice(item, 1); // Unit price
+  const totalPrice = calculateItemPrice(item, quantity); // Total price for quantity
 
   // Format options to display (exclude technical fields like unitPrice)
   const formatOptions = () => {
@@ -155,9 +146,9 @@ const CartItem = ({ item }: CartItemProps) => {
           </Link>
           <p className="text-gray-600 text-sm mb-2">{formatOptions()}</p>
           <div className="text-primary">
-            <span className="font-semibold">{formatPrice(itemPrice)}</span>
+            <span className="font-semibold">{formatCurrency(itemPrice)}</span>
             {quantity > 1 && (
-              <span className="text-gray-600 text-sm ml-1">× {quantity} = {formatPrice(totalPrice)}</span>
+              <span className="text-gray-600 text-sm ml-1">× {quantity} = {formatCurrency(totalPrice)}</span>
             )}
           </div>
         </div>
